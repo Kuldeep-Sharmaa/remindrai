@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="./src/assets/logo.png"
+      type="image/x-icon"
+    />
+    <title>RemindrAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script>
+      document.documentElement.classList.add("no-transition");
+      window.addEventListener("load", () => {
+        document.documentElement.classList.remove("no-transition");
+      });
+    </script>
+    <script>
+      (function () {
+        "use strict";
+
+        const LOCAL_STORAGE_THEME_KEY = "remindrai-theme";
+        const FALLBACK_THEME = "light";
+
+        function getSystemTheme() {
+          try {
+            if (typeof window !== "undefined" && window.matchMedia) {
+              return window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+            }
+          } catch (e) {
+            console.warn("Could not detect system theme:", e);
+          }
+          return FALLBACK_THEME;
+        }
+
+        function getStoredTheme() {
+          try {
+            return localStorage.getItem(LOCAL_STORAGE_THEME_KEY) || "auto";
+          } catch (e) {
+            console.warn("Could not access localStorage for theme:", e);
+            return "auto";
+          }
+        }
+
+        function applyTheme() {
+          try {
+            const storedTheme = getStoredTheme();
+            const systemTheme = getSystemTheme();
+            const effectiveTheme =
+              storedTheme === "auto" ? systemTheme : storedTheme;
+
+            const root = document.documentElement;
+
+            root.classList.remove(
+              "dark",
+              "theme-light-image",
+              "theme-dark-image",
+              "theme-auto-image"
+            );
+
+            if (effectiveTheme === "dark") {
+              root.classList.add("dark");
+            }
+
+            root.classList.add(`theme-${storedTheme}-image`);
+
+            root.setAttribute("data-theme", storedTheme);
+            root.setAttribute("data-effective-theme", effectiveTheme);
+            root.setAttribute("data-system-theme", systemTheme);
+
+            return { storedTheme, effectiveTheme, systemTheme };
+          } catch (e) {
+            console.error("Failed to apply initial theme:", e);
+
+            document.documentElement.classList.remove("dark");
+            document.documentElement.setAttribute("data-theme", "light");
+            document.documentElement.setAttribute(
+              "data-effective-theme",
+              "light"
+            );
+            document.documentElement.setAttribute("data-system-theme", "light");
+            return {
+              storedTheme: "light",
+              effectiveTheme: "light",
+              systemTheme: "light",
+            };
+          }
+        }
+
+        const initialTheme = applyTheme();
+
+        function setupSystemThemeListener() {
+          try {
+            if (typeof window !== "undefined" && window.matchMedia) {
+              const mediaQuery = window.matchMedia(
+                "(prefers-color-scheme: dark)"
+              );
+
+              const handleSystemThemeChange = () => {
+                const currentStoredTheme = getStoredTheme();
+
+                if (currentStoredTheme === "auto") {
+                  applyTheme();
+                }
+              };
+
+              if (mediaQuery.addEventListener) {
+                mediaQuery.addEventListener("change", handleSystemThemeChange);
+              } else if (mediaQuery.addListener) {
+                // Fallback for older browsers
+                mediaQuery.addListener(handleSystemThemeChange);
+              }
+
+              return mediaQuery;
+            }
+          } catch (e) {
+            console.warn("Could not set up system theme listener:", e);
+          }
+          return null;
+        }
+
+        const mediaQuery = setupSystemThemeListener();
+
+        if (typeof window !== "undefined") {
+          window.__remindrai_THEME_DEBUG__ = {
+            initialTheme,
+            applyTheme,
+            getStoredTheme,
+            getSystemTheme,
+            mediaQuery,
+          };
+        }
+
+        const style = document.createElement("style");
+        style.textContent = `
+          /* This ensures theme changes are instant initially for all elements */
+          *
+           {
+            transition: background-color 0s !important, 
+                        color 0s !important, 
+                        border-color 0s !important,
+                        box-shadow 0s !important,
+                        opacity 0s !important,
+                        transform 0s !important;
+          }
+          /* This specific class (applied to html) overrides the above for elements
+             that need a true 'no transition' state before React takes over */
+          html.no-transition * {
+            transition: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+
+        document.documentElement.classList.add("no-transition");
+
+        window.addEventListener("load", function () {
+          setTimeout(() => {
+            document.documentElement.classList.remove("no-transition");
+            style.remove();
+          }, 100);
+        });
+      })();
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "remindrai-backend",
+  "version": "1.0.0",
+  "description": "Backend Cloud Functions for RemindrAI",
+  "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "deploy": "firebase deploy --only functions",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "firebase-functions": "^7.0.0",
+    "luxon": "^3.7.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "nodemon": "^3.1.11"
+  }
+}

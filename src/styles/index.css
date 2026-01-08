@@ -1,0 +1,808 @@
+/* src/index.css - Ultra-optimized for lightning-fast theme transitions */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Production-ready theme system styles - CSS Custom Properties for theme management */
+  :root {
+    /* Brand Colors (Your existing brand colors) */
+    --color-brand-primary: #8e4efc;
+    --color-brand-secondary: #4a90e2;
+    --color-brand-accent: #3b82f6; /* Or another neutral tone */
+
+    /* Light theme colors */
+    --color-bg-primary-light: #f9f9fb;
+    --color-bg-secondary-light: #f8fafc; /* For subtle background variations, e.g., scrollbar track */
+    --color-text-primary-light: #1a1a1a;
+    --color-text-secondary-light: #64748b; /* For secondary text, e.g., labels, less prominent info */
+    --color-border-light: #e2e8f0;
+    --color-accent-light: #3b82f6; /* General accent for interactive elements, links etc. */
+
+    /* Dark theme colors */
+    --color-bg-primary-dark: #000000;
+    --color-bg-secondary-dark: #1a1a1a;
+    --color-text-primary-dark: #e1e1e1;
+    --color-text-secondary-dark: #94a3b8;
+    --color-border-dark: #374151;
+    --color-accent-dark: #60a5fa;
+
+    /* Theme toggle specific colors (from your previous input) */
+    --toggle-bg-light: #e2e8f0;
+    --toggle-bg-dark: #374151;
+    --toggle-thumb-light: #ffffff;
+    --toggle-thumb-dark: #1e293b;
+    --toggle-accent: var(
+      --color-brand-secondary
+    ); /* Using your brand secondary for toggle accent */
+    --toggle-accent-hover: #2563eb; /* A slightly darker blue for hover */
+
+    /* Animation settings */
+    --theme-transition-duration: 0.2s;
+    --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Size variants (from your previous input) */
+    --toggle-size-small: 36px;
+    --toggle-size-default: 48px;
+    --toggle-size-large: 60px;
+
+    /* Map switch variables to toggle variables for consistency */
+    --switch-width: var(--toggle-size-default);
+    --switch-height: calc(var(--toggle-size-default) * 0.6);
+    --circle-diameter: calc(var(--switch-height) - 4px);
+    --circle-inset: 2px;
+  }
+
+  /* Global theme application and CSS variable mapping */
+  /* Default (Light Mode) */
+  html {
+    --current-bg-primary: var(--color-bg-primary-light);
+    --current-bg-secondary: var(--color-bg-secondary-light);
+    --current-text-primary: var(--color-text-primary-light);
+    --current-text-secondary: var(--color-text-secondary-light);
+    --current-border: var(--color-border-light);
+    --current-accent: var(--color-accent-light); /* System accent */
+
+    /* Loader colors now derive from current theme */
+    --loader-bg: var(--current-bg-primary);
+    --loader-text: var(--current-text-primary);
+    --loader-circle-color: var(--current-text-primary);
+    --loader-shadow-color: rgba(
+      0,
+      0,
+      0,
+      0.4
+    ); /* Specific shadow for light theme loader */
+
+    /* Switch component background/thumb based on light mode */
+    --switch-bg: var(--toggle-bg-light);
+    --switch-bg-checked: var(
+      --toggle-bg-dark
+    ); /* When checked, it turns dark toggle background */
+    --circle-bg: var(--toggle-thumb-light);
+    --circle-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Specific shadow for light thumb */
+
+    /* Apply these current variables to html directly for base styling */
+    background-color: var(--current-bg-primary);
+    color: var(--current-text-primary);
+    color-scheme: light; /* Helps browser optimize text rendering */
+
+    /* Enable global transition for smooth theme changes */
+    transition: background-color var(--theme-transition-duration)
+        var(--theme-transition-easing),
+      color var(--theme-transition-duration) var(--theme-transition-easing);
+  }
+
+  /* Dark theme overrides for global CSS variables */
+  html.dark,
+  html[data-effective-theme="dark"] {
+    --current-bg-primary: var(--color-bg-primary-dark);
+    --current-bg-secondary: var(--color-bg-secondary-dark);
+    --current-text-primary: var(--color-text-primary-dark);
+    --current-text-secondary: var(--color-text-secondary-dark);
+    --current-border: var(--color-border-dark);
+    --current-accent: var(--color-accent-dark);
+
+    /* Loader colors now derive from current theme */
+    --loader-bg: var(--current-bg-primary);
+    --loader-text: var(--current-text-primary);
+    --loader-circle-color: var(--current-text-primary);
+    --loader-shadow-color: rgba(
+      255,
+      255,
+      255,
+      0.2
+    ); /* Specific shadow for dark theme loader */
+
+    /* Switch component background/thumb based on dark mode */
+    --switch-bg: var(
+      --toggle-bg-dark
+    ); /* Initial state of switch in dark mode */
+    --switch-bg-checked: var(
+      --toggle-accent
+    ); /* When checked, it uses toggle accent */
+    --circle-bg: var(--toggle-thumb-dark);
+    --circle-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Specific shadow for dark thumb */
+
+    background-color: var(--current-bg-primary);
+    color: var(--current-text-primary);
+    color-scheme: dark;
+  }
+
+  /* Light theme overrides for global CSS variables (for data-effective-theme) */
+  html.light,
+  html[data-effective-theme="light"] {
+    --current-bg-primary: var(--color-bg-primary-light);
+    --current-bg-secondary: var(--color-bg-secondary-light);
+    --current-text-primary: var(--color-text-primary-light);
+    --current-text-secondary: var(--color-text-secondary-light);
+    --current-border: var(--color-border-light);
+    --current-accent: var(--color-accent-light);
+
+    /* Loader colors for light theme */
+    --loader-bg: var(--current-bg-primary);
+    --loader-text: var(--current-text-primary);
+    --loader-circle-color: var(--current-text-primary);
+    --loader-shadow-color: rgba(0, 0, 0, 0.4);
+
+    /* Switch component background/thumb based on light mode */
+    --switch-bg: var(--toggle-bg-light);
+    --switch-bg-checked: var(--toggle-bg-dark);
+    --circle-bg: var(--toggle-thumb-light);
+    --circle-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    background-color: var(--current-bg-primary);
+    color: var(--current-text-primary);
+    color-scheme: light;
+  }
+
+  /* System theme respecting styles (data-theme="auto") */
+  /* These will be overridden by data-effective-theme once JS determines system preference */
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] {
+      --current-bg-primary: var(--color-bg-primary-dark);
+      --current-bg-secondary: var(--color-bg-secondary-dark);
+      --current-text-primary: var(--color-text-primary-dark);
+      --current-text-secondary: var(--color-text-secondary-dark);
+      --current-border: var(--color-border-dark);
+      --current-accent: var(--color-accent-dark);
+
+      --loader-bg: var(--current-bg-primary);
+      --loader-text: var(--current-text-primary);
+      --loader-circle-color: var(--current-text-primary);
+      --loader-shadow-color: rgba(255, 255, 255, 0.2);
+
+      --switch-bg: var(--toggle-bg-dark);
+      --switch-bg-checked: var(--toggle-accent);
+      --circle-bg: var(--toggle-thumb-dark);
+      --circle-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+      background-color: var(--current-bg-primary);
+      color: var(--current-text-primary);
+      color-scheme: dark;
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    html[data-theme="auto"] {
+      --current-bg-primary: var(--color-bg-primary-light);
+      --current-bg-secondary: var(--color-bg-secondary-light);
+      --current-text-primary: var(--color-text-primary-light);
+      --current-text-secondary: var(--color-text-secondary-light);
+      --current-border: var(--color-border-light);
+      --current-accent: var(--color-accent-light);
+
+      --loader-bg: var(--current-bg-primary);
+      --loader-text: var(--current-text-primary);
+      --loader-circle-color: var(--current-text-primary);
+      --loader-shadow-color: rgba(0, 0, 0, 0.4);
+
+      --switch-bg: var(--toggle-bg-light);
+      --switch-bg-checked: var(--toggle-bg-dark);
+      --circle-bg: var(--toggle-thumb-light);
+      --circle-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      background-color: var(--current-bg-primary);
+      color: var(--current-text-primary);
+      color-scheme: light;
+    }
+  }
+
+  /* Apply base styles to html, body, #root */
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    /* Use the current theme variables here (already set on html) */
+    /* No need to re-declare background-color and color if html already covers it */
+  }
+
+  html {
+    @apply font-inter;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-grotesk;
+  }
+
+  /* ---------- Desktop: keep custom scrollbar styles ---------- */
+  @media (min-width: 1024px) {
+    /* Optimized scrollbar - no transitions */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--current-bg-secondary);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--color-brand-secondary);
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-brand-primary);
+    }
+
+    /* Firefox scrollbar styling on desktop */
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-brand-secondary) var(--current-bg-secondary);
+    }
+  }
+
+  /* ---------- Mobile: hide scrollbars visually and avoid inner scrolls ---------- */
+  @media (max-width: 1023px) {
+    /* Hide WebKit scrollbars (iOS/Android webviews and mobile Chrome) */
+    ::-webkit-scrollbar {
+      display: none; /* hide the track & thumb */
+      width: 0;
+      height: 0;
+    }
+
+    /* Firefox: hide scrollbar */
+    html {
+      -ms-overflow-style: none; /* IE 10+ */
+      scrollbar-width: none; /* Firefox */
+    }
+
+    /* Force inner scrollable containers (if any) to be visible and not create separate scrollbars */
+    /* Replace .app-shell/.sidebar/.main with whatever classes you use */
+    .app-shell,
+    .layout,
+    .main,
+    .sidebar {
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+  }
+}
+@layer components {
+  /* ULTRA-OPTIMIZED UI-SWITCH - Maximum performance */
+  .ui-switch {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Switch background - Only animate on interaction, not theme change */
+  .slider {
+    width: var(--switch-width);
+    height: var(--switch-height);
+    background: var(--switch-bg);
+    border-radius: 12px;
+    position: relative;
+    display: block;
+
+    /* Enable GPU acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+
+    /* Only transition background on user interaction */
+    transition: background-color var(--theme-transition-duration)
+      var(--theme-transition-easing);
+  }
+
+  /* Switch circle - Hardware accelerated movement */
+  .slider .circle {
+    position: absolute;
+    top: var(--circle-inset);
+    left: var(--circle-inset);
+    width: var(--circle-diameter);
+    height: var(--circle-diameter);
+    background: var(--circle-bg);
+    border-radius: 50%;
+    box-shadow: var(--circle-shadow);
+
+    /* CRITICAL: Use transform3d for hardware acceleration */
+    transform: translate3d(0, 0, 0);
+
+    /* Ultra-fast transition - only for user interactions */
+    transition: transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Performance optimizations */
+    will-change: transform;
+    backface-visibility: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  /* Theme icons */
+  .slider .circle::after {
+    content: "☀️";
+    display: block;
+    line-height: 1;
+  }
+
+  /* Checked state - immediate background change, smooth circle movement */
+  .ui-switch input:checked + .slider {
+    background: var(--switch-bg-checked);
+  }
+
+  .ui-switch input:checked + .slider .circle {
+    transform: translate3d(
+      calc(
+        var(--switch-width) - var(--circle-diameter) - var(--circle-inset) * 2
+      ),
+      0,
+      0
+    );
+    background: var(
+      --toggle-thumb-dark
+    ); /* Directly use dark thumb for checked state */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Static shadow for dark thumb */
+  }
+
+  .ui-switch input:checked + .slider .circle::after {
+    content: "🌙";
+  }
+
+  /* Interactive states - only for user feedback */
+  .ui-switch:hover .slider .circle {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .ui-switch:active .slider .circle {
+    transform: translate3d(0, 0, 0) scale(0.95);
+    transition: transform 0.05s ease-out;
+  }
+
+  .ui-switch input:checked:active + .slider .circle {
+    transform: translate3d(
+        calc(
+          var(--switch-width) - var(--circle-diameter) - var(--circle-inset) * 2
+        ),
+        0,
+        0
+      )
+      scale(0.95);
+    transition: transform 0.05s ease-out;
+  }
+
+  /* Focus styles for accessibility */
+  .ui-switch input:focus-visible + .slider {
+    outline: 2px solid var(--toggle-accent); /* Use toggle accent */
+    outline-offset: 2px;
+  }
+
+  /* Prevent any layout shift */
+  .theme-toggle-wrapper {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    contain: layout style;
+  }
+
+  /* Existing Theme Toggle Component Styles (from your previous input) */
+  .theme-toggle-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .theme-toggle-container.theme-toggle-loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .theme-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--toggle-size-default);
+    height: calc(var(--toggle-size-default) * 0.6);
+    border: 2px solid transparent;
+    border-radius: calc(var(--toggle-size-default) * 0.3);
+    background: none;
+    cursor: pointer;
+    transition: all var(--theme-transition-duration)
+      var(--theme-transition-easing);
+    outline: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .theme-switch:focus-visible,
+  .theme-toggle-focus-visible .theme-switch {
+    border-color: var(--toggle-accent);
+    box-shadow: 0 0 0 2px var(--toggle-accent) 25;
+  }
+
+  .theme-switch:hover:not(:disabled) {
+    transform: scale(1.05);
+  }
+
+  .theme-switch:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .theme-switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Size variants */
+  .theme-toggle-small .theme-switch {
+    width: var(--toggle-size-small);
+    height: calc(var(--toggle-size-small) * 0.6);
+    border-radius: calc(var(--toggle-size-small) * 0.3);
+  }
+
+  .theme-toggle-large .theme-switch {
+    width: var(--toggle-size-large);
+    height: calc(var(--toggle-size-large) * 0.6);
+    border-radius: calc(var(--toggle-size-large) * 0.3);
+  }
+
+  /* Switch Track */
+  .theme-switch-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--toggle-bg-light);
+    transition: background-color var(--theme-transition-duration)
+      var(--theme-transition-easing);
+    overflow: hidden;
+  }
+
+  .theme-switch-checked .theme-switch-track {
+    background: var(--toggle-bg-dark);
+  }
+
+  /* Switch Thumb */
+  .theme-switch-thumb {
+    position: absolute;
+    top: 1px;
+    left: 0px;
+    width: calc(60% - 4px);
+    height: calc(100% - 4px);
+    border-radius: calc(var(--toggle-size-default) * 0.25);
+    background: var(--toggle-thumb-light);
+    transition: all var(--theme-transition-duration)
+      var(--theme-transition-easing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+
+  .theme-switch-checked .theme-switch-thumb {
+    transform: translateX(calc(100% + 4px));
+    background: var(--toggle-thumb-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .theme-switch-transitioning .theme-switch-thumb {
+    transition-duration: calc(var(--theme-transition-duration) * 1.5);
+  }
+
+  /* Theme Icons */
+  .theme-icon {
+    position: absolute;
+    font-size: 60%;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all var(--theme-transition-duration)
+      var(--theme-transition-easing);
+  }
+
+  .theme-icon-light {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .theme-switch-checked .theme-icon-light {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .theme-switch-checked .theme-icon-dark {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Loading Spinner for toggle */
+  .theme-loading-spinner {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Track Indicators */
+  .theme-track-indicators {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .track-indicator {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    transition: opacity var(--theme-transition-duration)
+      var(--theme-transition-easing);
+  }
+
+  .theme-switch:hover .track-indicator {
+    opacity: 0.8;
+  }
+
+  /* Hidden Input */
+  .theme-toggle-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+  }
+
+  .skeleton-switch {
+    width: var(--toggle-size-default);
+    height: calc(var(--toggle-size-default) * 0.6);
+    border-radius: calc(var(--toggle-size-default) * 0.3);
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    position: relative;
+  }
+
+  .skeleton-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(60% - 4px);
+    height: calc(100% - 4px);
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Interaction States */
+  .theme-toggle-active .theme-switch {
+    transform: scale(0.98);
+  }
+
+  .theme-toggle-interacted .theme-switch {
+    animation: theme-toggle-pulse 0.3s ease-out;
+  }
+
+  @keyframes theme-toggle-pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--toggle-accent) 40;
+    }
+    50% {
+      box-shadow: 0 0 0 8px var(--toggle-accent) 10;
+    }
+    100% {
+      box-shadow: 0 0 0 0 var(--toggle-accent) 00;
+    }
+  }
+
+  /* Variant Styles */
+  .theme-toggle-outline .theme-switch {
+    border: 2px solid var(--current-border); /* Use current border color */
+    background: var(--current-bg-primary); /* Use current primary background */
+  }
+
+  .theme-toggle-outline .theme-switch:hover {
+    border-color: var(--toggle-accent);
+  }
+
+  .theme-toggle-minimal .theme-switch {
+    background: transparent;
+    border: none;
+  }
+
+  .theme-toggle-minimal .theme-switch-track {
+    background: var(
+      --current-bg-secondary
+    ); /* Use current secondary background */
+    border: 1px solid var(--current-border); /* Use current border color */
+  }
+
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    .theme-switch,
+    .theme-switch-thumb,
+    .theme-switch-track,
+    .theme-icon,
+    .track-indicator {
+      transition-duration: 0.01ms;
+    }
+
+    .theme-toggle-interacted .theme-switch {
+      animation: none;
+    }
+
+    .spinner {
+      animation-duration: 2s;
+    }
+  }
+
+  /* High Contrast Support */
+  @media (prefers-contrast: high) {
+    .theme-switch {
+      border-width: 3px;
+    }
+
+    .theme-switch-track {
+      border: 2px solid var(--current-text-primary);
+    }
+
+    .theme-switch-thumb {
+      border: 2px solid var(--current-text-primary);
+    }
+  }
+
+  /* Dark mode optimizations for skeleton */
+  @media (prefers-color-scheme: dark) {
+    .skeleton-switch {
+      background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    }
+  }
+}
+
+/* Emergency class to disable ALL transitions during theme change */
+.theme-changing,
+.theme-changing * {
+  transition: none !important;
+  animation-duration: 0s !important;
+}
+
+/* EMPATY DRAFT */
+
+/* Empty state: force Lottie/SVG to monochrome / neutral tone */
+.empty-eyes-animation,
+.empty-eyes-animation svg,
+.empty-eyes-animation path,
+.empty-eyes-animation g {
+  filter: grayscale(1) saturate(0) opacity(0.95) !important;
+  /* Optionally adjust brightness/contrast if you want slightly lighter/darker: */
+  filter: grayscale(1) saturate(0) contrast(0.95) brightness(0.98);
+  transition: filter 180ms ease;
+  color: inherit;
+  fill: currentColor; /* sometimes helps if the Lottie respects currentColor */
+}
+
+/* ---------------------------------------------------------------------------
+  Hot-toast: force fixed top-center wrapper and polished toast animations
+  --------------------------------------------------------------------------- */
+/* Toast wrapper pedestrian override (we'll mutate wrapper inline too) */
+#_rht_toaster > div[style*="justify-content: center"] {
+  position: fixed !important;
+  top: 76px !important; /* slightly below topbar */
+  left: 50% !important; /* we will adjust translateX from JS */
+  transform: translateX(-50%) !important;
+  right: auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
+  padding: 0 !important;
+}
+
+/* Make card feel lighter and anchored */
+#_rht_toaster .demo-toast-root {
+  pointer-events: auto !important;
+  max-width: 520px !important; /* ensure toast is narrow */
+  margin: 0 8px !important; /* small outer margin */
+  border-radius: 12px !important;
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.6), 0 6px 24px rgba(2, 6, 23, 0.36);
+  backdrop-filter: blur(6px);
+}
+
+/* Snappier notification animation */
+.demo-toast-enter {
+  animation: notif-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+.demo-toast-leave {
+  animation: notif-out 220ms ease-in forwards !important;
+}
+@keyframes notif-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.995);
+  }
+  60% {
+    transform: translateY(2px) scale(1.01);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes notif-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.995);
+  }
+}
