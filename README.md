@@ -1,12 +1,14 @@
 # RemindrAI
 
-**A tool to help you actually show up for your content.**
+---
+
+> A tool to help you actually show up for your content.
 
 RemindrAI is being built for creators and professionals who struggle with consistency—not because they lack ideas, but because remembering _when_ to post and _what_ to write adds up to real friction over time.
 
 This repo is intentionally public and unfinished. It's here to show how a real product gets built, messy bits and all.
 
----
+<br>
 
 ## Why this exists
 
@@ -22,99 +24,112 @@ The real problem hits when it's time to sit down and _create_—and you're stari
 
 Right now, the focus is on building something reliable and maintainable. Polish comes later.
 
----
+<br>
 
-## Where things stand
+## Current Status
 
-This is a work in progress, and it's being built in public on purpose.
+![Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
+![Target](https://img.shields.io/badge/v1%20target-feb%2016%2C%202025-blue?style=for-the-badge)
 
-**What's working:**
+### What's working
 
 - Core frontend structure
-- Firebase Auth for login/signup
-- Firestore for user data
-- Feature-based architecture (not a giant `components/` folder)
+- Firebase Auth
+- Firestore integration
+- Feature-based architecture
 
-**What's being worked on:**
+### In progress
 
 - AI draft generation
-- Scheduled background jobs with Firebase Functions
-- Edge cases, error handling, and general polish
+- Background jobs
+- Edge case handling
 
-**Target for initial v1:** February 16, 2026
+<br>
 
----
-
-## Tech stack
-
-The tools were chosen to be practical, not trendy:
-
-- **React (Vite)** — fast dev experience, modern tooling
-- **Tailwind CSS** — predictable styling without fighting CSS
-- **Firebase Auth** — handles authentication so I don't have to
-- **Firestore** — real-time database that scales
-- **Firebase Functions** — backend logic and cron jobs
-
-The focus is on reliability and maintainability over novelty.
-
-## How it's organized
-
-The codebase is structured to stay maintainable as it grows:
-
-src/
-features/ # Business logic organized by domain
-components/ # Reusable UI pieces
-services/ # Firebase integrations and data access
-hooks/ # Shared React logic
-context/ # Global state management
-pages/ # Top-level screens
-routes/ # Routing setup
-
-functions/ # Backend logic (Firebase Functions)
-.env.example # Template for environment variables
+## Tech Stack
 
 ```
+Frontend          React + Vite, Tailwind CSS
+Auth & Database   Firebase Auth, Firestore
+Backend           Firebase Functions
+```
 
-The goal is to avoid the "one massive folder" problem that happens when projects grow.
+**Why these choices:**  
+The focus is on reliability and maintainability over novelty. Each piece was chosen because it solves a specific problem well and has proven itself in production environments.
 
+<br>
 
+## Design Principles
 
-## Running it locally
+- Build for consistency before automation
+- Prefer clarity over cleverness
+- Separate concerns early to avoid rewrites later
 
-End users interact with RemindrAI through the web application; this setup exists purely for development and code review.
+<br>
 
-This repo is mostly here for review and learning, but if you want to spin it up:
+## Project Structure
 
-1. Clone the repo
-2. Copy `.env.example` to `.env` and fill in your own Firebase credentials
-3. Run `npm install`
-4. Run `npm run dev`
+```
+src/
+├── features/       Business logic by domain
+├── components/     Reusable UI components
+├── services/       Firebase integrations
+├── hooks/          Shared React logic
+├── context/        Global state
+├── pages/          Screen-level components
+└── routes/         Routing configuration
 
-Production keys and services aren't included—you'll need to set up your own Firebase project.
+functions/          Backend logic and scheduled tasks
+```
 
+Organized to scale without becoming unwieldy.
 
+<br>
 
-## What this project is (and isn't)
+## Development Setup
 
-**This is:**
+**Note:** End users interact with RemindrAI through the web application. This section exists only for development and code review.
 
-- An in-progress SaaS build
-- A real-world example of how apps evolve
-- Being built in public as a learning process
+```bash
+# Clone and install
+git clone [repo-url]
+npm install
 
-**This isn't:**
+# Configure environment
+cp .env.example .env
+# Add your Firebase credentials
+
+# Run locally
+npm run dev
+```
+
+You'll need your own Firebase project—production credentials aren't included.
+
+<br>
+
+## What This Is
+
+This is an **in-progress SaaS build** being developed in public. It's a real-world example of how applications evolve from concept to production.
+
+**This is not:**
 
 - A polished demo
-- A finished product
-- A tutorial (though you might learn something from reading the code)
+- A tutorial project
+- Production-ready (yet)
 
+The code reflects actual development practices—including the messy middle stages where things work but aren't pretty yet.
 
+<br>
 
 ## License
 
-Shared for portfolio and educational purposes. Not licensed for commercial use without explicit permission.
-
-
-**Questions? Thoughts? Feedback?**
-Feel free to open an issue or reach out. This is a learning process, and I'm here for it.
 ```
+Shared for portfolio and educational purposes.
+Not licensed for commercial use without explicit permission.
+```
+
+<br>
+
+---
+
+**Questions or feedback?** Open an issue. This is a learning process.
