@@ -1,27 +1,16 @@
 # Dependencies
-
 node_modules/
-
 # Build output
-
 dist/
 dist-ssr/
-
-
 # Environment variables
-
-
 .env
 .env.*
 !.env.example
-
-# Firebase
-
+# Firebase configuration files
 .firebase/
 functions/.runtimeconfig.json
-
 # Logs
-
 logs/
 *.log
 npm-debug.log*
@@ -29,10 +18,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-
-# Editor / OS files
-
+# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea/
