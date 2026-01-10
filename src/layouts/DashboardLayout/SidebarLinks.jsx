@@ -1,7 +1,7 @@
 // ============================================================================
 // 📁 src/constants/SidebarLinks.js
 // ----------------------------------------------------------------------------
-// 🧭 Sidebar Navigation for RemindrAI Dashboard
+// Sidebar Navigation for RemindrAI Dashboard
 // Tone: calm, confident, and professional
 // ----------------------------------------------------------------------------
 
