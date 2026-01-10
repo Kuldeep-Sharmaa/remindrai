@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-import Logo from "../../../public/assets//Navbar-logo/logo.png";
+import Logo from "../../../public/assets/logo/transparent_logo.svg";
 
 export const Navbar = () => {
   return (

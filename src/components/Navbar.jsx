@@ -20,7 +20,6 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import logo from "../../public/assets/Navbar-logo/logo.png";
 import ThemeToggle from "./ThemeToggleButton";
 import { useAuthContext } from "../context/AuthContext";
 
@@ -134,7 +133,11 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="relative">
-              <img src={logo} alt="RemindrAI Logo" className="h-8 sm:h-10" />
+              <img
+                src="/assets/logo/transparent_logo.svg"
+                alt="RemindrAI Logo"
+                className="h-8 sm:h-10 invert dark:invert-0"
+              />
             </div>
           </Link>
 
@@ -182,7 +185,11 @@ export default function Navbar() {
           {/* Logo with Premium Status */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="relative">
-              <img src={logo} alt="RemindrAI Logo" className="h-8 sm:h-10" />
+              <img
+                src="/assets/logo/transparent_logo.svg"
+                alt="RemindrAI Logo"
+                className="h-8 sm:h-10 invert dark:invert-0"
+              />
             </div>
           </Link>
 

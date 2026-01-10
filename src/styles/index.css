@@ -806,12 +806,3 @@
     transform: translateY(-8px) scale(0.995);
   }
 }
-/* Dark mode (default) */
-.logo {
-  filter: brightness(0) invert(1);
-}
-
-/* Light mode */
-.light .logo {
-  filter: none;
-}

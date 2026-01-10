@@ -3,28 +3,35 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./src/assets/svg/**/*.svg", // optional if you use SVGR inline styling
+    "./src/assets/svg/**/*.svg",
   ],
-  darkMode: "class", // enables dark mode with a class
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // Brand Colors
-        primary: "#8e4efc", // Main vivid purple
-        secondary: "#4a90e2", // Electric blue
-        accent: "#3b82f6", // A clean, professional blue (same as --color-accent-light)
+        /* Core Accent */
+        brand: {
+          DEFAULT: "#3b82f6",
+          hover: "#2563eb",
+          soft: "#60a5fa",
+        },
 
-        // Backgrounds
-        bgDark: "#0f172a", // Dark mode background
-        bgLight: "#f9f9fb", // Light mode background
+        /* Backgrounds */
+        bgDark: "#000000",
+        bgLight: "#ffffff",
 
-        // Text Colors
-        textDark: "#e1e1e1", // Text on dark background
-        textLight: "#1a1a1a", // Text on light background
+        /* Text */
+        textDark: "#e5e7eb",
+        textLight: "#0f172a",
+
+        /* Neutral UI */
+        border: "#1f2933",
+        muted: "#9ca3af",
       },
+
       fontFamily: {
-        grotesk: ["Space Grotesk", "sans-serif"], // For headings/logo
-        inter: ["Inter", "sans-serif"], // For body/UI
+        grotesk: ["Space Grotesk", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
       },
     },
   },

@@ -4,7 +4,7 @@ import SidebarNav from "./SidebarNav";
 export default function Sidebar({ expanded, setExpanded, onLogoutClick }) {
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen bg-black/90 backdrop-blur-md text-white 
+      className={`fixed top-0 left-0 h-screen dark:bg-black/90 bg-white/90
                   border-r border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.3)] 
                   transition-all duration-500 ease-in-out z-30
                   ${expanded ? "w-64" : "w-20"} 
