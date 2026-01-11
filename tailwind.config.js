@@ -11,7 +11,7 @@ export default {
       colors: {
         /* Core Accent */
         brand: {
-          DEFAULT: "#3b82f6",
+          DEFAULT: "#2563eb",
           hover: "#2563eb",
           soft: "#60a5fa",
         },
