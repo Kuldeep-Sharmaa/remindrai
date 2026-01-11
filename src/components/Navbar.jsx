@@ -134,9 +134,9 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="relative">
               <img
-                src="/assets/logo/transparent_logo.svg"
+                src="/transparent_logo.svg"
                 alt="RemindrAI Logo"
-                className="h-8 sm:h-10 invert dark:invert-0"
+                className="h-8 sm:h-10 "
               />
             </div>
           </Link>
@@ -186,9 +186,9 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="relative">
               <img
-                src="/assets/logo/transparent_logo.svg"
+                src="/transparent_logo.svg"
                 alt="RemindrAI Logo"
-                className="h-8 sm:h-10 invert dark:invert-0"
+                className="h-8 sm:h-10 "
               />
             </div>
           </Link>

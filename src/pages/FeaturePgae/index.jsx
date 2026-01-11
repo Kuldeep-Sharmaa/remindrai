@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-import DataAnalysisSVG from "../../../public/assets/svg/feature/Data.svg";
+import DataAnalysisSVG from "../../assets/svg/feature/Data.svg";
 import GradientButton from "../../components/Ui/GradientBtn";
 
 // Simple intersection observer hook

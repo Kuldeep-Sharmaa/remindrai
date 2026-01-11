@@ -2,7 +2,7 @@ import React, { useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import agendaAnimation from "../../../public/assets/Animation/Agenda.json";
+import agendaAnimation from "../../assets/Animation/Agenda.json";
 import Lottie from "lottie-react";
 
 // Register GSAP plugins OUTSIDE the component to ensure they're available immediately

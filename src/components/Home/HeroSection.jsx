@@ -1,12 +1,11 @@
 import React, { useRef, useEffect } from "react";
 import Lottie from "lottie-react";
-import { Sparkles, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import aiAnimationData from "../../../public/assets/Animation/ai.json";
+import aiAnimationData from "../..//assets/Animation/ai.json";
 
 import GradientButton from "../Ui/GradientBtn";
 

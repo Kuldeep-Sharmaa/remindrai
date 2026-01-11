@@ -1,8 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-import Logo from "../../../public/assets/logo/transparent_logo.svg";
-
 export const Navbar = () => {
   return (
     <motion.nav
@@ -15,7 +13,11 @@ export const Navbar = () => {
       <div className="flex items-center justify-center max-w-7xl text-center mx-auto">
         {/* Logo and App Name */}
         <div className="flex items-center space-x-3">
-          <img src={Logo} alt="RemindrAI Logo" className="h-8 sm:h-10" />
+          <img
+            src="/transparent_logo.svg"
+            alt="RemindrAI Logo"
+            className="h-8 sm:h-10"
+          />
         </div>
         {/* You can add navigation links or other elements here if needed */}
       </div>

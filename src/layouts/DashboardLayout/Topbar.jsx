@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { Menu, X, User2 } from "lucide-react";
-import Logo from "../../../public/assets/images/logo.png";
 
 export default function Topbar({ expanded, setExpanded }) {
   const navigate = useNavigate();
@@ -46,12 +45,12 @@ export default function Topbar({ expanded, setExpanded }) {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <img
-          src={Logo}
+          src="/brand_logo.svg"
           alt="Logo"
-          className="w-8 h-8 cursor-pointer"
+          className="w-10 h-10 cursor-pointer"
           onClick={() => navigate("/")}
         />
-        <h1 className="text-base sm:text-lg font-semibold tracking-tight text-white">
+        <h1 className="text-base sm:text-lg font-semibold tracking-tight text-brand-hover dark:text-brand-soft">
           Workspace
         </h1>
       </div>

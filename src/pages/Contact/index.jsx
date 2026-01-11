@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import BackgroundImage from "../../../public/assets/images/contact.png";
+import BackgroundImage from "../../assets/images/contact.png";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({

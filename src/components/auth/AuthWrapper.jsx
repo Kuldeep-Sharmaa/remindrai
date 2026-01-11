@@ -1,16 +1,15 @@
 // src/components/auth/AuthWrapper.jsx
 
-import React, { useState } from "react"; // Import useState for internal state
+import React, { useState } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { motion, AnimatePresence } from "framer-motion";
 
 import LoginForm from "./login/LoginForm";
 import SignupForm from "./signup/SignupForm";
-import DynamicWords from "./DynamicWords"; //  works independently
+import DynamicWords from "./DynamicWords";
 
-import loginanimation from "../../../public/assets/Animation/login.json";
-import signupanimation from "../../../public/assets/Animation/Agenda.json";
-import Logo from "../../../public/assets/images/logo.png";
+import loginanimation from "../../assets/Animation/Login.json";
+import signupanimation from "../../assets/Animation/Agenda.json";
 
 const containerVariants = {
   initial: { opacity: 0, y: 20 },
@@ -25,8 +24,7 @@ const formVariants = {
 };
 
 const AuthWrapper = () => {
-  // Manage the form state internally
-  const [isLogin, setIsLogin] = useState(true); // true for Login, false for Signup
+  const [isLogin, setIsLogin] = useState(true);
 
   // Function to toggle between login and signup forms
   const toggleForm = () => {
@@ -49,18 +47,17 @@ const AuthWrapper = () => {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-                className="inline-flex items-center justify-center w-12 h-12 mb-6"
+                className="inline-flex items-center justify-center  mb-6"
               >
                 <img
-                  src={Logo}
+                  src="/transparent_logo.svg"
                   alt="RemindrAI Logo"
-                  className="object-cover"
+                  className=" h-16 w-auto"
                   loading="eager"
                 />
               </motion.div>
 
-              <h1 className="text-3xl dark:text-white font-bold">RemindrAI</h1>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed">
                 {isLogin
                   ? "Welcome back to your AI-powered workspace"
                   : "Join thousands of professionals using AI"}
@@ -97,9 +94,6 @@ const AuthWrapper = () => {
               </AnimatePresence>
 
               <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300/50 dark:border-gray-600/30"></div>
-                </div>
                 <div className="relative flex justify-center text-xs">
                   <span className="px-3 bg-gray-100/40 dark:bg-gray-800/20 text-gray-500 dark:text-gray-300 rounded-full">
                     or

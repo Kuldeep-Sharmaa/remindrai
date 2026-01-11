@@ -230,7 +230,7 @@ const Experience = () => {
 
             <div className="fade-in relative flex items-center justify-center w-56 h-56 sm:w-72 sm:h-72 lg:w-96 lg:h-80">
               <img
-                src={`/assets/svg/homepage/step-${i + 1}.svg`}
+                src={`/src/assets/svg/homepage/step-${i + 1}.svg`}
                 alt={step.title}
                 className="relative w-40 sm:w-80 lg:w-96 select-none"
                 loading="lazy"

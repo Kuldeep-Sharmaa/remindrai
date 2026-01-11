@@ -185,9 +185,6 @@ const SignupForm = ({ onSwitchToLogin }) => {
         />
         <SubmitButton isSubmitting={isSubmitting} isFormValid={isFormValid} />
         <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600/50"></div>
-          </div>
           <div className="relative flex justify-center text-xs">
             <span className="px-3 bg-white dark:bg-gray-800/30 text-gray-500 dark:text-gray-400 rounded-full">
               sign up with

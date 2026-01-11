@@ -12,10 +12,10 @@ import {
   Users,
   Lightbulb,
 } from "lucide-react";
-import svg1 from "../../../public/assets/svg/about/SelfConfidence.svg";
-import svg2 from "../../../public/assets/svg/about/innovation.svg";
-import svg3 from "../../../public/assets/svg/about/Vision.svg";
-import svg4 from "../../../public/assets/svg/about/Founder.svg";
+import svg1 from "../../assets/svg/about/SelfConfidence.svg";
+import svg2 from "../../assets/svg/about/innovation.svg";
+import svg3 from "../../assets/svg/about/Vision.svg";
+import svg4 from "../../assets/svg/about/Founder.svg";
 import GradientButton from "../../components/Ui/GradientBtn.jsx";
 
 const fadeUp = {
