@@ -57,7 +57,6 @@ const NotificationPreferences = () => {
     setTimeout(() => setMessage(""), 3000);
   };
 
-  // ✅ Fixed toggle with working Tailwind peer styles
   const renderToggle = (id, label, description) => (
     <div className="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
       <div className="flex-1 pr-4">
@@ -101,9 +100,6 @@ const NotificationPreferences = () => {
       className="p-6 sm:p-8 w-full max-w-2xl mx-auto rounded-2xl shadow-lg 
          bg-white dark:bg-black border border-gray-200 dark:border-gray-700"
     >
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-        Notification Preferences
-      </h2>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
         Choose what notifications you want to receive from RemindrAI.
       </p>

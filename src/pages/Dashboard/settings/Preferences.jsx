@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { db } from "../../../services/firebase"; // Ensure this path is correct for your project
-import { useAuthContext } from "../../../context/AuthContext"; // Ensure this path is correct for your project
+import { db } from "../../../services/firebase";
+import { useAuthContext } from "../../../context/AuthContext";
 import {
   Loader2,
   CheckCircle,
   XCircle,
-  User, // For Role selection icon inside Select
-  MessageCircle, // For Tone selection icon inside Select
-  Share2, // For Platform selection icon inside Select
+  User,
+  MessageCircle,
+  Share2,
   ChevronDown,
   Check,
-  Brain, // Accent icon for the page header
-  Target, // Icon for Role section header
-  Mic, // Icon for Tone selection icon
-  Globe, // Icon for Platform selection icon
+  Brain,
+  Target,
+  Mic,
+  Globe,
 } from "lucide-react";
 
-// Enhanced Select Component
 const Select = ({
   label,
   value,
@@ -32,7 +31,6 @@ const Select = ({
 
   return (
     <div className="relative">
-      {/* Dropdown Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
@@ -321,20 +319,6 @@ const Preferences = () => {
   return (
     <div className="min-h-screen  py-10 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Brain className="w-7 h-7 sm:w-8 sm:h-8 text-black dark:text-white" />
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-black dark:text-white tracking-tight">
-              AI Content Preferences
-            </h1>
-          </div>
-          <p className="text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto leading-relaxed">
-            Control how your content is generated — your tone, your platform,
-            your way.
-          </p>
-        </div>
-
         {/* Notification */}
         {message && (
           <div className="mb-6">

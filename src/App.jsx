@@ -34,9 +34,10 @@ import DashboardHome from "./pages/Dashboard/Overview";
 import Deliveries from "./pages/Dashboard/Content";
 import Insights from "./pages/Dashboard/Insights";
 import Studio from "./pages/Dashboard/Reminders";
-import SettingsPage from "./pages/SettingsPage";
+import SettingsIndex from "./pages/SettingsIndex";
 
 // Settings sub-pages
+import SettingsLayout from "./layouts/SettingsLayout";
 import AccountInfo from "./pages/Dashboard/settings/AccountInfo";
 import Notification from "./pages/Dashboard/settings/NotificationPreferences";
 import Appearance from "./pages/Dashboard/settings/Appearance";
@@ -259,20 +260,17 @@ function AppContent() {
               <Route path="insights" element={<Insights />} />
 
               {/* Settings & nested settings routes */}
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="settings/accountinfo" element={<AccountInfo />} />
-              <Route path="settings/notifications" element={<Notification />} />
-              <Route path="settings/security" element={<Security />} />
-              <Route path="settings/preferences" element={<Preferences />} />
-              <Route path="settings/appearance" element={<Appearance />} />
-              <Route
-                path="settings/aboutremindrai"
-                element={<Aboutremindrai />}
-              />
-              <Route
-                path="settings/deleteaccount"
-                element={<DeleteAccount />}
-              />
+
+              <Route path="settings" element={<SettingsLayout />}>
+                <Route index element={<SettingsIndex />} />
+                <Route path="accountinfo" element={<AccountInfo />} />
+                <Route path="notifications" element={<Notification />} />
+                <Route path="security" element={<Security />} />
+                <Route path="preferences" element={<Preferences />} />
+                <Route path="appearance" element={<Appearance />} />
+                <Route path="aboutremindrai" element={<Aboutremindrai />} />
+                <Route path="deleteaccount" element={<DeleteAccount />} />
+              </Route>
             </Route>
 
             {/* Email Verification (protected) */}

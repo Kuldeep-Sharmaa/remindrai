@@ -13,22 +13,21 @@ import {
 } from "lucide-react";
 
 import TimezoneSettingCard from "./TimezoneSettingCard";
-import { useTheme } from "../../../hooks/useTheme"; // Ensure this path is correct
+import { useTheme } from "../../../hooks/useTheme";
 
 const AppearanceSettings = () => {
   const {
-    theme, // User's selected preference ('light', 'dark', 'auto')
-    setTheme, // (Note: handleThemeChange is preferred for external use)
+    theme,
+    setTheme,
     systemTheme,
-    currentEffectiveTheme, // The actual theme applied ('light' or 'dark')
+    currentEffectiveTheme,
     isLoadingThemeChange,
     themeUsage,
-    handleThemeChange, // Use this for changing theme
-    updateCounter, // Add this line
-    isInitialized, // Add this line
+    handleThemeChange,
+    updateCounter,
+    isInitialized,
   } = useTheme();
 
-  // ENHANCED DEBUG LOGGING
   console.log("AppearanceSettings re-rendered:", {
     theme,
     systemTheme,
@@ -39,7 +38,6 @@ const AppearanceSettings = () => {
     renderCount: React.useRef(0).current++,
   });
 
-  // Wait for initialization
   if (!isInitialized) {
     return <div>Loading theme settings...</div>;
   }
@@ -118,16 +116,6 @@ const AppearanceSettings = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-black transition-colors duration-500">
       <div className="max-w-4xl mx-auto  sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 space-y-8">
-        {/* Header */}
-        <header className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white tracking-tight mb-3">
-            Appearance Settings
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            Tailor your experience for optimal comfort and productivity.
-          </p>
-        </header>
-
         {/* Theme Overview */}
         <section className="bg-white/80 dark:bg-black/40 backdrop-blur-md border border-gray-300/40 dark:border-white/10 rounded-xl shadow-lg p-6 sm:p-8 space-y-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">

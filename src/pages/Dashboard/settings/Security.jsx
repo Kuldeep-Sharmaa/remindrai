@@ -10,10 +10,6 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { DateTime } from "luxon";
 import zxcvbn from "zxcvbn";
 
-// No need to import 'auth' here directly anymore, as we get the user object from context
-// import { auth } from "../../services/firebase"; // REMOVE THIS LINE
-
-// ✨ Import Lucide Icons
 import {
   ShieldCheck,
   Key,
@@ -24,7 +20,6 @@ import {
 } from "lucide-react";
 
 const Security = () => {
-  // --- FIX HERE: Destructure 'firebaseUser' and 'currentUser' (which is userProfile) ---
   const {
     firebaseUser,
     currentUser,
@@ -39,7 +34,7 @@ const Security = () => {
   const [passwordStrength, setPasswordStrength] = useState(null);
 
   useEffect(() => {
-    // Use currentUser.lastSignInTime from the userProfile (which is now `currentUser`)
+    // Use currentUser.lastSignInTime from the userProfile
     if (currentUser) {
       setLastSignInTime(currentUser.lastSignInTime);
     } else {
@@ -99,7 +94,6 @@ const Security = () => {
       return;
     }
 
-    // --- FIX HERE: Use 'firebaseUser' for Firebase Auth operations ---
     if (!firebaseUser) {
       showToast({
         type: "error",
@@ -111,12 +105,12 @@ const Security = () => {
 
     try {
       const credential = EmailAuthProvider.credential(
-        currentUser.email, // Use email from the userProfile (currentUser)
+        currentUser.email,
         oldPassword
       );
-      // --- FIX HERE: Pass 'firebaseUser' to reauthenticateWithCredential ---
+
       await reauthenticateWithCredential(firebaseUser, credential);
-      // --- FIX HERE: Pass 'firebaseUser' to updatePassword ---
+
       await updatePassword(firebaseUser, newPassword);
 
       showToast({
@@ -178,20 +172,6 @@ const Security = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-50 flex flex-col items-center py-8  sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full">
-        {/* Main Heading */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <ShieldCheck className="h-8 w-8 sm:h-10 sm:w-10 text-black dark:text-white" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-black dark:text-white">
-              Security & Privacy
-            </h1>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg leading-relaxed">
-            Manage your password, view sign-in activity, and protect your
-            account with 2FA.
-          </p>
-        </div>
-
         {/* Change Password Section */}
         <div className="mb-8 p-6 bg-white/80 dark:bg-black/40 backdrop-blur-md border border-gray-300/40 dark:border-white/10 rounded-2xl shadow-md">
           <h2 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-2 text-black dark:text-white">
@@ -320,7 +300,7 @@ const Security = () => {
             Account Activity
           </h2>
           <p className="text-gray-700 dark:text-gray-300">
-            Last Sign-In:{" "}
+            Last Log-In:{" "}
             <strong className="text-black dark:text-white">
               {formatTimestamp(lastSignInTime)}
             </strong>

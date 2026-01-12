@@ -257,23 +257,21 @@ const AccountInfo = () => {
     <div className="min-h-screen">
       <div className="max-w-3xl w-full mx-auto ">
         {/* Header Section */}
-        <div className="text-center mb-10 pb-8">
+        <div className="text-center mb-10 mt-3 ">
           <div className="relative inline-block mb-4">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-600 to-purple-700 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold uppercase shadow-lg ring-4 ring-white dark:ring-gray-800">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 bg-brand rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold uppercase shadow-lg ring-4 ring-white dark:ring-gray-800">
               {firstLetter}
             </div>
-            {/* Online indicator */}
+
             <div className="absolute bottom-1 right-1 w-7 h-7 bg-green-500 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center">
               <span className="sr-only">Online</span>
               <div className="w-3 h-3 bg-white rounded-full"></div>
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mt-6 mb-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mt-6 mb-2 tracking-tight">
             Account Overview
           </h1>
-          <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-            View your personal details and account registration information
-          </p>
+          <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl mx-auto"></p>
         </div>
 
         {/* Main Content Card */}
@@ -356,7 +354,7 @@ const AccountInfo = () => {
                     size={16}
                     className="text-gray-500 dark:text-gray-400"
                   />
-                  Timezone
+                  Current Timezone
                 </label>
                 <div className="bg-white/70 dark:bg-black/40 backdrop-blur-md rounded-xl p-4 border border-gray-300/40 dark:border-white/10 shadow-sm">
                   <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">

@@ -4,15 +4,10 @@ import React, { useState, useEffect } from "react";
 import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../context/AuthContext";
-import { auth } from "../../../services/firebase"; // Import the auth instance directly for Firebase Auth operations
+import { auth } from "../../../services/firebase";
 
-// Import your actual toast system
-import { showToast } from "../../../components/ToastSystem/toastUtils"; // Adjust path as needed
+import { showToast } from "../../../components/ToastSystem/toastUtils";
 
-/**
- * Reauthentication Modal Component
- * Enhanced with better animations and mobile-first design
- */
 const ReauthenticateModal = ({ onClose, onReauthenticate, loading, error }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +17,6 @@ const ReauthenticateModal = ({ onClose, onReauthenticate, loading, error }) => {
     onReauthenticate(password);
   };
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -222,10 +216,6 @@ const ReauthenticateModal = ({ onClose, onReauthenticate, loading, error }) => {
   );
 };
 
-/**
- * Enhanced DeleteAccountButton Component
- * Now integrated with AuthContext deleteAccount method
- */
 const DeleteAccountButton = () => {
   // Use deleteAccount and isAccountDeleting from AuthContext
   const {
@@ -363,38 +353,6 @@ const DeleteAccountButton = () => {
   return (
     <div className="w-full mt-6 max-w-2xl mx-auto">
       <div className="bg-gradient-to-r from-red-50/80 to-pink-50/80 dark:from-red-900/20 dark:to-pink-900/20 backdrop-blur-sm rounded-2xl border border-red-200/50 dark:border-red-800/50 p-6 sm:p-8 shadow-xl">
-        {/* Header Section */}
-        <div className="flex items-start gap-4 mb-6">
-          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/30 rounded-xl flex items-center justify-center shadow-inner">
-            <svg
-              className="w-6 h-6 text-red-600 dark:text-red-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Delete Account
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-              Permanently delete your{" "}
-              <span className="font-medium text-gray-800 dark:text-gray-200">
-                remindrai.app
-              </span>{" "}
-              account, including all associated data, scheduled posts, and
-              AI-generated drafts.
-            </p>
-          </div>
-        </div>
-
         {/* Warning */}
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-1">

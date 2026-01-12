@@ -16,20 +16,6 @@ export default function Aboutremindrai() {
   return (
     <div className="min-h-screen transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-2xl mb-6 shadow-md">
-            <Globe className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
-            {name}
-          </h1>
-          <div className="w-24 h-0.5 bg-blue-600 dark:bg-blue-400 mx-auto mb-6"></div>
-          <p className="text-lg text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
-            Enterprise Social Media Management Platform
-          </p>
-        </div>
-
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {/* System Information */}
