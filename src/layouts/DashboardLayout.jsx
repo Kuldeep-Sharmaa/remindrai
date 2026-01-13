@@ -1,11 +1,11 @@
-// ============================================================================
 // 📁 src/layouts/DashboardLayout.jsx
-// ----------------------------------------------------------------------------
-// 🧠 Clean, OpenAI-inspired minimal layout
-// 🌗 Fully responsive with dark/light theme harmony
-// 💡 Global proactive AI notification hook integrated (for YC demo)
-// 💡 Now includes TimezoneChangeModal for smart timezone sync
-// ----------------------------------------------------------------------------
+
+// App shell for authenticated dashboard
+// - Responsive sidebar + topbar
+// - Scroll management
+// - Logout flow
+// - Error boundary isolation
+// - Timezone sync modal
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
@@ -15,12 +15,6 @@ import Topbar from "./DashboardLayout/Topbar";
 import LogoutModal from "./DashboardLayout/LogoutModal";
 import { useAuthContext } from "../context/AuthContext";
 import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
-
-// 🔔 Global proactive AI demo (YC)
-import useDemoTriggerGlobal from "../features/remindersystem/demo/useDemoTriggerGlobal.jsx";
-import DemoDraftModal from "../features/remindersystem/demo/DemoDraftModal";
-
-// 🕐 NEW: Smart timezone modal
 import TimezoneChangeModal from "../components/TimezoneChangeModal";
 
 const DashboardLayout = () => {
@@ -36,35 +30,30 @@ const DashboardLayout = () => {
   const location = useLocation();
   const scrollRef = useRef(null);
 
-  // 🔔 Global proactive AI demo notifications
-  useDemoTriggerGlobal();
+  // Responsive handling + body scroll lock
 
-  // --------------------------------------------------------------------------
-  // 🧩 Responsive resize + scroll lock
-  // --------------------------------------------------------------------------
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     let resizeTimer;
+
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        const mobileNow = window.innerWidth < 1024;
-        setIsMobile(mobileNow);
-        if (!mobileNow && sidebarExpanded) setSidebarExpanded(false);
+        const mobile = window.innerWidth < 1024;
+        setIsMobile(mobile);
+        if (!mobile && sidebarExpanded) setSidebarExpanded(false);
       }, 200);
     };
 
-    const applyScrollLock = () => {
-      if (isMobile && sidebarExpanded) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    };
+    if (isMobile && sidebarExpanded) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-    applyScrollLock();
     window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimer);
@@ -72,17 +61,18 @@ const DashboardLayout = () => {
     };
   }, [sidebarExpanded, isMobile]);
 
-  // --------------------------------------------------------------------------
-  // 🚪 Logout flow
-  // --------------------------------------------------------------------------
+  // Logout flow
   const handleLogoutConfirm = useCallback(async () => {
     setIsLoggingOut(true);
     try {
       const result = await logout();
-      if (result?.success) navigate("/");
-      else setIsLoggingOut(false);
+      if (result?.success) {
+        navigate("/");
+      } else {
+        setIsLoggingOut(false);
+      }
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("[Logout]", err);
       setIsLoggingOut(false);
     } finally {
       setShowLogoutModal(false);
@@ -93,35 +83,30 @@ const DashboardLayout = () => {
     setSidebarExpanded(false);
   }, []);
 
-  const handleOpenLogout = useCallback(() => setShowLogoutModal(true), []);
-  const handleCloseLogout = useCallback(() => setShowLogoutModal(false), []);
-
-  // --------------------------------------------------------------------------
-  // ⬆️ Scroll reset on route change
-  // --------------------------------------------------------------------------
+  //  Scroll reset on route change
   useEffect(() => {
     try {
-      if (scrollRef?.current) scrollRef.current.scrollTop = 0;
-      else if (typeof window !== "undefined") window.scrollTo(0, 0);
-    } catch (err) {
-      console.warn("[DashboardLayout] scroll restore failed", err);
-    }
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = 0;
+      } else {
+        window.scrollTo(0, 0);
+      }
+    } catch {}
   }, [location.pathname]);
 
-  // --------------------------------------------------------------------------
-  // 🔧 Toast alignment logic (keep your existing)
-  // --------------------------------------------------------------------------
+  // Toast alignment (UI utility)
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let raf = null;
-    let observer = null;
+
+    let raf;
+    let observer;
 
     const realignToaster = () => {
       const wrapper = document.querySelector(
         '#_rht_toaster > div[style*="justify-content: center"]'
       );
       const main = document.querySelector("#main-scroll-container");
-
       if (!wrapper || !main) return;
 
       const rect = main.getBoundingClientRect();
@@ -129,12 +114,9 @@ const DashboardLayout = () => {
 
       wrapper.style.position = "fixed";
       wrapper.style.left = `${centerX}px`;
-      wrapper.style.top = `${Math.max(64, 70)}px`;
-      wrapper.style.right = "auto";
+      wrapper.style.top = "70px";
       wrapper.style.transform = "translateX(-50%)";
       wrapper.style.pointerEvents = "none";
-      wrapper.style.display = "flex";
-      wrapper.style.justifyContent = "center";
       wrapper.style.zIndex = "99999";
     };
 
@@ -146,7 +128,7 @@ const DashboardLayout = () => {
     realignToaster();
     window.addEventListener("resize", onResize);
 
-    observer = new MutationObserver(() => realignToaster());
+    observer = new MutationObserver(realignToaster);
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ["class", "style"],
@@ -159,9 +141,8 @@ const DashboardLayout = () => {
     };
   }, [sidebarExpanded]);
 
-  // --------------------------------------------------------------------------
-  // ✅ Layout Render
-  // --------------------------------------------------------------------------
+  //  Layout render
+
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-black flex justify-center overflow-hidden">
       <div className="w-full max-w-screen-2xl flex overflow-hidden">
@@ -169,35 +150,33 @@ const DashboardLayout = () => {
         <Sidebar
           expanded={sidebarExpanded}
           setExpanded={setSidebarExpanded}
-          onLogoutClick={handleOpenLogout}
+          onLogoutClick={() => setShowLogoutModal(true)}
           onLinkClick={handleSidebarLinkClick}
         />
 
-        {/* Mobile Overlay */}
+        {/* Mobile overlay */}
         <div
-          className={`fixed inset-0 z-20 lg:hidden transition-opacity duration-300 ease-in-out ${
+          className={`fixed inset-0 z-20 lg:hidden bg-black/50 transition-opacity ${
             sidebarExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-          } bg-black/50 backdrop-blur-sm`}
+          }`}
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* Main Section */}
+        {/* Main area */}
         <div
-          className={`flex flex-col flex-1 min-h-screen overflow-hidden transition-all duration-500 ease-in-out ${
+          className={`flex flex-col flex-1 min-h-screen overflow-hidden transition-all ${
             sidebarExpanded ? "lg:ml-64" : "lg:ml-20"
           }`}
         >
-          {/* Topbar */}
           <Topbar expanded={sidebarExpanded} setExpanded={setSidebarExpanded} />
 
-          {/* Main Scroll Area */}
           <main
             ref={scrollRef}
             id="main-scroll-container"
-            className={`flex-1 overflow-y-auto scroll-smooth px-4 sm:px-6 lg:px-8 pb-10 pt-20 transition-all duration-500 ease-in-out ${
+            className={`flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10 transition-all ${
               sidebarExpanded && isMobile
-                ? "transform scale-95 opacity-75 pointer-events-none"
-                : "transform scale-100 opacity-100"
+                ? "scale-95 opacity-75 pointer-events-none"
+                : ""
             }`}
           >
             <ErrorBoundary>
@@ -209,19 +188,15 @@ const DashboardLayout = () => {
         {/* Logout Modal */}
         {showLogoutModal && (
           <LogoutModal
-            isOpen={showLogoutModal}
-            onCancel={handleCloseLogout}
+            isOpen
+            onCancel={() => setShowLogoutModal(false)}
             onConfirm={handleLogoutConfirm}
             isLoggingOut={isLoggingOut}
           />
         )}
       </div>
 
-      {/* 🌐 Timezone Sync Modal (smart auto-detect) */}
       <TimezoneChangeModal />
-
-      {/* 🧪 DEV-ONLY: Demo Draft Modal */}
-      {process.env.NODE_ENV !== "production" && <DemoDraftModal />}
     </div>
   );
 };
