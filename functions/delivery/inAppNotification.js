@@ -1,30 +1,17 @@
 /**
  * inAppNotification.js
- * ---------------------------------------------
+ *
  * Purpose:
- *   - Encapsulate creation of in-app notifications in Firestore.
+ * Handles in-app delivery of reminder drafts.
  *
- * Responsibilities / Contents:
- *   - createNotification(uid, payload)
+ * Responsibilities:
+ * - Create notification records for executed reminders.
  *
- * Invariants & Guarantees:
- *   - Notification objects follow your UI contract.
+ * Guarantees:
+ * - No email or push logic here.
+ * - Phase 1 delivery only.
  *
- * When to update / modify this file:
- *   - When UI expects different notification schema.
- * ---------------------------------------------
+ * When to modify:
+ * - If in-app notification format changes.
+ * - If additional delivery metadata is required.
  */
-
-import { getDb } from "../libs/firestoreClient.js";
-
-export async function createNotification(uid, payload) {
-  const col = getDb().collection("users").doc(uid).collection("notifications");
-  const docRef = await col.add({
-    ...payload,
-    createdAt: new Date(),
-    read: false,
-  });
-  return { id: docRef.id };
-}
-
-export default { createNotification };
