@@ -40,9 +40,9 @@ Right now, the focus is on building something reliable and maintainable. Polish 
 
 ### In progress
 
-- AI draft generation
-- Background jobs
-- Edge case handling
+- AI draft generation (execution pipeline in place)
+- Background jobs (scheduler-based)
+- Edge case handling and cost safety
 
 <br>
 
