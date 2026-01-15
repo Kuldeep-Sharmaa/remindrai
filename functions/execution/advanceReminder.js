@@ -45,9 +45,10 @@ export async function advanceReminder({
       return;
     }
 
-    // Recurring reminders: compute next run time
+    // Recurring reminders: compute next run time from scheduled time (not execution time)
     const schedule = reminderData.schedule;
     const nextRunAtUTC = computeNextRunAtUTC(schedule, scheduledForUTC);
+
     await reminderRef.update({
       nextRunAtUTC,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
