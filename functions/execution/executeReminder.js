@@ -49,13 +49,13 @@
  */
 
 import * as admin from "firebase-admin";
-import { checkExecutionExists } from "../helpers/checkExecutionExists";
-import { recordExecution } from "../helpers/recordExecution";
-import { createDraft } from "../helpers/createDraft";
-import { advanceReminder } from "../helpers/advanceReminder";
-import { checkAICaps } from "../helpers/checkAICaps";
-import { incrementAICounters } from "../helpers/incrementAICounters";
-import { callAIOnce } from "../helpers/callAIOnce";
+import { checkExecutionExists } from "./idempotency";
+import { recordExecution } from "./recordExecution";
+import { advanceReminder } from "./advanceReminder";
+import { createDraft } from "../drafts/createDraft";
+import { checkAICaps } from "../usage/checkAICaps";
+import { incrementAICounters } from "../usage/incrementAICounters";
+import { callAIOnce } from "../ai/callAIOnce";
 
 /**
  * Executes a single reminder.
