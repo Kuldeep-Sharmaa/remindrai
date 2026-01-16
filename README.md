@@ -2,27 +2,31 @@
 
 ---
 
-> A tool to help you actually show up for your content.
+> A personal AI content assistant that helps you stay consistent.
 
-RemindrAI is being built for creators and professionals who struggle with consistency—not because they lack ideas, but because remembering _when_ to post and _what_ to write adds up to real friction over time.
+RemindrAI is being built for creators, founders, and busy professionals who struggle with consistency—not because they lack ideas, but because creation gets pushed aside by daily work.
 
-This repo is intentionally public and unfinished. It's here to show how a real product gets built, messy bits and all.
+Instead of asking you to remember what to write or when to start, RemindrAI is designed to **show up with content when it matters**.
+
+This repository is intentionally public and unfinished. It reflects how a real product is built—incrementally, imperfectly, and with long-term thinking.
 
 <br>
 
 ## Why this exists
 
-Most content tools solve scheduling. That's useful, but it's not where people get stuck.
+Most content tools focus on scheduling. That solves distribution, but not the hardest part.
 
-The real problem hits when it's time to sit down and _create_—and you're staring at a blank screen, trying to remember what you wanted to say or whether today was even the day you planned to post.
+The real friction happens earlier—when it’s time to create and you’re staring at a blank screen, unsure what to say, or whether now is even the right moment.
 
-**RemindrAI is being built to help at that exact moment:**
+RemindrAI is being built to help at that point.
 
-- Remind you when it's time to create
-- Cut through decision fatigue
-- Eventually, offer AI-assisted drafts that actually feel useful (not generic)
+The goal is simple:
 
-Right now, the focus is on building something reliable and maintainable. Polish comes later.
+- Reduce the mental load around consistency
+- Remove the need to repeatedly prompt or plan from scratch
+- Deliver fresh, relevant starting points instead of empty editors
+
+Over time, this becomes less about reminders and more about having an AI assistant that remembers your intent and acts on it.
 
 <br>
 
@@ -31,18 +35,20 @@ Right now, the focus is on building something reliable and maintainable. Polish 
 ![Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
 ![Target](https://img.shields.io/badge/v1%20target-feb%2016%2C%202025-blue?style=for-the-badge)
 
-### What's working
+### What’s working
 
-- Core frontend structure
-- Firebase Auth
-- Firestore integration
-- Feature-based architecture
+- Core frontend architecture
+- Authentication with Firebase
+- Firestore-based data model
+- Feature-oriented project structure
 
 ### In progress
 
-- AI draft generation (execution pipeline in place)
-- Background jobs (scheduler-based)
-- Edge case handling and cost safety
+- AI draft generation and delivery flow
+- Background execution and scheduling logic
+- Cost controls and edge-case handling
+
+The focus right now is reliability and correctness. Polish comes later.
 
 <br>
 
@@ -55,15 +61,16 @@ Backend           Firebase Functions
 ```
 
 **Why these choices:**  
-The focus is on reliability and maintainability over novelty. Each piece was chosen because it solves a specific problem well and has proven itself in production environments.
+Each tool was selected for stability, clarity, and long-term maintainability. There’s no experimentation for novelty’s sake—only what’s needed to support a real product.
 
 <br>
 
 ## Design Principles
 
-- Build for consistency before automation
-- Prefer clarity over cleverness
+- Consistency before automation
+- Clear flows over clever abstractions
 - Separate concerns early to avoid rewrites later
+- Prefer systems that fail safely
 
 <br>
 

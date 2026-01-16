@@ -2,29 +2,34 @@
 
 ---
 
-> How the system works, why it's built this way, and what tradeoffs were made.
+> How the system works, why it was designed this way, and the tradeoffs it intentionally accepts.
 
-This document explains the design decisions behind RemindrAI's backend. The system is designed to be simple, predictable, and cost-safe. Some tradeoffs are deliberate.
+This document explains the backend design behind RemindrAI.  
+The system is built to be predictable, cost-safe, and easy to reason about at small scale.  
+Some guarantees are intentionally relaxed to keep the system simple and reliable.
 
 <br>
 
 ## What RemindrAI is (and is not)
 
-**RemindrAI is a scheduler-driven AI execution system.**
+**RemindrAI is a proactive, time-triggered AI execution system.**
 
-It runs AI only at reminder time, generates a fresh draft on each run, and delivers drafts without users repeatedly prompting AI.
+It runs AI only at predefined moments, generates a fresh draft on each execution, and delivers results without requiring users to repeatedly open an editor or prompt an AI manually.
+
+Time acts as a trigger — not a task reminder.
 
 **It is not:**
 
-- A post scheduler
+- A post scheduling tool
 - A real-time system
-- An AI chat interface
+- An interactive AI chat product
 
-Late execution is acceptable. Rare duplicate execution is possible and intentionally tolerated.
+Delayed execution is acceptable.  
+Rare duplicate execution is possible and intentionally tolerated.
 
 <br>
 
-## High-level flow
+## High-level execution flow
 
 ```
 User creates reminder
@@ -46,67 +51,92 @@ Result saved and delivered
 System state advances
 ```
 
-The frontend never executes reminders. The backend is the single source of truth.
+The frontend never executes content generation.  
+The backend is the single source of truth.
 
 <br>
 
 ## Core components
 
-### Scheduler
+### Time trigger (scheduler)
 
 - One global Cloud Scheduler
 - Runs every 5 minutes
 - Triggers a single Cloud Function
-- Knows nothing about users or reminder logic
+- Has no knowledge of users or content
 
-Purpose: wake the backend, nothing more.
+Purpose: wake the system — nothing more.
 
 ### Execution engine
 
-- Queries due reminders in small batches
-- Processes reminders sequentially
-- Each reminder executes in isolation
-- One failure does not stop the batch
+- Queries due executions in small batches
+- Processes each execution independently
+- Failures are isolated per execution
+- One failure never blocks the batch
 
-This keeps behavior and cost predictable.
+This keeps behavior predictable and costs bounded.
 
 ### Idempotency layer
 
-Each reminder execution is identified by:
+Each execution is identified by:
 
-- `reminderId`
-- `scheduledForUTC` (the scheduled run time)
+- `reminderId` (intent identifier)
+- `scheduledForUTC` (intended execution time)
 
-This idempotency is **best-effort**, not transactional.
+Idempotency is **best-effort**, not transactional.
 
-The system does **not** guarantee exactly-once execution. In rare edge cases (overlapping scheduler runs, retries, partial failures), duplicate executions may occur.
+The system does **not** guarantee exactly-once execution.  
+In rare cases (overlapping scheduler runs, retries, partial crashes), duplicate executions may occur.
 
-This tradeoff avoids distributed locks, transactions, and complex coordination.
+This tradeoff avoids distributed locks, cross-service transactions, and complex coordination.
 
 ### AI usage controls
 
-AI execution is tightly controlled:
+AI execution is intentionally constrained:
 
-- AI runs only for AI reminders
+- AI runs only for AI-enabled intents
 - AI runs only at execution time
-- One AI call per reminder execution
-- Daily per-user and global AI caps are enforced
+- One AI call per execution
+- Daily per-user and global usage caps enforced
 
-If a cap is exceeded, the reminder execution is skipped, the event is logged, and the reminder still advances.
+If a limit is exceeded:
 
-Counters are updated after successful AI calls. In crash windows, counters may temporarily lag actual usage.
+- The execution is skipped
+- The event is logged
+- System state still advances
 
-### Reminder advancement
+Usage counters are updated after successful AI calls.  
+Short crash windows may temporarily undercount usage.
 
-Reminder intent is immutable.
+### State advancement
+
+User intent is immutable.
 
 After execution:
 
-- One-time reminders are disabled
-- Recurring reminders compute the next run time
-- Advancement is derived from the scheduled run time, not wall-clock execution time
+- One-time intents are disabled
+- Recurring intents compute their next execution time
+- Advancement is based on scheduled time, not wall-clock execution time
 
-This preserves schedule integrity even if executions are delayed or retried.
+This preserves consistency even when executions are delayed or retried.
+
+<br>
+
+## Authority model
+
+The frontend is treated as untrusted.
+
+- Clients may define intent only
+- Clients cannot execute, advance, or mutate future state
+- All system state transitions are backend-owned
+- Firestore Security Rules enforce this boundary
+
+Only the backend may:
+
+- Execute AI
+- Advance schedules
+- Record execution outcomes
+- Update usage counters
 
 <br>
 
@@ -117,30 +147,41 @@ The backend intentionally accepts the following tradeoffs:
 **Accepted:**
 
 - Idempotency is best-effort, not exactly-once
-- Rare duplicate executions may occur
-- AI failures do not retry and permanently advance reminders
+- Rare duplicate executions are tolerated
+- AI failures do not retry
 - Execution logs are observational, not transactional
 - Availability is preferred over strict correctness
 
 **Why:**  
-These choices keep the system simple, affordable, and explainable at small scale.
+These choices keep the system affordable, debuggable, and understandable at the intended scale.
 
 <br>
 
 ## Explicit non-goals
 
-This backend intentionally does **not** attempt to provide:
+This backend deliberately avoids:
 
-- Distributed locks
-- Firestore transactions around AI
-- Two-phase commit
-- Exactly-once semantics
-- Queue-based worker systems
+- Distributed locking
+- Firestore transactions around AI execution
+- Two-phase commit patterns
+- Exactly-once guarantees
+- Queue-based worker orchestration
 
-These were rejected to avoid unnecessary complexity and cost at the current scale.
+These were rejected to avoid unnecessary complexity and cost.
 
 <br>
 
+## Failure philosophy
+
+The system prefers forward progress over perfection.
+
+- Execution should continue even if AI fails
+- Logging must never block advancement
+- Partial failures are tolerated and observable
+- No single execution should block future ones
+
+This prevents cascading failures and retry storms.
+
 ---
 
-**This architecture prioritizes clarity and predictability over absolute guarantees.**
+**This architecture prioritizes clarity, predictability, and cost safety over absolute guarantees.**
