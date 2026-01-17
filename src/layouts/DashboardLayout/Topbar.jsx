@@ -45,7 +45,7 @@ export default function Topbar({ expanded, setExpanded }) {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <img
-          src="../../public/brand_logo.svg"
+          src="/brand_logo.svg"
           alt="Logo"
           className="w-10 h-10 cursor-pointer"
           onClick={() => navigate("/")}
