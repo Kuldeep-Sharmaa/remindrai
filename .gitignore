@@ -28,3 +28,8 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+# Firebase Functions build output
+functions/lib/
+
+# Firebase emulator data
+firebase-debug.log
