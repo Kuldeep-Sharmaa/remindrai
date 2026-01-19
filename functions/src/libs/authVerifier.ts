@@ -18,7 +18,7 @@
 
 import admin from "firebase-admin";
 
-export async function verifyIdToken(idToken) {
+export async function verifyIdToken(idToken: string) {
   if (!idToken) throw new Error("Missing idToken");
   return admin.auth().verifyIdToken(idToken);
 }

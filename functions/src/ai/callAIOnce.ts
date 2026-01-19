@@ -1,43 +1,33 @@
 /**
- * callAIOnce.js
+ * callAIOnce.ts
  *
  * Purpose:
  * Performs a single AI call to generate content.
  *
- * Responsibilities:
- * - Call the AI model exactly once.
- * - Return generated text.
- *
  * Guarantees:
- * - No retries.
- * - No fallbacks.
- * - No Firestore access.
- *
- * When to modify:
- * - If AI provider or model changes.
- * - If prompt size or output handling rules change.
- *
- * Runtime requirements:
- * - Firebase Cloud Functions environment
- * - Outbound HTTPS access enabled
- * - OPENAI_API_KEY environment variable set
+ * - Exactly ONE AI call
+ * - NO retries
+ * - NO fallbacks
+ * - NO Firestore access
  */
 
-import fetch from "node-fetch";
-
-export async function callAIOnce(prompt) {
+export async function callAIOnce(prompt: string): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY environment variable not set");
   }
 
+  if (typeof prompt !== "string" || prompt.trim().length === 0) {
+    throw new Error("Invalid prompt provided to callAIOnce");
+  }
+
   console.log("[callAIOnce] Starting AI call", {
-    promptLength: prompt.length, // log size, not content
+    promptLength: prompt.length, // size only, never content
   });
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
   try {
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -48,7 +38,7 @@ export async function callAIOnce(prompt) {
         "User-Agent": "remindrai-backend/1.0",
       },
       body: JSON.stringify({
-        // Hardcoded for cost + behavior predictability
+        // Locked for cost + predictability
         model: "gpt-4.1-mini",
         input: prompt,
         max_output_tokens: 500,
@@ -56,28 +46,33 @@ export async function callAIOnce(prompt) {
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
       throw new Error(`AI API returned status ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
-    // Responses API convenience field
-    const outputText = data.output_text;
+    /**
+     * We intentionally validate minimally.
+     * If OpenAI changes response shape, we FAIL FAST.
+     */
+    const outputText =
+      typeof (data as any)?.output_text === "string"
+        ? (data as any).output_text
+        : null;
 
-    if (!outputText || typeof outputText !== "string") {
+    if (!outputText) {
       throw new Error("AI response missing output_text");
     }
 
     console.log("[callAIOnce] AI call succeeded");
     return outputText;
   } catch (error) {
-    clearTimeout(timeoutId);
     console.error("[callAIOnce] AI call failed", {
       error: error instanceof Error ? error.message : String(error),
     });
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

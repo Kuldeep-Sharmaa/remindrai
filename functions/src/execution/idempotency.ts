@@ -1,5 +1,5 @@
 /**
- * idempotency.js
+ * idempotency.ts
  *
  * Purpose:
  * Provides idempotency helpers for reminder execution.
@@ -9,29 +9,28 @@
  *   for a given scheduled run time.
  *
  * Guarantees:
- * - Execution identity is defined by reminderId + scheduledForUTC.
- * - This file does not create execution logs.
- *
- * When to modify:
- * - If execution identity definition changes.
- * - If execution log storage structure changes.
+ * - Execution identity = reminderId + scheduledForUTC
+ * - This file NEVER creates execution logs
+ * - Fails open on errors (does not block execution)
  */
+
 import * as admin from "firebase-admin";
 
 const db = admin.firestore();
 
 /**
  * Checks if an execution already exists for a given reminder and scheduled time.
- * Uses deterministic document ID for fast existence check.
- * Returns true if found, false otherwise.
- * Fails open on errors to avoid blocking execution.
+ *
+ * @returns true if execution already exists, false otherwise
  */
-export async function checkExecutionExists(uid, reminderId, scheduledForUTC) {
+export async function checkExecutionExists(
+  uid: string,
+  reminderId: string,
+  scheduledForUTC: string,
+): Promise<boolean> {
   try {
-    // Build deterministic execution ID
     const executionId = `${reminderId}_${scheduledForUTC}`;
 
-    // Check for document existence
     const executionDoc = await db
       .collection("users")
       .doc(uid)
@@ -47,6 +46,8 @@ export async function checkExecutionExists(uid, reminderId, scheduledForUTC) {
       scheduledForUTC,
       error: error instanceof Error ? error.message : String(error),
     });
+
+    // Fail open: allow execution rather than risk blocking reminders
     return false;
   }
 }

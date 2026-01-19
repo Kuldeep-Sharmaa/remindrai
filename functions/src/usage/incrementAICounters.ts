@@ -9,7 +9,7 @@ const db = admin.firestore();
  * Increments AI usage counters after a successful AI call.
  * Best-effort writes. Never throws to avoid blocking execution.
  */
-export async function incrementAICounters(uid) {
+export async function incrementAICounters(uid: string) {
   try {
     // Compute current UTC date key
     const now = new Date();

@@ -2,13 +2,14 @@
   "name": "remindrai-backend",
   "version": "1.0.0",
   "description": "Backend Cloud Functions for RemindrAI",
-  "main": "index.js",
+  "main": "lib/index.js",
   "engines": {
     "node": "18"
   },
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "firebase emulators:start --only functions,firestore",
     "deploy": "firebase deploy --only functions",
     "lint": "eslint ."
   },
@@ -18,7 +19,10 @@
     "luxon": "^3.7.2"
   },
   "devDependencies": {
-    "eslint": "^9.39.1",
-    "nodemon": "^3.1.11"
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0"
   }
 }
