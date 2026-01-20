@@ -25,17 +25,13 @@ import { db } from "../../../services/firebase";
 const USER_DOC = "users";
 const REMINDERS_COL = "reminders";
 
-/* ---------------------------
-   Path helpers
-   --------------------------- */
+//  Get user reminders collection reference
 function getUserRemindersCol(uid) {
   if (!uid) throw new Error("uid is required");
   return collection(db, USER_DOC, uid, REMINDERS_COL);
 }
 
-/* ---------------------------
-   Schedule normalizer
-   --------------------------- */
+//    Schedule normalizer
 function normalizeSchedule(
   payloadSchedule = {},
   timezoneFallback = "UTC",
@@ -62,9 +58,7 @@ function normalizeSchedule(
   return out;
 }
 
-/* ---------------------------
-   Basic validation
-   --------------------------- */
+// Basic validation
 function validateMinimalPayload(payload) {
   if (!payload || typeof payload !== "object")
     throw new Error("payload object required");
@@ -74,18 +68,14 @@ function validateMinimalPayload(payload) {
   if (!payload.reminderType) throw new Error("reminderType is required");
 }
 
-/* ---------------------------
-   Content sanitizer
-   --------------------------- */
+//   Content sanitizer
 function safeTrimString(v, maxLen = 2000) {
   if (typeof v !== "string") return null;
   const s = v.trim().slice(0, maxLen);
   return s === "" ? null : s;
 }
+//  Build intent-only document
 
-/* ---------------------------
-   Build intent-only document
-   --------------------------- */
 function buildIntentDoc(payload, schedule) {
   const baseDoc = {
     ownerId: payload.ownerId,
@@ -124,9 +114,7 @@ function buildIntentDoc(payload, schedule) {
   return { ...baseDoc, content };
 }
 
-/* ---------------------------
-   addReminder - Create New Intent
-   --------------------------- */
+// addReminder - Create a new reminder
 export async function addReminder(payload) {
   validateMinimalPayload(payload);
 
@@ -151,18 +139,14 @@ export async function addReminder(payload) {
   }
 }
 
-/* ---------------------------
-   updateReminder - DISABLED
-   Intent is immutable in this phase.
-   --------------------------- */
+//  updateReminder - NOT SUPPORTED
 export async function updateReminder() {
   throw new Error("Reminder updates are not supported. Intent is immutable.");
 }
 
-/* ---------------------------
-   disableReminder - STOP execution (Disable, don't Delete)
-   Preserves document for audit and idempotency.
-   --------------------------- */
+//  disableReminder - STOP execution (Disable, don't Delete)
+//  Preserves document for audit and idempotency.
+
 export async function disableReminder(uid, reminderId) {
   if (!uid || !reminderId) throw new Error("uid and reminderId are required");
 
@@ -179,17 +163,15 @@ export async function disableReminder(uid, reminderId) {
   }
 }
 
-/* ---------------------------
-   getReminder
-   --------------------------- */
+//  getReminder - Fetch a single reminder by ID
+
 export async function getReminder(uid, reminderId) {
   const snap = await getDoc(doc(getUserRemindersCol(uid), reminderId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-/* ---------------------------
-   listUserReminders
-   --------------------------- */
+//  listUserReminders - List all reminders for a user
+
 export async function listUserReminders(uid, { limit = 100 } = {}) {
   const q = query(
     getUserRemindersCol(uid),
@@ -200,9 +182,8 @@ export async function listUserReminders(uid, { limit = 100 } = {}) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/* ---------------------------
-   subscribeToReminders
-   --------------------------- */
+//  subscribeToReminders - Real-time listener
+
 export function subscribeToReminders(uid, callback) {
   const q = query(getUserRemindersCol(uid), orderBy("createdAt", "desc"));
   return onSnapshot(q, (snapshot) => {
@@ -217,7 +198,7 @@ export function subscribeToReminders(uid, callback) {
 const defaultExport = {
   addReminder,
   updateReminder,
-  disableReminder, // Replaced deleteReminder
+  disableReminder,
   getReminder,
   listUserReminders,
   subscribeToReminders,
