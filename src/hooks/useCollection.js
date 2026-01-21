@@ -1,22 +1,4 @@
 // src/hooks/useCollection.js
-// ============================================================================
-// 📁 useCollection.js
-// ----------------------------------------------------------------------------
-// 🔹 Purpose:
-//   Reusable hook for real-time Firestore collection listeners.
-//
-// 🔹 Responsibilities:
-//   - Accepts a Firestore query
-//   - Subscribes via `onSnapshot`
-//   - Returns { documents, isPending, error }
-//   - Cleans up automatically on unmount
-//
-// 🔹 When to edit:
-//   - Change how real-time caching or pagination works
-//   - Add sorting or field filtering inside the hook
-// ============================================================================
-// src/hooks/useCollection.js
-// Safe, drop-in replacement for your original hook.
 // - Avoids setState-after-unmount
 // - Returns [] for empty documents (easier consumer handling)
 // - Accepts an optional transform via options but reads it from a ref
@@ -25,17 +7,6 @@
 import { useState, useEffect, useRef } from "react";
 import { onSnapshot } from "firebase/firestore";
 
-/**
- * useCollection(q, options)
- * options:
- *  - includeMetadataChanges: boolean (passed to onSnapshot)
- *  - transform: (doc) => docTransformed  // optional; will be read from ref (no effect dependency)
- *
- * Returns: { documents, isPending, error }
- *
- * NOTE: This is intentionally conservative and drop-in compatible with
- * your previous implementation to avoid changing behavior unexpectedly.
- */
 export const useCollection = (q, options = {}) => {
   const { includeMetadataChanges = false, transform = null } = options;
 
@@ -59,7 +30,7 @@ export const useCollection = (q, options = {}) => {
       if (unsubscribeRef.current) {
         try {
           unsubscribeRef.current();
-        } catch (e) {
+        } catch {
           // noop
         }
         unsubscribeRef.current = null;
@@ -92,10 +63,9 @@ export const useCollection = (q, options = {}) => {
                   // allow transform to mutate or return new object
                   return transformRef.current(raw) || raw;
                 } catch (txErr) {
-                  // eslint-disable-next-line no-console
                   console.warn(
                     "useCollection: transform function threw:",
-                    txErr
+                    txErr,
                   );
                   return raw;
                 }
@@ -109,10 +79,9 @@ export const useCollection = (q, options = {}) => {
               setError(null);
             }
           } catch (processingError) {
-            // eslint-disable-next-line no-console
             console.error(
               "useCollection: snapshot processing failed:",
-              processingError
+              processingError,
             );
             if (mountedRef.current) {
               setError({
@@ -124,7 +93,6 @@ export const useCollection = (q, options = {}) => {
           }
         },
         (err) => {
-          // eslint-disable-next-line no-console
           console.error("useCollection: onSnapshot error:", err);
           if (mountedRef.current) {
             setError({
@@ -133,15 +101,14 @@ export const useCollection = (q, options = {}) => {
             });
             setIsPending(false);
           }
-        }
+        },
       );
 
       unsubscribeRef.current = unsubscribe;
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(
         "useCollection: failed to attach onSnapshot listener:",
-        err
+        err,
       );
       if (mountedRef.current) {
         setError({
@@ -164,7 +131,6 @@ export const useCollection = (q, options = {}) => {
       }
     };
     // Intentionally only depend on 'q' and includeMetadataChanges to avoid reattaching for
-    // ephemeral function identities (like inline transforms). The transform is read via ref.
   }, [q, includeMetadataChanges]);
 
   return { documents, isPending, error };
