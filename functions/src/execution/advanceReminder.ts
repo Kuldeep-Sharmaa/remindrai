@@ -19,13 +19,11 @@
  * - Never throws
  */
 
-import * as admin from "firebase-admin";
-import { DocumentReference } from "firebase-admin/firestore";
+import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 import { computeNextRunAtUTC } from "../utils/scheduleUtils";
 
 /**
  * Minimal scheduling data required to advance a reminder.
- * (DO NOT expand this type)
  */
 export type AdvanceableReminderData = {
   frequency: "one_time" | "daily" | "weekly";
@@ -50,31 +48,34 @@ export async function advanceReminder(
   const { reminderRef, reminderData, scheduledForUTC } = input;
 
   try {
-    const { frequency } = reminderData;
+    const { frequency, schedule } = reminderData;
 
-    // One-time reminders are disabled after execution
+    /**
+     * One-time reminders STOP FOREVER after execution.
+     * No nextRunAtUTC. No reschedule. No exceptions.
+     */
     if (frequency === "one_time") {
       await reminderRef.update({
         enabled: false,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
 
       console.log("[advanceReminder] One-time reminder disabled", {
         reminderId: reminderRef.id,
       });
+
       return;
     }
 
-    // Recurring reminders → compute next run time
-    // IMPORTANT: base is scheduledForUTC, not execution time
-    const nextRunAtUTC = computeNextRunAtUTC(
-      reminderData.schedule,
-      scheduledForUTC,
-    );
+    /**
+     * Recurring reminders only (daily / weekly)
+     * Base calculation on scheduledForUTC — NOT execution time.
+     */
+    const nextRunAtUTC = computeNextRunAtUTC(schedule, scheduledForUTC);
 
     await reminderRef.update({
       nextRunAtUTC,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     console.log("[advanceReminder] Reminder advanced", {
@@ -86,6 +87,7 @@ export async function advanceReminder(
       reminderId: reminderRef.id,
       error: error instanceof Error ? error.message : String(error),
     });
+
     // Intentionally swallow errors:
     // reminder advancement failure must NOT crash the system
   }
