@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 const db = admin.firestore();
 
@@ -30,7 +31,7 @@ export interface RecordExecutionInput {
  * NEVER throws.
  */
 export async function recordExecution(
-  input: RecordExecutionInput
+  input: RecordExecutionInput,
 ): Promise<void> {
   const {
     uid,
@@ -51,7 +52,7 @@ export async function recordExecution(
       scheduledForUTC: string;
       status: ExecutionStatus;
       aiUsed: boolean;
-      createdAt: admin.firestore.FieldValue;
+      createdAt: FieldValue;
       draftId?: string;
     } = {
       reminderId,
@@ -59,7 +60,7 @@ export async function recordExecution(
       scheduledForUTC,
       status,
       aiUsed,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     };
 
     if (draftId) {
