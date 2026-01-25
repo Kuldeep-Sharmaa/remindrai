@@ -11,6 +11,7 @@
  */
 
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 const db = admin.firestore();
 
@@ -42,13 +43,13 @@ export async function createDraft(
       reminderType: "simple" | "ai";
       content: string;
       scheduledForUTC: string;
-      createdAt: admin.firestore.FieldValue;
+      createdAt: FieldValue;
     } = {
       reminderId,
       reminderType,
       content,
       scheduledForUTC,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     };
 
     const draftRef = await db
