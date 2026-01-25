@@ -83,7 +83,6 @@ function buildIntentDoc(payload, schedule) {
       String(payload.reminderType).toLowerCase() === "ai" ? "ai" : "simple",
     frequency: payload.frequency,
     schedule,
-    enabled: true, // Initial intent is always enabled
   };
 
   if (baseDoc.reminderType === "ai") {
