@@ -2,357 +2,177 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-   // -------------------------
-// Helpers (timezone, time, weekdays, schedule)
-// -------------------------
-function isValidTimezone(tz) {
-  return tz is string
-    && tz.size() > 0
-    && tz.size() < 100
-    && tz.matches('^[A-Za-z_+\\-]+(?:\\/[A-Za-z_+\\-]+)*$');
-}
+    // -------------------------
+    // Helpers
+    // -------------------------
+    function isValidTimezone(tz) {
+      return tz is string
+        && tz.size() > 0
+        && tz.size() < 100
+        && tz.matches('^[A-Za-z_+\\-]+(?:\\/[A-Za-z_+\\-]+)*$');
+    }
 
-function isValidTimeToken(t) {
-  return t is string
-    && t.matches('^\\d{1,2}:\\d{2}$')
-    && (int(t.split(':')[0]) >= 0 && int(t.split(':')[0]) <= 23)
-    && (int(t.split(':')[1]) >= 0 && int(t.split(':')[1]) <= 59);
-}
+    function isValidTimeToken(t) {
+      return t is string
+        && t.matches('^\\d{1,2}:\\d{2}$')
+        && (int(t.split(':')[0]) >= 0 && int(t.split(':')[0]) <= 23)
+        && (int(t.split(':')[1]) >= 0 && int(t.split(':')[1]) <= 59);
+    }
 
-// weekDays: list, 1..7 entries allowed, size between 1 and 7.
-// Pragmatic check inspects first element range.
-function isValidWeekDays(wd) {
-  return wd is list
-    && wd.size() > 0
-    && wd.size() <= 7
-    && wd[0] is int
-    && wd[0] >= 1
-    && wd[0] <= 7;
-}
+    function isValidWeekDays(wd) {
+      return wd is list
+        && wd.size() > 0
+        && wd.size() <= 7
+        && wd[0] is int
+        && wd[0] >= 1
+        && wd[0] <= 7;
+    }
 
-/*
-  isValidSchedule accepts either legacy keys:
-    { timezone, timeOfDay, date?, weekDays? }
-  OR canonical keys:
-    { timezone, localTime, localDate?, daysOfWeek? }
-  It validates timezone, a time token, optional date token, and optional week list.
-*/
-function isValidSchedule(s) {
-  // determine time candidate from allowed aliases
-  let timeCandidate = (
-    ('localTime' in s) ? s.localTime :
-    (('timeOfDay' in s) ? s.timeOfDay :
-    (('time' in s) ? s.time :
-    (('timeLocal' in s) ? s.timeLocal : null)))
-  );
+    function isValidSchedule(s) {
+      let timeCandidate = (
+        ('localTime' in s) ? s.localTime :
+        (('timeOfDay' in s) ? s.timeOfDay :
+        (('time' in s) ? s.time :
+        (('timeLocal' in s) ? s.timeLocal : null)))
+      );
+      let localDateOk = !('localDate' in s) || (s.localDate is string && s.localDate.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+      let dateOk = !('date' in s) || (s.date is string && s.date.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+      let daysOfWeekOk = !('daysOfWeek' in s) || isValidWeekDays(s.daysOfWeek);
+      let weekDaysOk = !('weekDays' in s) || isValidWeekDays(s.weekDays);
 
-  // check date candidates
-  let localDateOk = !('localDate' in s) || (s.localDate is string && s.localDate.matches('^\\d{4}-\\d{2}-\\d{2}$'));
-  let dateOk = !('date' in s) || (s.date is string && s.date.matches('^\\d{4}-\\d{2}-\\d{2}$'));
+      return s is map
+        && ('timezone' in s) && isValidTimezone(s.timezone)
+        && (timeCandidate is string) && isValidTimeToken(timeCandidate)
+        && localDateOk
+        && dateOk
+        && daysOfWeekOk
+        && weekDaysOk;
+    }
 
-  // week list checks (either alias)
-  let daysOfWeekOk = !('daysOfWeek' in s) || isValidWeekDays(s.daysOfWeek);
-  let weekDaysOk = !('weekDays' in s) || isValidWeekDays(s.weekDays);
+    // -------------------------
+    // Users collection
+    // -------------------------
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && !('isAdmin' in request.resource.data);
 
-  return s is map
-    && ('timezone' in s) && isValidTimezone(s.timezone)
-    && (timeCandidate is string) && isValidTimeToken(timeCandidate)
-    && localDateOk
-    && dateOk
-    && daysOfWeekOk
-    && weekDaysOk;
-}
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && (!('timezone' in request.resource.data) || isValidTimezone(request.resource.data.timezone))
+        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
+        && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin);
 
-// -------------------------
-// Users collection (profile + prefs)
-// -------------------------
-match /users/{userId} {
-  allow read: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
 
-  allow create: if request.auth != null
-    && request.auth.uid == userId
-    && request.resource.data.email is string
-    && request.resource.data.email.size() > 3
-    && !('isAdmin' in request.resource.data);
+    match /users/{userId}/userPrefs {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
 
-  allow update: if request.auth != null
-    && request.auth.uid == userId
-    && (!('timezone' in request.resource.data) || isValidTimezone(request.resource.data.timezone))
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
-    && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin);
+    // -------------------------
+    // Idempotency mapping
+    // -------------------------
+    match /users/{userId}/reminderIdempotency/{key} {
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.reminderId is string
+        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == request.time)
+        && (!('expiresAt' in request.resource.data) || request.resource.data.expiresAt is timestamp)
+        && request.resource.data.keys().hasOnly(['reminderId', 'createdAt', 'expiresAt']);
 
-  // ADDED: allow authenticated user to delete their own profile doc
-  allow delete: if request.auth != null && request.auth.uid == userId;
-}
+      allow update: if false;
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+    }
 
-match /users/{userId}/userPrefs {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
-}
-
-// -------------------------
-// Per-user idempotency mapping
-// Path: users/{userId}/reminderIdempotency/{key}
-// -------------------------
-match /users/{userId}/reminderIdempotency/{key} {
-  allow create: if request.auth != null
-    && request.auth.uid == userId
-    && request.resource.data.reminderId is string
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == request.time)
-    && (!('expiresAt' in request.resource.data) || request.resource.data.expiresAt is timestamp)
-    && request.resource.data.keys().hasOnly(['reminderId', 'createdAt', 'expiresAt']);
-
-  allow update: if false;
-
-  allow read: if request.auth != null && request.auth.uid == userId;
-  allow delete: if request.auth != null && request.auth.uid == userId;
-}
-
-// -------------------------
-// Per-user reminders subcollection
-// Path: users/{userId}/reminders/{reminderId}
-// Accepts both legacy top-level shapes and new canonical `content` shape.
-// -------------------------
-match /users/{userId}/reminders/{reminderId} {
-  allow create: if request.auth != null
-    && request.auth.uid == userId
-    && request.resource.data.ownerId == request.auth.uid
-    && request.resource.data.reminderType in ['ai','simple']
-    && request.resource.data.frequency in ['one_time','daily','weekly']
-    && request.resource.data.enabled in [true, false]
-    && isValidSchedule(request.resource.data.schedule)
-    && ( !('weekDays' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && ( !('daysOfWeek' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == request.time)
-    && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt == request.time)
-    && ( !('meta' in request.resource.data) || (request.resource.data.meta is map && request.resource.data.meta.keys().hasOnly(['idempotencyKey'])) )
-    && (
-      // Branch 1: Legacy AI (top-level prompt)
-      (
-        request.resource.data.reminderType == 'ai'
-        && request.resource.data.keys().hasOnly([
-          'ownerId','reminderType','prompt','tone','platform',
-          'frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-        ])
-        && request.resource.data.prompt is string
-        && request.resource.data.prompt.size() <= 2000
-      )
-      ||
-      // Branch 2: New AI (content.aiPrompt)
-      (
-        request.resource.data.reminderType == 'ai'
-        && request.resource.data.keys().hasOnly([
-          'ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-        ])
-        && request.resource.data.content is map
-        && request.resource.data.content.aiPrompt is string
-        && request.resource.data.content.aiPrompt.size() <= 2000
-        && (!('tone' in request.resource.data.content) || request.resource.data.content.tone is string)
-        && (!('platform' in request.resource.data.content) || request.resource.data.content.platform is string)
-        && (!('role' in request.resource.data.content) || request.resource.data.content.role is string)
-      )
-      ||
-      // Branch 3: Legacy SIMPLE (title/notes top-level)
-      (
-        request.resource.data.reminderType == 'simple'
-        && request.resource.data.keys().hasOnly([
-          'ownerId','reminderType','title','notes',
-          'frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-        ])
-        && (!('title' in request.resource.data) || request.resource.data.title is string)
-        && (!('notes' in request.resource.data) || request.resource.data.notes is string)
-        && !('prompt' in request.resource.data)
-      )
-      ||
-      // Branch 4: New SIMPLE (content.message)
-      (
-        request.resource.data.reminderType == 'simple'
-        && request.resource.data.keys().hasOnly([
-          'ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-        ])
-        && request.resource.data.content is map
-        && request.resource.data.content.message is string
-        && request.resource.data.content.message.size() <= 2000
-      )
-    );
-
-  allow read, delete: if request.auth != null && request.auth.uid == userId;
-
-  allow update: if request.auth != null
-    && request.auth.uid == userId
-    && ( !('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId )
-    && (!('schedule' in request.resource.data) || isValidSchedule(request.resource.data.schedule))
-    // weekDays/daysOfWeek only allowed when resulting frequency == weekly (either in request or existing)
-    && (
-      !('schedule' in request.resource.data)
-      || !('weekDays' in request.resource.data.schedule)
-      || (request.resource.data.frequency == 'weekly' || resource.data.frequency == 'weekly')
-    )
-    && (
-      !('schedule' in request.resource.data)
-      || !('daysOfWeek' in request.resource.data.schedule)
-      || (request.resource.data.frequency == 'weekly' || resource.data.frequency == 'weekly')
-    )
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
-    && (!('nextRunAtUTC' in request.resource.data)
-        || request.resource.data.nextRunAtUTC == resource.data.nextRunAtUTC)
-    && (!('enabled' in request.resource.data)
-        || request.resource.data.enabled == resource.data.enabled)
-    && (
-      !('meta' in request.resource.data)
-      || (request.resource.data.meta is map && request.resource.data.meta.keys().hasOnly(['idempotencyKey']))
-    )
-    // If reminderType present or changed, ensure the body matches the chosen type (same branches as create)
-    && (
-      !('reminderType' in request.resource.data)
-      ||
-      (
-        (request.resource.data.reminderType == 'ai' &&
+    // -------------------------
+    // Per-user reminders (THE CORE LOGIC)
+    // -------------------------
+    match /users/{userId}/reminders/{reminderId} {
+      
+      // CREATE: Strictly allow Intent, Disallow System fields
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.reminderType in ['ai', 'simple']
+        && request.resource.data.frequency in ['one_time', 'daily', 'weekly']
+        && isValidSchedule(request.resource.data.schedule)
+        // Ensure system fields are NOT present in the payload
+        && !('enabled' in request.resource.data)
+        && !('nextRunAtUTC' in request.resource.data)
+        && !('createdAt' in request.resource.data)
+        && !('updatedAt' in request.resource.data)
+        && !('meta' in request.resource.data)
+        && (
+          // AI Intent Branch
           (
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','prompt','tone','platform','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) && request.resource.data.prompt is string )
-            ||
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) && request.resource.data.content is map && request.resource.data.content.aiPrompt is string && (!('tone' in request.resource.data.content) || request.resource.data.content.tone is string) && (!('platform' in request.resource.data.content) || request.resource.data.content.platform is string) && (!('role' in request.resource.data.content) || request.resource.data.content.role is string) )
+            request.resource.data.reminderType == 'ai'
+            && request.resource.data.keys().hasOnly(['ownerId', 'reminderType', 'content', 'frequency', 'schedule'])
+            && request.resource.data.content is map
+            && request.resource.data.content.aiPrompt is string
+            && request.resource.data.content.aiPrompt.size() <= 2000
           )
-        )
-        ||
-        (request.resource.data.reminderType == 'simple' &&
+          ||
+          // Simple Intent Branch
           (
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','title','notes','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) )
-            ||
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) && request.resource.data.content is map && request.resource.data.content.message is string && request.resource.data.content.message.size() <= 2000 )
+            request.resource.data.reminderType == 'simple'
+            && request.resource.data.keys().hasOnly(['ownerId', 'reminderType', 'content', 'frequency', 'schedule'])
+            && request.resource.data.content is map
+            && request.resource.data.content.message is string
           )
-        )
-      )
-    );
-}
+        );
 
-// -------------------------
-// Global reminders collection (legacy) - kept for backward compatibility
-// Accepts both legacy and content shapes similar to per-user collection
-// -------------------------
-match /reminders/{reminderId} {
-  allow create: if request.auth != null
-    && request.resource.data.ownerId == request.auth.uid
-    && request.resource.data.reminderType in ['ai','simple']
-    && request.resource.data.frequency in ['one_time','daily','weekly']
-    && isValidSchedule(request.resource.data.schedule)
-    && ( !('weekDays' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && ( !('daysOfWeek' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == request.time)
-    && (!('nextRunAtUTC' in request.resource.data) || request.resource.data.nextRunAtUTC is timestamp)
-    && (
-      // Legacy AI
-      (request.resource.data.reminderType == 'ai' && request.resource.data.keys().hasOnly([
-        'ownerId','reminderType','prompt','tone','platform',
-        'frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-      ]))
-      ||
-      // New AI content shape
-      (request.resource.data.reminderType == 'ai' && request.resource.data.keys().hasOnly([
-        'ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-      ]) && request.resource.data.content is map && request.resource.data.content.aiPrompt is string
-        && (!('tone' in request.resource.data.content) || request.resource.data.content.tone is string)
-        && (!('platform' in request.resource.data.content) || request.resource.data.content.platform is string)
-        && (!('role' in request.resource.data.content) || request.resource.data.content.role is string)
-      )
-      ||
-      // Legacy simple
-      (request.resource.data.reminderType == 'simple' && request.resource.data.keys().hasOnly([
-        'ownerId','reminderType','title','notes',
-        'frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-      ]))
-      ||
-      // New simple content
-      (request.resource.data.reminderType == 'simple' && request.resource.data.keys().hasOnly([
-        'ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta'
-      ]) && request.resource.data.content is map && request.resource.data.content.message is string)
-    );
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
 
-  allow read: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      // UPDATE: Allow intent changes, keep system fields immutable for Client
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && ( !('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId )
+        && (!('schedule' in request.resource.data) || isValidSchedule(request.resource.data.schedule))
+        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
+        // DISALLOW client from toggling enabled/scheduling via update
+        && (!('nextRunAtUTC' in request.resource.data) || request.resource.data.nextRunAtUTC == resource.data.nextRunAtUTC)
+        && (!('enabled' in request.resource.data) || request.resource.data.enabled == resource.data.enabled)
+        && (
+          !('reminderType' in request.resource.data) ||
+          request.resource.data.reminderType == resource.data.reminderType
+        );
+    }
 
-  allow update: if request.auth != null
-    && resource.data.ownerId == request.auth.uid
-    && ( !('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId )
-    && (!('schedule' in request.resource.data) || isValidSchedule(request.resource.data.schedule))
-    && ( !('weekDays' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && ( !('daysOfWeek' in request.resource.data.schedule) || request.resource.data.frequency == 'weekly' )
-    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
-    && (!('nextRunAtUTC' in request.resource.data) || request.resource.data.nextRunAtUTC is timestamp)
-    && (
-      !('reminderType' in request.resource.data)
-      ||
-      (
-        (request.resource.data.reminderType == 'ai' &&
-          (
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','prompt','tone','platform','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) )
-            ||
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) && request.resource.data.content is map && request.resource.data.content.aiPrompt is string && (!('tone' in request.resource.data.content) || request.resource.data.content.tone is string) && (!('platform' in request.resource.data.content) || request.resource.data.content.platform is string) && (!('role' in request.resource.data.content) || request.resource.data.content.role is string) )
-          )
-        )
-        ||
-        (request.resource.data.reminderType == 'simple' &&
-          (
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','title','notes','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) )
-            ||
-            ( request.resource.data.keys().hasOnly(['ownerId','reminderType','content','frequency','schedule','nextRunAtUTC','enabled','createdAt','updatedAt','meta']) && request.resource.data.content is map && request.resource.data.content.message is string && request.resource.data.content.message.size() <= 2000 )
-          )
-        )
-      )
-    );
+    // -------------------------
+    // Recompute queue
+    // -------------------------
+    match /recompute_queue/{jobId} {
+      allow read: if request.auth != null && request.auth.uid == jobId;
+      allow create: if request.auth != null
+        && request.auth.uid == jobId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.requestedAt is timestamp
+        && request.resource.data.newTimezone is string
+        && request.resource.data.status is string
+        && request.resource.data.requester is string
+        && request.resource.data.keys().hasOnly(['uid','newTimezone','requestedAt','status','requester','error']);
+      allow update, delete: if false;
+    }
 
-  allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
-}
+    // -------------------------
+    // Backend-only / Default Deny
+    // -------------------------
+    match /users/{uid}/executions/{executionId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
 
-// -------------------------
-// Recompute queue (client -> server job requests)
-// - Clients may create one job document per user (doc id == uid).
-// - Server/service account should process and update/remove jobs.
-// -------------------------
-match /recompute_queue/{jobId} {
-  // Clients can read their own job doc (optional)
-  allow read: if request.auth != null && request.auth.uid == jobId;
+    match /users/{uid}/drafts/{draftId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
 
-  // Allow client to create a job only for themselves with strict shape
-  allow create: if request.auth != null
-    && request.auth.uid == jobId
-    && request.resource.data.uid == request.auth.uid
-    && request.resource.data.requestedAt is timestamp
-    && request.resource.data.newTimezone is string
-    && request.resource.data.status is string
-    && request.resource.data.requester is string
-    && request.resource.data.keys().hasOnly(['uid','newTimezone','requestedAt','status','requester','error']);
-
-  // Clients must not update or delete jobs (server controls lifecycle)
-  allow update: if false;
-  allow delete: if false;
-}
-
-// -------------------------
-// Backend-only collections
-// -------------------------
-match /users/{uid}/executions/{executionId} {
-  allow read: if request.auth != null && request.auth.uid == uid;
-  allow write: if false;
-}
-
-match /users/{uid}/drafts/{draftId} {
-  allow read: if request.auth != null && request.auth.uid == uid;
-  allow write: if false;
-}
-
-match /users/{uid}/aiDaily/{dateKey} {
-  allow read, write: if false;
-}
-
-match /system/aiUsage/{document=**} {
-  allow read, write: if false;
-}
-
-// -------------------------
-// Default deny everything else
-// -------------------------
-match /{document=**} {
-  allow read, write: if false;
-}
-
+    match /users/{uid}/aiDaily/{dateKey} { allow read, write: if false; }
+    match /system/aiUsage/{document=**} { allow read, write: if false; }
+    match /{document=**} { allow read, write: if false; }
   }
 }
