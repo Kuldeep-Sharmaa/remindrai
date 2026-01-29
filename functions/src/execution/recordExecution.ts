@@ -1,12 +1,16 @@
-//recordExecution.ts
+/**
+ * recordExecution.ts
+ *
+ * Logs execution events for auditing and debugging.
+ * Best-effort writes - failures don't block execution.
+ * Execution identity = reminderId + scheduledForUTC
+ */
 
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-const db = admin.firestore();
-
 /**
- * Allowed execution statuses (LOCKED)
+ * Allowed execution statuses
  */
 export type ExecutionStatus =
   | "executed"
@@ -14,9 +18,6 @@ export type ExecutionStatus =
   | "skipped_cap"
   | "skipped_error";
 
-/**
- * Input contract for recording an execution
- */
 export interface RecordExecutionInput {
   uid: string;
   reminderId: string;
@@ -28,9 +29,8 @@ export interface RecordExecutionInput {
 }
 
 /**
- * Records an execution log for auditing and debugging.
- * Best-effort, non-transactional write.
- * NEVER throws.
+ * Records execution log for auditing and debugging.
+ * Never throws.
  */
 export async function recordExecution(
   input: RecordExecutionInput,
@@ -46,6 +46,9 @@ export async function recordExecution(
   } = input;
 
   try {
+    // Lazy access - ensures Admin is initialized
+    const db = admin.firestore();
+
     const executionId = `${reminderId}_${scheduledForUTC}`;
 
     const executionData: {
@@ -90,7 +93,6 @@ export async function recordExecution(
       status,
       error: error instanceof Error ? error.message : String(error),
     });
-    // Intentionally swallow errors:
-    // execution logging must never block reminder processing
+    // Swallow error - logging doesn't block execution
   }
 }
