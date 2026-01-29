@@ -1,23 +1,13 @@
 /**
  * createDraft.ts
  *
- * Purpose:
- * Persists the output of a reminder execution as a draft.
- *
- * Guarantees:
- * - Drafts are write-once
- * - Clients never write drafts directly
- * - Best-effort: failures must NOT block execution
+ * Persists execution output as a draft.
+ * Write-once only. Backend-owned. Failures don't block execution.
  */
 
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-const db = admin.firestore();
-
-/**
- * Input contract for creating a draft.
- */
 export interface CreateDraftInput {
   uid: string;
   reminderId: string;
@@ -27,10 +17,8 @@ export interface CreateDraftInput {
 }
 
 /**
- * Creates a draft document as the result of a reminder execution.
- *
- * @returns draftId on success, null on failure
- * NEVER throws.
+ * Creates a draft from execution output.
+ * Returns draftId on success, null on failure. Never throws.
  */
 export async function createDraft(
   input: CreateDraftInput,
@@ -38,6 +26,9 @@ export async function createDraft(
   const { uid, reminderId, reminderType, content, scheduledForUTC } = input;
 
   try {
+    // Lazy access - ensures Admin is initialized
+    const db = admin.firestore();
+
     const draftData: {
       reminderId: string;
       reminderType: "simple" | "ai";
@@ -73,7 +64,7 @@ export async function createDraft(
       error: error instanceof Error ? error.message : String(error),
     });
 
-    // Best-effort: draft failure must NOT block reminder execution
+    // Draft failure doesn't stop execution
     return null;
   }
 }
