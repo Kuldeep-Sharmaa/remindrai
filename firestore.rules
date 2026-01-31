@@ -2,9 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -------------------------
+
     // Helpers
-    // -------------------------
+    
     function isValidTimezone(tz) {
       return tz is string
         && tz.size() > 0
@@ -49,9 +49,9 @@ service cloud.firestore {
         && weekDaysOk;
     }
 
-    // -------------------------
+
     // Users collection
-    // -------------------------
+    
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null
@@ -73,9 +73,9 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // -------------------------
+
     // Idempotency mapping
-    // -------------------------
+    
     match /users/{userId}/reminderIdempotency/{key} {
       allow create: if request.auth != null
         && request.auth.uid == userId
@@ -88,9 +88,9 @@ service cloud.firestore {
       allow read, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    // -------------------------
+
     // Per-user reminders (THE CORE LOGIC)
-    // -------------------------
+    
     match /users/{userId}/reminders/{reminderId} {
       
       // CREATE: Strictly allow Intent, Disallow System fields
@@ -142,9 +142,9 @@ service cloud.firestore {
         );
     }
 
-    // -------------------------
+
     // Recompute queue
-    // -------------------------
+    
     match /recompute_queue/{jobId} {
       allow read: if request.auth != null && request.auth.uid == jobId;
       allow create: if request.auth != null
@@ -158,9 +158,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // -------------------------
+
+    // Draft interaction tracking
+    
+    match /users/{userId}/draftInteractions/{draftId} {
+      allow read, create, update: if request.auth != null
+        && request.auth.uid == userId;
+
+      allow delete: if false;
+    }
+
+
     // Backend-only / Default Deny
-    // -------------------------
+    
     match /users/{uid}/executions/{executionId} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
