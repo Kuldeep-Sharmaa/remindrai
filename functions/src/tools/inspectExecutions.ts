@@ -1,3 +1,8 @@
+/**
+ * Debug script for viewing execution logs in local emulator.
+ * Run with: node inspectExecutions.js
+ */
+
 import * as admin from "firebase-admin";
 
 admin.initializeApp({
