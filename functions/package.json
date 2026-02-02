@@ -4,7 +4,7 @@
   "description": "Backend Cloud Functions for RemindrAI",
   "main": "lib/index.js",
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "scripts": {
     "build": "tsc",
@@ -19,10 +19,11 @@
     "luxon": "^3.7.2"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "ts-node": "^10.9.2",
-    "eslint": "^8.57.0",
+    "@types/luxon": "^3.7.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0"
+    "eslint": "^8.57.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
   }
 }
