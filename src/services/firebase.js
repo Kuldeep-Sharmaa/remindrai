@@ -1,11 +1,14 @@
-// src/services/firebase.js
+/**
+ * Firebase SDK initialization for RemindrAI frontend.
+ * Supports both production and local emulator environments.
+ */
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// ✅ Firebase config loaded securely from environment variables
+// Firebase config from environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -16,24 +19,37 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// ✅ Prevent re-initialization during hot reloads
+// Prevent re-initialization during HMR
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ Initialize Firebase core services
+// Core Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// ✅ (Optional) Analytics only in supported browsers & production
+// Emulator connection (explicit opt-in only)
+const useEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
+
+if (useEmulator) {
+  console.log("🧪 Connected to Firebase emulators");
+  connectAuthEmulator(auth, "http://localhost:9099", {
+    disableWarnings: true,
+  });
+  connectFirestoreEmulator(db, "localhost", 8081);
+} else {
+  console.log("🔥 Connected to Firebase production");
+}
+
+// Analytics (production only)
 export let analytics = null;
+
 if (import.meta.env.MODE === "production") {
   isSupported().then((supported) => {
-    if (supported) analytics = getAnalytics(app);
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
   });
 }
 
-// ✅ Log project info in development for debugging
-if (import.meta.env.DEV) {
-  console.log(`🔥 Firebase initialized → Project: ${firebaseConfig.projectId}`);
-}
+console.log(`Firebase initialized: ${firebaseConfig.projectId}`);
 
 export default app;
