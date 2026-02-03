@@ -23,7 +23,7 @@ module.exports = {
 
   plugins: ["@typescript-eslint", "import"],
 
-  ignorePatterns: ["lib/**/*", "generated/**/*", "node_modules/"],
+  ignorePatterns: ["lib/**", "**/lib/**", "generated/**", "node_modules/**"],
 
   rules: {
     quotes: ["error", "double"],
