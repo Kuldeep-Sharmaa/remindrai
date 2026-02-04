@@ -2,9 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-
+   
     // Helpers
-    
+   
     function isValidTimezone(tz) {
       return tz is string
         && tz.size() > 0
@@ -49,9 +49,9 @@ service cloud.firestore {
         && weekDaysOk;
     }
 
-
+   
     // Users collection
-    
+   
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null
@@ -73,9 +73,9 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-
+   
     // Idempotency mapping
-    
+   
     match /users/{userId}/reminderIdempotency/{key} {
       allow create: if request.auth != null
         && request.auth.uid == userId
@@ -88,11 +88,11 @@ service cloud.firestore {
       allow read, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-
+   
     // Per-user reminders (THE CORE LOGIC)
-    
+   
     match /users/{userId}/reminders/{reminderId} {
-      
+
       // CREATE: Strictly allow Intent, Disallow System fields
       allow create: if request.auth != null
         && request.auth.uid == userId
@@ -105,6 +105,7 @@ service cloud.firestore {
         && !('nextRunAtUTC' in request.resource.data)
         && !('createdAt' in request.resource.data)
         && !('updatedAt' in request.resource.data)
+        && !('deletedAt' in request.resource.data)
         && !('meta' in request.resource.data)
         && (
           // AI Intent Branch
@@ -125,7 +126,8 @@ service cloud.firestore {
           )
         );
 
-      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      // READ ONLY - NO DELETE ALLOWED (Soft Delete Architecture)
+      allow read: if request.auth != null && request.auth.uid == userId;
 
       // UPDATE: Allow intent changes, keep system fields immutable for Client
       allow update: if request.auth != null
@@ -136,15 +138,16 @@ service cloud.firestore {
         // DISALLOW client from toggling enabled/scheduling via update
         && (!('nextRunAtUTC' in request.resource.data) || request.resource.data.nextRunAtUTC == resource.data.nextRunAtUTC)
         && (!('enabled' in request.resource.data) || request.resource.data.enabled == resource.data.enabled)
+        && (!('deletedAt' in request.resource.data) || request.resource.data.deletedAt == resource.data.deletedAt)
         && (
           !('reminderType' in request.resource.data) ||
           request.resource.data.reminderType == resource.data.reminderType
         );
     }
 
-
+   
     // Recompute queue
-    
+   
     match /recompute_queue/{jobId} {
       allow read: if request.auth != null && request.auth.uid == jobId;
       allow create: if request.auth != null
@@ -158,9 +161,9 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-
+   
     // Draft interaction tracking
-    
+   
     match /users/{userId}/draftInteractions/{draftId} {
       allow read, create, update: if request.auth != null
         && request.auth.uid == userId;
@@ -168,9 +171,9 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-
+   
     // Backend-only / Default Deny
-    
+   
     match /users/{uid}/executions/{executionId} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
@@ -185,4 +188,4 @@ service cloud.firestore {
     match /system/aiUsage/{document=**} { allow read, write: if false; }
     match /{document=**} { allow read, write: if false; }
   }
-}
+} 
