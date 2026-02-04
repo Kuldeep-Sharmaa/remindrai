@@ -39,3 +39,4 @@ export const scheduledRunScheduler = functions.pubsub
 
 // All function exports in one place for visibility
 export { onReminderCreate };
+export { deleteReminder } from "./tools/deleteReminder";
