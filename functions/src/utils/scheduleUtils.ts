@@ -1,29 +1,19 @@
 /**
  * scheduleUtils.ts
  *
- * Purpose:
- * - Compute the nextRunAtUTC for a reminder based on schedule + frequency.
- *
- * IMPORTANT DESIGN RULES (LOCKED):
- * - Uses scheduledForUTC as the base (NOT execution time).
- * - Frontend schedule shape is treated as opaque.
- * - No Firestore access here.
- * - Pure, deterministic function.
- * - No side effects.
+ * Computes next run time for reminders based on frequency.
+ * Uses scheduledForUTC as base (not actual execution time).
+ * Pure, deterministic, side-effect free.
  */
 
-type ReminderFrequency = "one_time" | "daily" | "weekly";
+export type ReminderFrequency = "one_time" | "daily" | "weekly";
 
 /**
- * Computes the next run time in UTC ISO string.
- *
- * @param schedule - Frontend-provided schedule object (opaque, do not assume shape)
- * @param scheduledForUTC - The UTC ISO string that just executed
- *
- * @returns nextRunAtUTC ISO string, or null if reminder should be disabled
+ * Computes next run time in UTC ISO string.
+ * Returns null if reminder should be disabled.
  */
 export function computeNextRunAtUTC(
-  schedule: any,
+  frequency: ReminderFrequency,
   scheduledForUTC: string,
 ): string | null {
   const baseDate = new Date(scheduledForUTC);
@@ -34,31 +24,25 @@ export function computeNextRunAtUTC(
     );
   }
 
-  const frequency: ReminderFrequency | undefined = schedule?.frequency;
-
-  if (!frequency) {
-    throw new Error("[computeNextRunAtUTC] Missing frequency in schedule");
-  }
-
-  // One-time reminders do not advance
+  // One-time reminders don't advance
   if (frequency === "one_time") {
     return null;
   }
 
-  // Daily reminders: add 1 day
+  // Daily: +1 day
   if (frequency === "daily") {
     const next = new Date(baseDate);
     next.setUTCDate(next.getUTCDate() + 1);
     return next.toISOString();
   }
 
-  // Weekly reminders: add 7 days
+  // Weekly: +7 days
   if (frequency === "weekly") {
     const next = new Date(baseDate);
     next.setUTCDate(next.getUTCDate() + 7);
     return next.toISOString();
   }
 
-  // Exhaustiveness guard (future safety)
+  // Exhaustiveness guard
   throw new Error(`[computeNextRunAtUTC] Unsupported frequency: ${frequency}`);
 }
