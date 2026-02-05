@@ -9,14 +9,10 @@ import {
   writeBatch,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../../../services/firebase"; // adjust path to your firebase export
+import { db } from "../../../services/firebase";
 
-/**
- * computeNextRunUTC(localSpec, zone)
- * - localSpec: { hour, minute, date? (YYYY-MM-DD) or null, recurrence: 'one-time'|'daily'|'weekly'|null, weekday? (1..7) }
- * - zone: IANA timezone string, e.g., "Asia/Kolkata"
- * Returns ISO string in UTC or null if cannot compute.
- */
+// Compute nextRunUTC (ISO string) from localSpec and timezone
+
 function computeNextRunUTC(localSpec, zone) {
   if (!localSpec) return null;
 
@@ -26,7 +22,7 @@ function computeNextRunUTC(localSpec, zone) {
       // Expect localSpec.date like "2025-10-20"
       const isoLocal = `${localSpec.date}T${String(localSpec.hour).padStart(
         2,
-        "0"
+        "0",
       )}:${String(localSpec.minute).padStart(2, "0")}:00`;
       const dt = DateTime.fromISO(isoLocal, { zone });
       if (!dt.isValid) return null;
@@ -37,7 +33,7 @@ function computeNextRunUTC(localSpec, zone) {
     const now = DateTime.now().setZone(zone);
     let candidate = DateTime.fromObject(
       { hour: localSpec.hour ?? 0, minute: localSpec.minute ?? 0, second: 0 },
-      { zone }
+      { zone },
     );
 
     // If weekly recurrence with weekday provided (ISO weekday 1=Mon .. 7=Sun)
@@ -86,7 +82,7 @@ function computeNextRunUTC(localSpec, zone) {
 export async function recomputeRemindersForUserTimezone(
   uid,
   newTZ,
-  options = {}
+  options = {},
 ) {
   const batchSize = options.batchSize || 400;
   const progressCb =

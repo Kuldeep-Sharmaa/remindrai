@@ -1,17 +1,19 @@
 /**
  * remindrClient.js
- * * Simple Firestore client for user reminders.
- * Sends user intent only. Backend owns all execution logic.
- * * CORE RULES:
- * 1. Intent is IMMUTABLE. No updates allowed.
- * 2. History is PERMANENT. No deletions allowed.
- * 3. User can only Create or Disable.
+ *
+ * Firestore client for user reminders.
+ * Writes user intent only. Backend owns execution logic.
+ *
+ * Core rules:
+ * - Intent is immutable (no updates)
+ * - History is permanent (no deletions)
+ * - User can only create or disable
  */
+
 import {
   collection,
   doc,
   setDoc,
-  updateDoc,
   getDoc,
   getDocs,
   query,
@@ -19,19 +21,23 @@ import {
   onSnapshot,
   limit as queryLimit,
 } from "firebase/firestore";
-
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { db } from "../../../services/firebase";
 
 const USER_DOC = "users";
 const REMINDERS_COL = "reminders";
 
-//  Get user reminders collection reference
+// Backend callable for deletion
+const functions = getFunctions();
+const deleteReminderCallable = httpsCallable(functions, "deleteReminder");
+
+// Get user reminders collection reference
 function getUserRemindersCol(uid) {
   if (!uid) throw new Error("uid is required");
   return collection(db, USER_DOC, uid, REMINDERS_COL);
 }
 
-//    Schedule normalizer
+// Normalize schedule object from various input formats
 function normalizeSchedule(
   payloadSchedule = {},
   timezoneFallback = "UTC",
@@ -58,7 +64,7 @@ function normalizeSchedule(
   return out;
 }
 
-// Basic validation
+// Validate required fields
 function validateMinimalPayload(payload) {
   if (!payload || typeof payload !== "object")
     throw new Error("payload object required");
@@ -68,14 +74,14 @@ function validateMinimalPayload(payload) {
   if (!payload.reminderType) throw new Error("reminderType is required");
 }
 
-//   Content sanitizer
+// Sanitize string content
 function safeTrimString(v, maxLen = 2000) {
   if (typeof v !== "string") return null;
   const s = v.trim().slice(0, maxLen);
   return s === "" ? null : s;
 }
-//  Build intent-only document
 
+// Build intent document for Firestore
 function buildIntentDoc(payload, schedule) {
   const baseDoc = {
     ownerId: payload.ownerId,
@@ -113,7 +119,10 @@ function buildIntentDoc(payload, schedule) {
   return { ...baseDoc, content };
 }
 
-// addReminder - Create a new reminder
+/**
+ * Create a new reminder.
+ * Returns created reminder with ID.
+ */
 export async function addReminder(payload) {
   validateMinimalPayload(payload);
 
@@ -138,39 +147,42 @@ export async function addReminder(payload) {
   }
 }
 
-//  updateReminder - NOT SUPPORTED
+/**
+ * Updates not supported - intent is immutable.
+ */
 export async function updateReminder() {
   throw new Error("Reminder updates are not supported. Intent is immutable.");
 }
 
-//  disableReminder - STOP execution (Disable, don't Delete)
-//  Preserves document for audit and idempotency.
-
+/**
+ * Disable reminder via backend callable.
+ * Returns deletion status from backend.
+ */
 export async function disableReminder(uid, reminderId) {
-  if (!uid || !reminderId) throw new Error("uid and reminderId are required");
+  if (!uid || !reminderId) {
+    throw new Error("uid and reminderId are required");
+  }
 
   try {
-    const reminderDocRef = doc(getUserRemindersCol(uid), reminderId);
-
-    // We only toggle the enabled flag. Backend handles the rest.
-    await updateDoc(reminderDocRef, { enabled: false });
-
-    return { success: true, id: reminderId, enabled: false };
+    const res = await deleteReminderCallable({ reminderId });
+    return res.data; // { status: "deleted" | "already_deleted" }
   } catch (err) {
     console.error("disableReminder failed:", err);
     throw err;
   }
 }
 
-//  getReminder - Fetch a single reminder by ID
-
+/**
+ * Fetch single reminder by ID.
+ */
 export async function getReminder(uid, reminderId) {
   const snap = await getDoc(doc(getUserRemindersCol(uid), reminderId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-//  listUserReminders - List all reminders for a user
-
+/**
+ * List all reminders for a user.
+ */
 export async function listUserReminders(uid, { limit = 100 } = {}) {
   const q = query(
     getUserRemindersCol(uid),
@@ -181,8 +193,9 @@ export async function listUserReminders(uid, { limit = 100 } = {}) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-//  subscribeToReminders - Real-time listener
-
+/**
+ * Real-time listener for reminder changes.
+ */
 export function subscribeToReminders(uid, callback) {
   const q = query(getUserRemindersCol(uid), orderBy("createdAt", "desc"));
   return onSnapshot(q, (snapshot) => {
