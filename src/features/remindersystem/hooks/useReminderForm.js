@@ -1,30 +1,9 @@
 /**
  * useReminderForm.js
- * ------------------
- * Production-grade React hook for reminder creation UI.
  *
- * Purpose:
- *  - Lazy-activated: does nothing until user interacts (isActive guard).
- *  - Builds a canonical, minimal payload for remindrClient.addReminder().
- *  - Enforces idempotency (client-generated idempotencyKey) and supports AbortController for cancel.
- *  - Injects brand context (role, tone, platform) ONLY for AI reminders and only when present.
- *  - Keeps simple reminders minimal (only message/title/notes).
- *
- * Contents:
- *  - Safe localStorage helpers & uuidv4
- *  - Default schedule generator (5 minutes ahead)
- *  - Lazy state management (prompt, platform, tone, frequency, schedule)
- *  - Derived next-run (via useNextRun hook) & validation (useReminderValidation)
- *  - buildCanonicalPayload: canonicalizes payload for Firestore (normalizes types & minimal fields)
- *  - save(): performs validation, builds payload, calls remindrClient.addReminder() with idempotencyKey
- *
- * Invariants:
- *  - If reminderType === 'ai' -> content MAY include { role, tone, platform } (only when present)
- *  - If reminderType === 'simple' -> content MUST NOT include role/tone/platform
- *
- * Note:
- *  - remindrClient.addReminder currently does not accept AbortController.signal; this hook still uses AbortController
- *    to cancel local in-flight UI work and to avoid duplicate concurrent saves.
+ * Main hook for reminder creation form.
+ * Validates locally, saves intent to backend.
+ * Backend owns execution timing - we only show preview to user.
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -38,9 +17,7 @@ import useReminderValidation from "./useReminderValidation";
 
 const LS_PROMPT_KEY = "remindr_prompt_autosave_v1";
 
-/* -----------------------
-   Helpers (safe localStorage + UUID)
-   ----------------------- */
+// Safe localStorage helpers
 function safeLocalGet(key) {
   try {
     return localStorage.getItem(key);
@@ -51,13 +28,19 @@ function safeLocalGet(key) {
 function safeLocalSet(key, value) {
   try {
     localStorage.setItem(key, value);
-  } catch {}
+  } catch {
+    // Ignore abort errors
+  }
 }
 function safeLocalRemove(key) {
   try {
     localStorage.removeItem(key);
-  } catch {}
+  } catch {
+    // Ignore abort errors
+  }
 }
+
+// Simple UUID for client-side idempotency tracking
 function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -66,9 +49,7 @@ function uuidv4() {
   });
 }
 
-/* -----------------------
-   Default schedule (5 min ahead)
-   ----------------------- */
+// Default schedule starts 5 mins in future
 function makeDefaultSchedule(confirmedTimezone) {
   const timezone =
     confirmedTimezone ||
@@ -88,31 +69,25 @@ function makeDefaultSchedule(confirmedTimezone) {
   };
 }
 
-/* ============================================================================
-   Hook
-   =========================================================================== */
 export default function useReminderForm(opts = {}) {
   const { user: userProfile } = useAuthContext();
   const { timezone: providerTimezone } = useAppTimezone();
   const initial = opts.initial ?? null;
   const onSaved = typeof opts.onSaved === "function" ? opts.onSaved : null;
 
-  // --------------------------------------------------------------------------
-  // Lazy activation (no work until user interacts)
-  // --------------------------------------------------------------------------
+  // Track if user has touched the form
   const [isActive, setIsActive] = useState(false);
+
   const activate = useCallback(() => {
     if (!isActive) setIsActive(true);
   }, [isActive]);
 
-  // validator (disabled until active)
+  // Validation only runs when active
   const { validate: validateReminder } = useReminderValidation({
     enabled: isActive,
   });
 
-  // --------------------------------------------------------------------------
-  // State
-  // --------------------------------------------------------------------------
+  // Form state
   const [prompt, setPrompt] = useState(() => {
     if (initial?.prompt) return initial.prompt;
     return safeLocalGet(LS_PROMPT_KEY) || "";
@@ -129,11 +104,11 @@ export default function useReminderForm(opts = {}) {
       initial?.tone ||
       userProfile?.tone ||
       userProfile?.preferences?.tone ||
-      "friendly"
+      "friendly",
   );
 
   const [frequency, setFrequency] = useState(
-    () => initial?.frequency || "one_time"
+    () => initial?.frequency || "one_time",
   );
 
   const [scheduleInternal, setScheduleInternal] = useState(() => {
@@ -142,49 +117,45 @@ export default function useReminderForm(opts = {}) {
       : makeDefaultSchedule(providerTimezone);
   });
 
+  // UI status
   const [saving, setSaving] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generating] = useState(false);
   const [lastError, setLastError] = useState(null);
 
-  // refs
+  // Refs for safety
   const apiInFlightRef = useRef(false);
   const saveAbortControllerRef = useRef(null);
   const lastIdempotencyKeyRef = useRef(null);
   const unmountedRef = useRef(false);
 
-  // --------------------------------------------------------------------------
-  // Setter wrappers (auto-activate on change)
-  // --------------------------------------------------------------------------
+  // Setters with auto-activate
   const setPromptInternal = useCallback(
     (val) => {
       activate();
       setPrompt(val);
     },
-    [activate]
+    [activate],
   );
-
   const setPlatformInternal = useCallback(
     (val) => {
       activate();
       setPlatform(val);
     },
-    [activate]
+    [activate],
   );
-
   const setToneInternal = useCallback(
     (val) => {
       activate();
       setTone(val);
     },
-    [activate]
+    [activate],
   );
-
   const setFrequencyInternal = useCallback(
     (val) => {
       activate();
       setFrequency(val);
     },
-    [activate]
+    [activate],
   );
 
   const setSchedule = useCallback(
@@ -192,18 +163,17 @@ export default function useReminderForm(opts = {}) {
       activate();
       setScheduleInternal((prev) => ({ ...(prev || {}), ...(partial || {}) }));
     },
-    [activate]
+    [activate],
   );
 
-  // --------------------------------------------------------------------------
-  // Derived schedule with timezone
-  // --------------------------------------------------------------------------
+  // Ensure valid timezone
   const scheduleWithTZ = useMemo(() => {
     const tz =
       scheduleInternal?.timezone ||
       providerTimezone ||
       Intl.DateTimeFormat().resolvedOptions().timeZone ||
       "UTC";
+
     return {
       timezone: tz,
       timeOfDay: scheduleInternal?.timeOfDay || "09:00",
@@ -214,9 +184,8 @@ export default function useReminderForm(opts = {}) {
     };
   }, [scheduleInternal, providerTimezone]);
 
-  // --------------------------------------------------------------------------
-  // Next-run calculation (lazy)
-  // --------------------------------------------------------------------------
+  // Calculate next run for UI preview only
+  // We don't send this to backend
   const { nextRunIso: nextRunIsoFromHook, nextRunHuman: nextRunHumanFromHook } =
     useNextRun({
       frequency,
@@ -224,13 +193,10 @@ export default function useReminderForm(opts = {}) {
       enabled: isActive,
     });
 
-  // --------------------------------------------------------------------------
-  // Validation (lazy)
-  // --------------------------------------------------------------------------
+  // Run validation
   const uiValidation = useMemo(() => {
-    if (!isActive) {
-      return { ok: false, errors: {} };
-    }
+    if (!isActive) return { ok: false, errors: {} };
+
     const reminderType = initial?.reminderType || "ai";
     const params = {
       reminderType,
@@ -238,55 +204,25 @@ export default function useReminderForm(opts = {}) {
       message: reminderType === "simple" ? prompt : undefined,
       frequency,
       scheduleWithTZ,
-      nextRunIso: nextRunIsoFromHook,
     };
+
     try {
       return validateReminder(params);
     } catch {
       return { ok: false, errors: { _global: "Validation failed." } };
     }
-  }, [
-    isActive,
-    prompt,
-    frequency,
-    scheduleWithTZ,
-    nextRunIsoFromHook,
-    validateReminder,
-    initial,
-  ]);
+  }, [isActive, prompt, frequency, scheduleWithTZ, validateReminder, initial]);
 
-  // --------------------------------------------------------------------------
-  // Derived next-run
-  // --------------------------------------------------------------------------
-  const derivedNextRunIso =
-    nextRunIsoFromHook ||
-    (uiValidation.ok && uiValidation.normalized?.nextRunUtc) ||
-    null;
+  const isNextRunValid = !!nextRunIsoFromHook;
 
-  const derivedNextRunHuman =
-    nextRunHumanFromHook ||
-    (derivedNextRunIso
-      ? DateTime.fromISO(derivedNextRunIso).toLocaleString(
-          DateTime.DATETIME_MED_WITH_WEEKDAY
-        )
-      : null);
-
-  const derivedIsNextRunValid = !!derivedNextRunIso;
-
-  const validationResult = uiValidation;
-
-  // --------------------------------------------------------------------------
-  // Autosave prompt (lazy)
-  // --------------------------------------------------------------------------
+  // Autosave draft to localStorage
   useEffect(() => {
     if (!isActive) return;
     const t = setTimeout(() => safeLocalSet(LS_PROMPT_KEY, prompt || ""), 700);
     return () => clearTimeout(t);
   }, [prompt, isActive]);
 
-  // --------------------------------------------------------------------------
-  // Toggle weekday
-  // --------------------------------------------------------------------------
+  // Toggle weekday in selector
   const toggleWeekday = useCallback(
     (weekday) => {
       activate();
@@ -299,124 +235,85 @@ export default function useReminderForm(opts = {}) {
         return { ...(prev || {}), weekDays: Array.from(s).sort() };
       });
     },
-    [activate, setSchedule]
+    [activate, setSchedule],
   );
 
-  // --------------------------------------------------------------------------
-  // Cancel in-flight requests
-  // --------------------------------------------------------------------------
   const cancelInFlight = useCallback(() => {
     try {
       if (saveAbortControllerRef.current) {
         saveAbortControllerRef.current.abort();
         saveAbortControllerRef.current = null;
       }
-    } catch {}
+    } catch {
+      // Ignore abort errors
+    }
   }, []);
 
-  // --------------------------------------------------------------------------
-  // Perform save (thin wrapper)
-  // --------------------------------------------------------------------------
-  async function performSave(canonicalPayload, { idempotencyKey } = {}) {
-    // remindrClient.addReminder currently accepts (payload, { idempotencyKey, resolveTimestamps })
-    // do NOT pass an AbortController.signal here since remindrClient (current) doesn't support it.
-    const opts = {};
-    if (idempotencyKey) opts.idempotencyKey = idempotencyKey;
-    return client.addReminder(canonicalPayload, opts);
-  }
-
-  // --------------------------------------------------------------------------
-  // Build canonical Firestore payload
-  //  - For AI reminders: include role, tone, platform safely
-  //  - Do not write undefined values (keep payload minimal)
-  // --------------------------------------------------------------------------
+  // Build intent-only payload for backend
   const buildCanonicalPayload = useCallback(
-    ({ normalized, overrides = {}, idempotencyKey }) => {
-      if (!normalized || typeof normalized !== "object") {
-        throw new Error("Normalized payload missing.");
-      }
+    ({ normalized, overrides = {} }) => {
+      if (!normalized) throw new Error("Normalized payload missing.");
 
-      const ownerId = userProfile?.uid ?? null;
-      const nowIso = new Date().toISOString();
+      const ownerId = userProfile?.uid;
+      if (!ownerId) throw new Error("Cannot save: Missing Owner ID");
 
-      // Normalize type to lower-case for remindrClient expectations
-      const normalizedType =
-        (normalized.type && String(normalized.type).toLowerCase()) ||
-        (initial?.reminderType
-          ? String(initial.reminderType).toLowerCase()
-          : "ai");
+      const rawType = normalized.type || initial?.reminderType || "ai";
+      const reminderType =
+        String(rawType).toLowerCase() === "ai" ? "ai" : "simple";
 
-      // Decide authoritative role/tone/platform values:
-      // - role: prefer userProfile.role (server/source-of-truth) if present
-      // - tone/platform: prefer current form state, fallback to userProfile
-      const resolvedRole = userProfile?.role ?? undefined;
+      const resolvedRole = userProfile?.role;
       const resolvedTone =
-        (typeof tone === "string" && tone.length > 0
+        tone && tone.length > 0
           ? tone
-          : userProfile?.tone ?? userProfile?.preferences?.tone) ?? undefined;
+          : userProfile?.tone || userProfile?.preferences?.tone;
       const resolvedPlatform =
-        (typeof platform === "string" && platform.length > 0
-          ? platform
-          : userProfile?.platform) ?? undefined;
+        platform && platform.length > 0 ? platform : userProfile?.platform;
 
-      const base = {
-        ownerId,
-        reminderType: normalizedType, // 'ai' | 'simple'
-        frequency,
-        schedule: {
-          timezone: normalized.schedule?.timezone,
-          ...(normalized.schedule?.localTime
-            ? { localTime: normalized.schedule.localTime }
-            : {}),
-          ...(normalized.schedule?.localDate
-            ? { localDate: normalized.schedule.localDate }
-            : {}),
-          ...(normalized.schedule?.daysOfWeek
-            ? { daysOfWeek: normalized.schedule.daysOfWeek }
-            : {}),
-        },
-        // client uses nextRunAtUTC_iso (remindrClient will interpret it)
-        nextRunAtUTC_iso: normalized.nextRunUtc || null,
-        enabled: true,
-        createdByClientAt: nowIso,
-        meta: {
-          // explicit idempotency: prefer arg, else normalized.meta.idempotencyKey, else generate
-          idempotencyKey:
-            idempotencyKey ||
-            (normalized.meta && normalized.meta.idempotencyKey) ||
-            uuidv4(),
-        },
+      // Build schedule
+      const cleanSchedule = {
+        timezone: normalized.schedule?.timezone,
+        timeOfDay: normalized.schedule?.localTime || "09:00",
       };
 
-      // Content block — use normalizedType (lowercased) so "AI"/"ai"/"Ai" all work
-      if (normalizedType === "ai") {
+      if (normalized.schedule?.localDate) {
+        cleanSchedule.date = normalized.schedule.localDate;
+      }
+      if (normalized.schedule?.daysOfWeek) {
+        cleanSchedule.weekDays = normalized.schedule.daysOfWeek;
+      }
+
+      // Base payload - no nextRunAtUTC, no enabled
+      const payload = {
+        ownerId,
+        reminderType,
+        frequency,
+        schedule: cleanSchedule,
+      };
+
+      // Build content
+      if (reminderType === "ai") {
         const content = {
           aiPrompt: normalized.content?.aiPrompt,
         };
-
-        // Inject resolved brand/context values only when present (keep payload minimal)
         if (resolvedTone) content.tone = resolvedTone;
         if (resolvedPlatform) content.platform = resolvedPlatform;
         if (resolvedRole) content.role = resolvedRole;
 
-        base.content = content;
+        payload.content = content;
       } else {
-        // simple reminder content — explicit to avoid accidental brand injection
-        base.content = {
+        payload.content = {
           message: normalized.content?.message,
           ...(overrides.title ? { title: overrides.title } : {}),
           ...(overrides.notes ? { notes: overrides.notes } : {}),
         };
       }
 
-      return { ...base, ...overrides };
+      return payload;
     },
-    [userProfile, frequency, tone, platform, initial]
+    [userProfile, frequency, tone, platform, initial],
   );
 
-  // --------------------------------------------------------------------------
-  // Public save()
-  // --------------------------------------------------------------------------
+  // Save to backend
   const save = useCallback(
     async (overrides = {}) => {
       activate();
@@ -427,68 +324,55 @@ export default function useReminderForm(opts = {}) {
       const controller = new AbortController();
       saveAbortControllerRef.current = controller;
 
-      // client-visible idempotencyKey: generate now and keep reference
       const idempotencyKey = uuidv4();
       lastIdempotencyKeyRef.current = idempotencyKey;
 
-      const reminderType =
-        overrides.reminderType || initial?.reminderType || "ai";
-
-      const validatorParams = {
-        reminderType: reminderType.toLowerCase(),
-        aiPrompt:
-          reminderType === "ai" ? overrides.aiPrompt ?? prompt : undefined,
-        message:
-          reminderType === "simple" ? overrides.message ?? prompt : undefined,
-        frequency,
-        scheduleWithTZ,
-        nextRunIso: derivedNextRunIso,
-      };
-
-      const validation = validateReminder(validatorParams);
-
-      if (!validation || validation.ok !== true) {
-        const errMsg =
-          validation?.errorMessage ||
-          JSON.stringify(validation?.errors || {}) ||
-          "Validation failed";
-        setSaving(false);
-        setLastError(errMsg);
-        throw new Error(errMsg);
-      }
-
-      const normalized = validation.normalized;
-      // ensure normalized carries the idempotencyKey for downstream debugging if needed
-      const normalizedWithMeta = {
-        ...normalized,
-        meta: { ...(normalized.meta || {}), idempotencyKey },
-      };
-
-      const canonicalPayload = buildCanonicalPayload({
-        normalized: normalizedWithMeta,
-        overrides,
-        idempotencyKey,
-      });
-
       try {
-        const saved = await performSave(canonicalPayload, {
+        const reminderType =
+          overrides.reminderType || initial?.reminderType || "ai";
+        const validatorParams = {
+          reminderType: reminderType.toLowerCase(),
+          aiPrompt:
+            reminderType === "ai" ? (overrides.aiPrompt ?? prompt) : undefined,
+          message:
+            reminderType === "simple"
+              ? (overrides.message ?? prompt)
+              : undefined,
+          frequency,
+          scheduleWithTZ,
+        };
+
+        const validation = validateReminder(validatorParams);
+        if (!validation || validation.ok !== true) {
+          throw new Error(validation?.errorMessage || "Validation failed");
+        }
+
+        const canonicalPayload = buildCanonicalPayload({
+          normalized: validation.normalized,
+          overrides,
+        });
+
+        const saved = await client.addReminder(canonicalPayload, {
           idempotencyKey,
         });
 
         safeLocalRemove(LS_PROMPT_KEY);
         setSaving(false);
-        if (onSaved) onSaved(saved, null);
         saveAbortControllerRef.current = null;
+
+        if (onSaved) onSaved(saved, null);
         return saved;
       } catch (err) {
+        setSaving(false);
+        saveAbortControllerRef.current = null;
+
         if (err?.name === "AbortError") {
           setLastError("Save cancelled.");
         } else {
-          setLastError(err?.message || "Failed to save reminder.");
+          const msg = err?.message || "Failed to save reminder.";
+          setLastError(msg);
+          throw err;
         }
-        setSaving(false);
-        saveAbortControllerRef.current = null;
-        throw err;
       }
     },
     [
@@ -499,15 +383,12 @@ export default function useReminderForm(opts = {}) {
       prompt,
       frequency,
       scheduleWithTZ,
-      derivedNextRunIso,
       validateReminder,
       initial,
-    ]
+    ],
   );
 
-  // --------------------------------------------------------------------------
-  // Keyboard shortcut: Ctrl/Cmd+Enter -> save()
-  // --------------------------------------------------------------------------
+  // Keyboard shortcut (Cmd+Enter)
   useEffect(() => {
     const handler = (e) => {
       const isSubmit = (e.ctrlKey || e.metaKey) && e.key === "Enter";
@@ -521,23 +402,18 @@ export default function useReminderForm(opts = {}) {
       e.preventDefault();
       apiInFlightRef.current = true;
 
-      (async () => {
-        try {
-          await save();
-        } catch {
-        } finally {
+      save()
+        .catch(() => {})
+        .finally(() => {
           apiInFlightRef.current = false;
-        }
-      })();
+        });
     };
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [save, saving, generating, isActive]);
 
-  // --------------------------------------------------------------------------
   // Cleanup on unmount
-  // --------------------------------------------------------------------------
   useEffect(() => {
     return () => {
       unmountedRef.current = true;
@@ -545,11 +421,8 @@ export default function useReminderForm(opts = {}) {
     };
   }, [cancelInFlight]);
 
-  // --------------------------------------------------------------------------
-  // Return public API
-  // --------------------------------------------------------------------------
   return {
-    // form state
+    // Form inputs
     prompt,
     setPrompt: setPromptInternal,
     platform,
@@ -561,16 +434,15 @@ export default function useReminderForm(opts = {}) {
     schedule: scheduleWithTZ,
     setSchedule,
 
-    // derived values
-    nextRunIso: derivedNextRunIso,
-    nextRunHuman: derivedNextRunHuman,
-    isNextRunValid: derivedIsNextRunValid,
+    // Preview only - never sent to backend
+    nextRunHuman: nextRunHumanFromHook,
+    isNextRunValid,
 
-    // status
+    // Meta
     saving,
     generating,
     lastError,
-    validation: validationResult,
+    validation: uiValidation,
     save,
     cancelSave: cancelInFlight,
     toggleWeekday,
