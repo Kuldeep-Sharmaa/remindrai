@@ -1,22 +1,10 @@
 /**
  * advanceReminder.ts
  *
- * Purpose:
- * Advances backend-owned reminder state after execution.
- *
- * Responsibilities:
- * - Disable one-time reminders after execution.
- * - Compute and set the nextRunAtUTC for recurring reminders.
- * - Update only system-owned fields.
- *
- * Guarantees:
- * - Reminder content and intent are never modified.
- * - Frontend never controls reminder advancement.
- *
- * IMPORTANT:
- * - Uses scheduledForUTC (NOT execution time)
- * - Best-effort
- * - Never throws
+ * Advances reminder state after execution.
+ * Disables one-time reminders, computes next run for recurring ones.
+ * Uses scheduledForUTC (not actual execution time) for advancement.
+ * Best-effort, never throws.
  */
 
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
@@ -27,12 +15,9 @@ import { computeNextRunAtUTC } from "../utils/scheduleUtils";
  */
 export type AdvanceableReminderData = {
   frequency: "one_time" | "daily" | "weekly";
-  schedule: any; // frontend-owned, intentionally opaque
+  schedule: any; // Frontend-owned, intentionally opaque
 };
 
-/**
- * Input contract for advancing reminder state.
- */
 export interface AdvanceReminderInput {
   reminderRef: DocumentReference;
   reminderData: AdvanceableReminderData;
@@ -40,7 +25,7 @@ export interface AdvanceReminderInput {
 }
 
 /**
- * Advances reminder state after an execution attempt.
+ * Advances reminder state after execution attempt.
  */
 export async function advanceReminder(
   input: AdvanceReminderInput,
@@ -48,12 +33,9 @@ export async function advanceReminder(
   const { reminderRef, reminderData, scheduledForUTC } = input;
 
   try {
-    const { frequency, schedule } = reminderData;
+    const { frequency } = reminderData;
 
-    /**
-     * One-time reminders STOP FOREVER after execution.
-     * No nextRunAtUTC. No reschedule. No exceptions.
-     */
+    // One-time reminders stop after execution
     if (frequency === "one_time") {
       await reminderRef.update({
         enabled: false,
@@ -67,11 +49,8 @@ export async function advanceReminder(
       return;
     }
 
-    /**
-     * Recurring reminders only (daily / weekly)
-     * Base calculation on scheduledForUTC — NOT execution time.
-     */
-    const nextRunAtUTC = computeNextRunAtUTC(schedule, scheduledForUTC);
+    // Recurring reminders - compute next run from scheduled time
+    const nextRunAtUTC = computeNextRunAtUTC(frequency, scheduledForUTC);
 
     await reminderRef.update({
       nextRunAtUTC,
@@ -88,7 +67,6 @@ export async function advanceReminder(
       error: error instanceof Error ? error.message : String(error),
     });
 
-    // Intentionally swallow errors:
-    // reminder advancement failure must NOT crash the system
+    // Swallow error - advancement failure doesn't crash the system
   }
 }
