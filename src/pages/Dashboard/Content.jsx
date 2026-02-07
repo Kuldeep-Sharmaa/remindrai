@@ -1,8 +1,8 @@
 /**
  * Content.jsx
  *
- * Drafts list view with unread-first sorting and filtering.
- * Fetches drafts, reminders, and interaction data to build delivery items.
+ * Drafts list view with filtering and sorting.
+ * Shows unread drafts first, supports tab and reminder filtering.
  */
 
 import React, { useMemo, useState } from "react";
@@ -13,16 +13,15 @@ import { useAuthContext } from "../../context/AuthContext";
 import DraftListItem from "./ContentDraftUI/DraftListItem";
 import DraftModal from "./ContentDraftUI/DraftModal";
 import { markOpened } from "../../services/draftInteractionsService";
+import ReminderDropdown from "./ContentDraftUI/DeliveryDropdown";
 
 export default function Content() {
   const { currentUser } = useAuthContext();
   const userId = currentUser?.uid;
 
   const [selectedDraft, setSelectedDraft] = useState(null);
-
-  // Filter state (logic implemented, UI not yet wired)
-  const [activeTab] = useState("all"); // "all" | "unread" | "today"
-  const [selectedReminderId] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedReminderId, setSelectedReminderId] = useState("all");
 
   // Drafts query
   const draftsQuery = useMemo(() => {
@@ -34,9 +33,9 @@ export default function Content() {
   }, [userId]);
 
   const {
-    documents: drafts,
-    isPending: draftsPending,
-    error: draftsError,
+    documents: drafts = [],
+    isPending,
+    error,
   } = useCollection(draftsQuery);
 
   // Reminders query
@@ -45,7 +44,7 @@ export default function Content() {
     return collection(db, "users", userId, "reminders");
   }, [userId]);
 
-  const { documents: reminders } = useCollection(remindersQuery);
+  const { documents: reminders = [] } = useCollection(remindersQuery);
 
   // Interactions query
   const interactionsQuery = useMemo(() => {
@@ -53,49 +52,45 @@ export default function Content() {
     return collection(db, "users", userId, "draftInteractions");
   }, [userId]);
 
-  const { documents: interactions } = useCollection(interactionsQuery);
+  const { documents: interactions = [] } = useCollection(interactionsQuery);
 
   // Build lookup maps
   const reminderMap = useMemo(() => {
     const map = new Map();
-    reminders?.forEach((r) => map.set(r.id, r));
+    reminders.forEach((r) => map.set(r.id, r));
     return map;
   }, [reminders]);
 
   const interactionMap = useMemo(() => {
     const map = new Map();
-    interactions?.forEach((i) => map.set(i.id, i));
+    interactions.forEach((i) => map.set(i.id, i));
     return map;
   }, [interactions]);
 
-  // Truncate helper
   const truncate = (text = "", max = 40) =>
     text.length > max ? text.slice(0, max) + "…" : text;
 
   // Build delivery items
   const deliveryItems = useMemo(() => {
-    if (!drafts) return [];
-
     return drafts.map((draft) => {
       const reminder = reminderMap.get(draft.reminderId);
       const interaction = interactionMap.get(draft.id);
 
-      const reminderTitle = truncate(reminder?.content?.aiPrompt || "Unknown");
-      const isUnread = !interaction?.openedAt;
+      const baseLabel =
+        reminder?.content?.aiPrompt || reminder?.content?.message || "Unknown";
 
       return {
         id: draft.id,
         createdAt: draft.createdAt,
-        preview: draft.content || "",
-        reminderTitle,
-        isUnread,
         reminderId: draft.reminderId,
+        reminderTitle: truncate(baseLabel),
+        isUnread: !interaction?.openedAt,
         originalDraft: draft,
       };
     });
   }, [drafts, reminderMap, interactionMap]);
 
-  // Sort: unread first, newest within groups
+  // Sort: unread first, then by creation time
   const sortedItems = useMemo(() => {
     return [...deliveryItems].sort((a, b) => {
       if (a.isUnread !== b.isUnread) return a.isUnread ? -1 : 1;
@@ -107,18 +102,22 @@ export default function Content() {
   const filteredItems = useMemo(() => {
     let list = sortedItems;
 
-    // Tab filter
     if (activeTab === "unread") {
       list = list.filter((i) => i.isUnread);
     }
 
     if (activeTab === "today") {
-      const now = Date.now();
-      const last24h = now - 24 * 60 * 60 * 1000;
-      list = list.filter((i) => i.createdAt?.toDate?.().getTime() >= last24h);
+      const now = new Date();
+      const todayStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      ).getTime();
+      list = list.filter(
+        (i) => i.createdAt?.toDate?.().getTime() >= todayStart,
+      );
     }
 
-    // Reminder filter
     if (selectedReminderId !== "all") {
       list = list.filter((i) => i.reminderId === selectedReminderId);
     }
@@ -126,61 +125,94 @@ export default function Content() {
     return list;
   }, [sortedItems, activeTab, selectedReminderId]);
 
+  // Only show reminders that have executed at least once
+  const executedReminders = useMemo(() => {
+    const executedIds = new Set(deliveryItems.map((d) => d.reminderId));
+    return reminders.filter((r) => executedIds.has(r.id));
+  }, [deliveryItems, reminders]);
+
+  const unreadCount = useMemo(
+    () => deliveryItems.filter((d) => d.isUnread).length,
+    [deliveryItems],
+  );
+
   // Loading state
-  if (draftsPending) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted">Loading drafts...</div>
-      </div>
-    );
+  if (isPending) {
+    return <div className="p-8 text-muted">Loading drafts...</div>;
   }
 
   // Error state
-  if (draftsError) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-red-500">Error loading drafts</div>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (!filteredItems.length) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <div className="text-muted mb-2">No drafts yet</div>
-        <div className="text-sm text-muted/60">
-          Your generated drafts will appear here
-        </div>
-      </div>
-    );
+  if (error) {
+    return <div className="p-8 text-red-500">Error loading drafts</div>;
   }
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
           <h2 className="text-2xl font-grotesk font-semibold">Drafts</h2>
           <p className="text-sm text-muted mt-1">
-            {filteredItems.length}{" "}
-            {filteredItems.length === 1 ? "draft" : "drafts"} delivered
+            {deliveryItems.length} delivered
           </p>
         </div>
 
-        <div className="space-y-3">
-          {filteredItems.map((item) => (
-            <DraftListItem
-              key={item.id}
-              draft={item.originalDraft}
-              reminderTitle={item.reminderTitle}
-              isUnread={item.isUnread}
-              onClick={() => {
-                markOpened({ uid: userId, draftId: item.id });
-                setSelectedDraft(item.originalDraft);
-              }}
-            />
-          ))}
+        {/* Tabs and reminder filter */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex gap-2">
+            {[
+              { key: "all", label: "All" },
+              { key: "unread", label: `Unread (${unreadCount})` },
+              { key: "today", label: "Today" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-3 py-1.5 text-sm rounded-md ${
+                  activeTab === tab.key
+                    ? "bg-brand/10 text-brand"
+                    : "text-muted hover:text-textLight dark:hover:text-textDark"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <ReminderDropdown
+            reminders={executedReminders}
+            selectedId={selectedReminderId}
+            onChange={setSelectedReminderId}
+          />
         </div>
+
+        {/* Empty states */}
+        {deliveryItems.length === 0 ? (
+          <div className="text-muted text-center py-20">No drafts yet</div>
+        ) : filteredItems.length === 0 ? (
+          activeTab === "unread" ? (
+            <div className="text-muted text-center py-20">
+              You're all caught up.
+            </div>
+          ) : (
+            <div className="text-muted text-center py-20">No drafts found.</div>
+          )
+        ) : (
+          <div>
+            {filteredItems.map((item) => (
+              <DraftListItem
+                key={item.id}
+                draft={item.originalDraft}
+                reminderTitle={item.reminderTitle}
+                isUnread={item.isUnread}
+                onClick={() => {
+                  markOpened({ uid: userId, draftId: item.id });
+                  setSelectedDraft(item.originalDraft);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {selectedDraft && (
