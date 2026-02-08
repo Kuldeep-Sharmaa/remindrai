@@ -1,16 +1,15 @@
-// ============================================================================
-// 📁 src/pages/Dashboard/Reminders.jsx
-// ----------------------------------------------------------------------------
-// - Now powered by global reminder pipeline via useAuthContext()
-// - No duplicate Firestore listener (uses single source of truth).
-// - Maintains same UX, animation, and upgrade flow.
-// - Clean, efficient, production-ready.
-// ----------------------------------------------------------------------------
+/**
+ * Reminders.jsx
+ *
+ * Main reminders dashboard page.
+ * Shows active drafts, slot usage, and creation CTA.
+ * Uses global reminder pipeline from AuthContext.
+ */
 
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import Spinner from "../../components/Ui/LoadingSpinner";
 import UserPreferencesCard from "../../features/remindersystem/components/UserPreferencesCard";
@@ -19,26 +18,23 @@ import { useAuthContext } from "../../context/AuthContext";
 import PageTransition from "../../components/DashboardAnimations/PageTransition";
 
 const REMINDER_CONFIG = Object.freeze({
-  MAX_REMINDERS: 5,
+  MAX_REMINDERS: 7, // for local and devlopment users
 });
 
 const Reminders = () => {
   const navigate = useNavigate();
 
-  // ✅ Pull all reminder data and loading states from context pipeline
   const {
     user,
     loading: isAuthLoading,
     reminders,
     isLoadingReminders,
-    activeReminders,
-    activeCount,
     totalReminders,
   } = useAuthContext();
 
   const maxSlots = user?.maxSlots || REMINDER_CONFIG.MAX_REMINDERS;
 
-  // Derived state: slot usage
+  // Calculate slot usage
   const reminderStatus = useMemo(() => {
     const remindersUsed = totalReminders;
     const limitReached = remindersUsed >= maxSlots;
@@ -49,29 +45,25 @@ const Reminders = () => {
     if (reminderStatus.limitReached) {
       toast.error(
         `You've reached your current limit of ${maxSlots} active drafts. Upgrade to add more.`,
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
     navigate("/dashboard/studio/create");
   }, [reminderStatus.limitReached, maxSlots, navigate]);
 
-  const handleDeleteReminder = useCallback(
-    async (id) => {
-      if (!user?.uid) {
-        toast.error("Authentication required to delete this item.");
-        return;
-      }
-      try {
-        toast.success("Removal requested…");
-        // deletion handled by reminder service
-      } catch (error) {
-        console.error("Error deleting reminder:", error);
-        toast.error("Failed to remove. Please try again.");
-      }
-    },
-    [user]
-  );
+  const handleDeleteReminder = useCallback(async () => {
+    if (!user?.uid) {
+      toast.error("Authentication required to delete this item.");
+      return;
+    }
+    try {
+      toast.success("Removal requested…");
+    } catch (error) {
+      console.error("Error deleting reminder:", error);
+      toast.error("Failed to remove. Please try again.");
+    }
+  }, [user]);
 
   const handleSettingsClick = useCallback(() => {
     navigate("/dashboard/settings");
@@ -81,15 +73,13 @@ const Reminders = () => {
 
   if (isAppLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-950 overflow-x-hidden">
+      <div className="flex items-center justify-center min-h-screen bg-bgLight dark:bg-bgDark">
         <Spinner />
       </div>
     );
   }
 
-  // --------------------------------------------------------------------------
-  // SlotDots: compact slot usage indicator
-  // --------------------------------------------------------------------------
+  // Slot usage indicator
   const SlotDots = ({ used, total }) => {
     const dots = Array.from({ length: total });
     return (
@@ -106,16 +96,15 @@ const Reminders = () => {
                 key={i}
                 className={`inline-block w-2.5 h-2.5 rounded-full transition-all duration-150 ${
                   isUsed
-                    ? "bg-blue-600 dark:bg-blue-400 shadow-sm"
-                    : "border border-gray-200 dark:border-gray-700 bg-transparent"
+                    ? "bg-brand shadow-sm"
+                    : "border border-border bg-transparent"
                 }`}
               />
             );
           })}
         </div>
 
-        {/* Desktop label */}
-        <div className="hidden sm:block text-xs text-gray-500 dark:text-gray-400 ml-2">
+        <div className="hidden sm:block text-xs text-muted ml-2">
           {used}/{total}
         </div>
 
@@ -124,7 +113,6 @@ const Reminders = () => {
     );
   };
 
-  // Motion variants
   const heroVariants = {
     hidden: { opacity: 0, y: 8 },
     enter: {
@@ -143,29 +131,22 @@ const Reminders = () => {
     },
   };
 
-  // --------------------------------------------------------------------------
-  // Render
-  // --------------------------------------------------------------------------
   return (
     <PageTransition>
-      <div className="min-h-screen overflow-x-hidden">
-        <div className="w-full max-w-screen-xl mx-auto sm:px-6 lg:px-8 py-10">
-          {/* Hero */}
+      <div className="min-h-screen">
+        <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {/* Header */}
           <motion.header
             className="text-center mb-10"
             initial="hidden"
             animate="enter"
             variants={heroVariants}
           >
-            <div className="flex justify-center mb-3">
-              <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-gray-900 dark:text-white mb-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-grotesk font-semibold tracking-tight text-textLight dark:text-textDark mb-3">
               You plan once. We handle the rest
             </h1>
 
-            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-muted max-w-2xl mx-auto leading-relaxed">
               Your consistency engine — it remembers, creates, and delivers when
               you need it.
             </p>
@@ -180,7 +161,7 @@ const Reminders = () => {
             />
           </section>
 
-          {/* CTA + slot indicator */}
+          {/* CTA and slot indicator */}
           <motion.section
             className="flex flex-col items-center justify-center gap-5 mt-10 mb-12 text-center"
             initial="hidden"
@@ -192,14 +173,14 @@ const Reminders = () => {
                 <button
                   disabled
                   aria-disabled
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm sm:text-base font-medium rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 cursor-not-allowed shadow-inner"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm sm:text-base font-medium rounded-xl bg-bgLight dark:bg-bgDark border border-border text-muted cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4 opacity-60" />
                   All slots active
                 </button>
 
-                <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span>You’ve reached your current plan limit.</span>
+                <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-muted">
+                  <span>You've reached your current plan limit.</span>
                   <button
                     onClick={() =>
                       toast.promise(Promise.resolve(), {
@@ -208,7 +189,7 @@ const Reminders = () => {
                         error: "Unable to open upgrade right now.",
                       })
                     }
-                    className="font-medium text-blue-600 dark:text-blue-400 hover:underline ml-0 sm:ml-2"
+                    className="font-medium text-brand hover:underline ml-0 sm:ml-2"
                   >
                     Upgrade to add more drafts
                   </button>
@@ -218,10 +199,10 @@ const Reminders = () => {
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <button
                   onClick={handleAddReminderClick}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm sm:text-base font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:shadow-md hover:scale-[1.02]"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm sm:text-base font-medium rounded-xl bg-brand hover:brightness-110 text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand hover:shadow-md hover:scale-[1.02]"
                 >
                   <Plus className="w-4 h-4" />
-                  Create draft
+                  Start a draft
                 </button>
               </div>
             )}
