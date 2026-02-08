@@ -1,6 +1,9 @@
-// ============================================================================
-// 📁 ReminderForm.jsx (UPDATED - hide Learn More modal; NextRun shows after prompt touch/type)
-// ----------------------------------------------------------------------------
+/**
+ * ReminderForm.jsx
+ *
+ * Main form for creating reminders and AI drafts.
+ * Handles validation, scheduling, and user preferences.
+ */
 
 import React, {
   useCallback,
@@ -23,13 +26,11 @@ import UserPreferencesCard from "../UserPreferencesCard";
 export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   const navigate = useNavigate();
 
-  // Local UI state
   const [promptTouched, setPromptTouched] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
 
   const closeBtnRef = useRef(null);
 
-  // Hooks: single source of truth
   const form = useReminderForm();
   const {
     prompt = "",
@@ -48,14 +49,12 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     isNextRunValid,
   } = form || {};
 
-  // Reminder Type (local control UI) — keep synced with save calls
   const [reminderType, setReminderType] = useState("ai");
 
   useEffect(() => {
     if (form?.reminderType && form.reminderType !== reminderType) {
       setReminderType(form.reminderType);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form?.reminderType]);
 
   const validation = useMemo(() => {
@@ -91,7 +90,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     validation?.errorMessage ||
     null;
 
-  // Handlers
   const handlePromptTouch = useCallback(() => setPromptTouched(true), []);
 
   const handleOpenPreferences = useCallback(() => {
@@ -115,57 +113,55 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
 
         toast.success(
           reminderType === "ai"
-            ? "Your AI content flow is ready "
-            : "Your content plan is set"
+            ? "Your AI draft is ready to begin."
+            : "Your content note is set.",
         );
 
         if (typeof onSuccess === "function") return onSuccess();
         navigate("/dashboard/studio");
       } catch (err) {
-        console.error("⛔ Save error:", err);
-        toast.error(err?.message || "Failed to save reminder.");
+        console.error("Save error:", err);
+        toast.error(err?.message || "Failed to save.");
       }
     },
-    [save, reminderType, prompt, onSuccess, navigate]
+    [save, reminderType, prompt, onSuccess, navigate],
   );
 
   const handleCancel = useCallback(
     () => navigate("/dashboard/studio"),
-    [navigate]
+    [navigate],
   );
 
   const shouldShowValidationError =
     !isValid && (promptTouched || attemptedSave || scheduleFieldError);
 
-  // When to show NextRunDisplay:
-  // - Only after user touched/typed OR when prompt is non-empty (so user can edit an existing reminder)
+  // Show next run after user touches prompt or if editing existing reminder
   const showNextRun =
     promptTouched || (typeof prompt === "string" && prompt.trim().length > 0);
 
   return (
-    <div className="min-h-screen py-6 sm:py-10 ">
+    <div className="min-h-screen">
       <div className="max-w-5xl mx-auto w-full">
         <form
           onSubmit={handleSave}
-          className="space-y-8 bg-white/80 dark:bg-black/50 backdrop-blur-lg rounded-2xl border border-gray-300/40 dark:border-white/10 shadow-xl p-5 sm:p-8 transition-all"
+          className="space-y-8 bg-bgLight/80 dark:bg-bgDark/50 backdrop-blur-lg rounded-2xl border border-border/40 shadow-xl p-5 sm:p-8 transition-all"
           aria-labelledby="remindr-form-title"
         >
           {/* Header */}
           <div className="text-center sm:text-left">
             <h1
               id="remindr-form-title"
-              className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight"
+              className="text-2xl sm:text-3xl font-grotesk font-bold text-textLight dark:text-textDark tracking-tight"
             >
-              Let <span className="text-indigo-600">RemindrAI</span> create for
-              you
+              Let <span className="text-brand">RemindrAI</span> create for you
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2">
-              Consistency powered by AI — it creates, reminds, and delivers
-              right on time
+            <p className="text-sm sm:text-base text-muted mt-2">
+              Consistency powered by AI — It prepares and delivers what you
+              need, right on time.
             </p>
           </div>
 
-          {/* User Preferences (only for AI mode) */}
+          {/* User preferences for AI mode */}
           {reminderType === "ai" && (
             <div className="mt-4">
               <UserPreferencesCard
@@ -180,7 +176,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             onOpenLearnMore={() => {}}
           />
 
-          {/* Prompt Input */}
           <div className="mt-4">
             <PromptInput
               prompt={prompt}
@@ -190,7 +185,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             />
           </div>
 
-          {/* Frequency + Time */}
+          {/* Frequency and time selection */}
           <div className="mt-4 space-y-3">
             <FrequencySelector value={frequency} onChange={setFrequency} />
             <TimeSelector
@@ -211,7 +206,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             )}
           </div>
 
-          {/* Validation & Errors */}
+          {/* Validation errors */}
           {shouldShowValidationError &&
             validation?.errorCode &&
             !(
@@ -239,30 +234,31 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Form actions */}
           <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button
               type="button"
               onClick={handleCancel}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-textLight dark:text-textDark bg-bgLight dark:bg-bgDark border border-border rounded-md hover:brightness-95 transition"
             >
               Cancel
             </button>
-
             <button
               type="submit"
               disabled={!isValid || saving}
-              className={`w-full sm:w-auto px-4 py-2 text-sm sm:text-base font-semibold text-white rounded-md transition duration-150 ease-in-out ${
+              className={`w-full sm:w-auto px-4 py-2 text-sm sm:text-base font-semibold text-white rounded-md transition-colors duration-150 ${
                 !isValid || saving
-                  ? "bg-indigo-300 dark:bg-indigo-600/50 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 shadow-lg"
+                  ? "bg-brand/40 cursor-not-allowed"
+                  : "bg-brand hover:brightness-110"
               }`}
             >
               {saving
-                ? "Saving..."
+                ? reminderType === "ai"
+                  ? "Preparing draft…"
+                  : "Keeping note ready…"
                 : reminderType === "ai"
-                ? "Create with RemindrAI"
-                : "Save Reminder"}
+                  ? "Create draft"
+                  : "Save note"}
             </button>
           </div>
         </form>
