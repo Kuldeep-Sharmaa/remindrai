@@ -1,10 +1,9 @@
-// ReminderListContainer.jsx — polished, brand-aligned, mobile-first
-// ----------------------------------------------------------------------------
-// - OpenAI-style minimal UX
-// - Brand tone: calm, professional, proactive (focus: drafts & nudges)
-// - Keeps optimistic delete (no undo), accessible modal wiring
-// - Uses EmptyState component for the empty screen (eyes animation, monochrome)
-// ----------------------------------------------------------------------------
+/**
+ * ReminderListContainer.jsx
+ *
+ * Main list view for user's active reminders.
+ * Handles optimistic deletes, modal state, and empty/error states.
+ */
 
 import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -46,39 +45,41 @@ const SkeletonRow = () => (
   </div>
 );
 
-const ReminderListContainer = ({
-  reminders,
-  error,
-  onAddReminderClick,
-  limitReached,
-}) => {
+const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
   const { user } = useAuthContext();
 
   const [visibleReminders, setVisibleReminders] = useState(reminders || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-  // Keep visibleReminders in sync with upstream reminders while
-  // preserving existing DOM order with new items prepended.
+  // Sync with upstream reminders, exclude deleted ones, prepend new items
   useEffect(() => {
     if (!reminders) {
       setVisibleReminders([]);
       return;
     }
-    const incomingById = new Map(reminders.map((r) => [r.id, r]));
+
+    // Deleted reminders never appear in UI
+    const activeReminders = reminders.filter((r) => !r.deletedAt);
+
+    const incomingById = new Map(activeReminders.map((r) => [r.id, r]));
+
     setVisibleReminders((prev) => {
-      // keep items that still exist upstream
-      const kept = prev.filter((p) => incomingById.has(p.id));
-      // find new upstream items that were not in kept
-      const newItems = reminders.filter(
-        (r) => !kept.some((k) => k.id === r.id)
+      // Keep items that still exist, but refresh with upstream data
+      const kept = prev
+        .filter((p) => incomingById.has(p.id))
+        .map((p) => incomingById.get(p.id));
+
+      // Find new items not in kept
+      const newItems = activeReminders.filter(
+        (r) => !kept.some((k) => k.id === r.id),
       );
-      // place new items at the front so new drafts appear top
+
+      // New items appear at top
       return [...newItems, ...kept];
     });
   }, [reminders]);
 
-  // Modal open / close handlers
   const handleViewDetails = useCallback((id) => {
     setSelectedTaskId(id);
     setIsModalOpen(true);
@@ -89,7 +90,7 @@ const ReminderListContainer = ({
     setIsModalOpen(false);
   }, []);
 
-  // Delete logic (optimistic, no undo)
+  // Optimistic delete with rollback on failure
   const handleDelete = useCallback(
     async (id) => {
       if (!user?.uid) {
@@ -97,31 +98,32 @@ const ReminderListContainer = ({
         return;
       }
 
-      // Keep a copy to allow rollback on failure
-      const previous = visibleReminders;
+      // Capture the item being deleted for potential rollback
+      const deletedItem = visibleReminders.find((r) => r.id === id);
+      if (!deletedItem) return;
 
-      // Optimistically remove from UI
+      // Remove from UI immediately
       setVisibleReminders((prev) => prev.filter((r) => r.id !== id));
 
       try {
         await remindrClient.deleteReminder(user.uid, id);
         toast.success("Task deleted.");
       } catch (err) {
-        // rollback UI
-        const upstream = reminders?.find((r) => r.id === id);
-        if (upstream) {
-          setVisibleReminders((prev) => [upstream, ...prev]);
-        } else {
-          setVisibleReminders(previous);
-        }
+        // Rollback: restore the deleted item at its original position
+        setVisibleReminders((prev) => {
+          // Check if it was already re-added somehow
+          if (prev.some((r) => r.id === id)) return prev;
+          // Add back to front (safest position)
+          return [deletedItem, ...prev];
+        });
         toast.error("Failed to delete item. Try again.");
         console.error("deleteReminder error:", err);
       }
     },
-    [user, reminders, visibleReminders]
+    [user, visibleReminders],
   );
 
-  // Error screen
+  // Error state
   if (error) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 overflow-hidden">
@@ -138,25 +140,27 @@ const ReminderListContainer = ({
     );
   }
 
-  // Empty state — emphasize drafts & consistency (USP)
+  // Empty state
   if (!visibleReminders || visibleReminders.length === 0) {
-    return <EmptyState onCreate={onAddReminderClick} />;
+    if (reminders === null) {
+      // Fall through to skeleton
+    } else {
+      return <EmptyState onCreate={onAddReminderClick} />;
+    }
   }
 
-  // Main list view
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 overflow-hidden">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Your drafts & nudges
+          Your drafts
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Manage active items — we’ll deliver the next idea when it’s time.
+          Active drafts prepared from your intent. The next one arrives when
+          it's ready.
         </p>
       </div>
 
-      {/* List */}
       <motion.div
         className="flex flex-col gap-4"
         initial="hidden"
@@ -187,7 +191,7 @@ const ReminderListContainer = ({
           ))}
         </AnimatePresence>
 
-        {/* Loading skeletons when upstream is null (initial load) */}
+        {/* Loading skeletons on initial load */}
         {reminders === null && (
           <>
             <SkeletonRow />
@@ -197,7 +201,6 @@ const ReminderListContainer = ({
         )}
       </motion.div>
 
-      {/* Details modal (read-only) */}
       <TaskDetailModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
