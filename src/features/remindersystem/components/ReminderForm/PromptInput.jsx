@@ -19,7 +19,7 @@ export default function PromptInput({
 }) {
   const textareaRef = useRef(null);
   const [localValue, setLocalValue] = useState(
-    typeof prompt === "string" ? prompt : ""
+    typeof prompt === "string" ? prompt : "",
   );
 
   // track whether we've already notified parent that the prompt was touched
@@ -125,7 +125,7 @@ export default function PromptInput({
         htmlFor="reminder-prompt"
         className="block text-sm font-medium text-gray-700 dark:text-gray-200"
       >
-        What do you want to create or get reminded of next?
+        What should RemindrAI prepare for you next ?
       </label>
 
       <textarea

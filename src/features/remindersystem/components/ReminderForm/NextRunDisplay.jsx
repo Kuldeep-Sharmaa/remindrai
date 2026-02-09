@@ -1,19 +1,9 @@
-// ============================================================================
-// 📁 NextRunDisplay.jsx (Enhanced — Smart Schedule Awareness with Icons)
-// ----------------------------------------------------------------------------
-// - Professional UI: uses Lucide icons instead of emojis
-// - Adapts tone for "ai" or "simple" reminders with clean, minimal design
-// - Fully accessible (aria-live)
-// - Feels like Linear or Notion AI-level UX
-// ----------------------------------------------------------------------------
-
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
-import { Bot, Bell, Hourglass, CalendarDays } from "lucide-react"; // ✅ Professional icons
+import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
 
 export default function NextRunDisplay({
   nextRunHuman,
-  isFormValid,
   isNextRunValid,
   reminderMode = "ai",
   schedule = {},
@@ -22,75 +12,41 @@ export default function NextRunDisplay({
     if (isNextRunValid && nextRunHuman) return nextRunHuman;
 
     if (!schedule?.timeOfDay && !schedule?.time)
-      return "Waiting for a valid time...";
+      return "Select a time to preview.";
     if (schedule?.kind === "one_time" && !schedule?.date)
-      return "Pick a date to see your next run time.";
+      return "Select a date to preview.";
 
-    return "Waiting for a valid schedule...";
+    return null;
   }, [isNextRunValid, nextRunHuman, schedule]);
 
-  const shouldShow =
-    (isNextRunValid && nextRunHuman) ||
-    (!isNextRunValid && displayText !== "Waiting for a valid schedule...");
-
-  if (!shouldShow) return null;
-
-  // ✅ Professional titles with icons
-  const title = (() => {
-    const waiting = !isNextRunValid;
-
-    if (reminderMode === "ai") {
-      return waiting ? (
-        <>
-          <Hourglass className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-          <Bot className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-          <span>AI Reminder preview — waiting for your schedule</span>
-        </>
-      ) : (
-        <>
-          <Bot className="inline-block w-4 h-4 mr-1 text-indigo-600" />
-
-          <span>
-            Your AI will deliver a fresh, on-brand draft — right on time
-          </span>
-        </>
-      );
-    } else {
-      return waiting ? (
-        <>
-          <Hourglass className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-          <Bell className="inline-block w-4 h-4 mr-1 text-indigo-500" />
-          <span>Reminder preview — waiting for your schedule</span>
-        </>
-      ) : (
-        <>
-          <Bell className="inline-block w-4 h-4 mr-1 text-indigo-600" />
-
-          <span>Your reminder is set — we’ll make sure you don’t miss it.</span>
-        </>
-      );
-    }
-  })();
+  if (!displayText) return null;
 
   const isWaiting = !isNextRunValid;
 
+  const title = isWaiting
+    ? "Choose a time to continue."
+    : reminderMode === "ai"
+      ? "Your next draft will be ready:"
+      : "Your note will be there at:";
+
+  const Icon = reminderMode === "ai" ? HiOutlineCpuChip : HiOutlineBookmark;
+
   return (
     <div
-      className={`mt-4 p-3 rounded-lg border transition-all duration-200 ${
+      className={`mt-4 p-3 rounded-lg border transition-colors ${
         isWaiting
           ? "bg-gray-50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700"
-          : "bg-indigo-50 dark:bg-gray-700/50 border-indigo-200 dark:border-gray-700"
+          : "bg-brand/10 border-brand/30"
       }`}
       role="status"
       aria-live="polite"
     >
       <p
-        className={`flex items-center gap-1 text-sm font-medium ${
-          isWaiting
-            ? "text-gray-600 dark:text-gray-400"
-            : "text-indigo-700 dark:text-indigo-300"
+        className={`flex items-center gap-2 text-sm font-medium ${
+          isWaiting ? "text-gray-600 dark:text-gray-400" : "text-brand"
         }`}
       >
+        <Icon className="w-4 h-4" />
         {title}
       </p>
 
@@ -109,7 +65,6 @@ export default function NextRunDisplay({
 
 NextRunDisplay.propTypes = {
   nextRunHuman: PropTypes.string,
-  isFormValid: PropTypes.bool,
   isNextRunValid: PropTypes.bool,
   reminderMode: PropTypes.oneOf(["ai", "simple"]),
   schedule: PropTypes.object,

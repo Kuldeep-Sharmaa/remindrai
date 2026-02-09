@@ -1,12 +1,6 @@
-// ReminderType.jsx
-// Minimal, OpenAI-style, mobile-first selector.
-// - Single column on mobile, two columns on sm+
-// - Subtle selection treatment (soft tint + outline), no heavy shadows
-// - Clear typography, roomy taps, accessible keyboard support
-// - onOpenLearnMore(mode) callback for Learn more links
-
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
 
 export default function ReminderType({
   value = "ai",
@@ -17,163 +11,82 @@ export default function ReminderType({
 }) {
   const select = useCallback(
     (next) => {
-      if (disabled) return;
-      if (next === value) return;
-      if (typeof onChange === "function") onChange(next);
+      if (disabled || next === value) return;
+      onChange?.(next);
     },
-    [value, onChange, disabled]
-  );
-
-  const handleKey = useCallback(
-    (e) => {
-      if (disabled) return;
-      const key = e.key;
-      if (key === "ArrowLeft" || key === "ArrowUp") {
-        e.preventDefault();
-        select("ai");
-      } else if (key === "ArrowRight" || key === "ArrowDown") {
-        e.preventDefault();
-        select("simple");
-      } else if (key === " " || key === "Enter") {
-        e.preventDefault();
-        select(value === "ai" ? "simple" : "ai");
-      }
-    },
-    [select, value, disabled]
+    [value, onChange, disabled],
   );
 
   const optionBase =
-    "w-full text-left rounded-xl p-4 border transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400";
-  const optionIdle =
-    "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900";
-  const optionActive = "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/40";
+    "w-full text-left rounded-xl p-4 border transition-colors focus:outline-none focus:ring-2 focus:ring-brand";
+  const optionIdle = "border-border bg-white dark:bg-bgDark";
+  const optionActive = "border-brand bg-brand/10";
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <div className="flex items-baseline justify-between">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-          Choose how you want RemindrAI to assist
-        </h3>
-      </div>
+      <h3 className="text-sm font-medium text-textLight dark:text-textDark">
+        Choose how you want RemindrAI to assist
+      </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* AI */}
+        {/* AI Draft */}
         <button
           type="button"
           role="radio"
           aria-checked={value === "ai"}
-          aria-label="AI-powered reminder"
           onClick={() => select("ai")}
-          onKeyDown={handleKey}
           disabled={disabled}
           className={`${optionBase} ${
             value === "ai" ? optionActive : optionIdle
-          } ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+          } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-9 h-9 rounded-md flex items-center justify-center bg-gradient-to-br from-indigo-600 to-indigo-500 text-white text-base font-semibold">
-              🤖
-            </div>
+            <HiOutlineCpuChip className="w-6 h-6 text-brand mt-0.5" />
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                  AI-Powered Draft
-                </div>
-                <div
-                  className={`text-xs font-medium ${
-                    value === "ai" ? "text-indigo-600" : "text-gray-400"
-                  }`}
-                >
+            <div className="flex-1">
+              <div className="flex justify-between">
+                <span className="text-sm font-semibold text-textLight dark:text-textDark">
+                  AI Draft
+                </span>
+                <span className="text-xs text-muted">
                   {value === "ai" ? "Selected" : "Choose"}
-                </div>
-              </div>
-
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                writes and delivers a fresh, on-brand draft right when it’s time
-                to post.
-              </p>
-
-              {/* FIX: Replaced nested <button> with accessible <span> */}
-              <div className="mt-3">
-                <span
-                  role="link"
-                  tabIndex={0}
-                  onClick={(ev) => {
-                    ev.stopPropagation(); // Prevents radio button click
-                    onOpenLearnMore("ai");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      onOpenLearnMore("ai");
-                    }
-                  }}
-                  className="text-xs font-medium text-indigo-600 dark:text-indigo-300 hover:underline focus:outline-none cursor-pointer"
-                >
-                  Learn more
                 </span>
               </div>
+
+              <p className="mt-1 text-xs text-muted">
+                Prepares and delivers an on-brand draft when it’s needed.
+              </p>
             </div>
           </div>
         </button>
 
-        {/* Simple */}
+        {/* Simple Note */}
         <button
           type="button"
           role="radio"
           aria-checked={value === "simple"}
-          aria-label="Simple reminder"
           onClick={() => select("simple")}
-          onKeyDown={handleKey}
           disabled={disabled}
           className={`${optionBase} ${
             value === "simple" ? optionActive : optionIdle
-          } ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+          } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-9 h-9 rounded-md flex items-center justify-center bg-gray-700 text-white text-base font-semibold">
-              🔔
-            </div>
+            <HiOutlineBookmark className="w-6 h-6 text-muted mt-0.5" />
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Simple Draft
-                </div>
-                <div
-                  className={`text-xs font-medium ${
-                    value === "simple" ? "text-indigo-600" : "text-gray-400"
-                  }`}
-                >
+            <div className="flex-1">
+              <div className="flex justify-between">
+                <span className="text-sm font-semibold text-textLight dark:text-textDark">
+                  Simple Note
+                </span>
+                <span className="text-xs text-muted">
                   {value === "simple" ? "Selected" : "Choose"}
-                </div>
-              </div>
-
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                Just need a gentle nudge? I’ll remind you to stay consistent
-              </p>
-
-              {/* FIX: Replaced nested <button> with accessible <span> */}
-              <div className="mt-3">
-                <span
-                  role="link"
-                  tabIndex={0}
-                  onClick={(ev) => {
-                    ev.stopPropagation(); // Prevents radio button click
-                    onOpenLearnMore("simple");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      onOpenLearnMore("simple");
-                    }
-                  }}
-                  className="text-xs font-medium text-indigo-600 dark:text-indigo-300 hover:underline focus:outline-none cursor-pointer"
-                >
-                  Learn more
                 </span>
               </div>
+
+              <p className="mt-1 text-xs text-muted">
+                Keeps an idea ready so you can return to it anytime.
+              </p>
             </div>
           </div>
         </button>
