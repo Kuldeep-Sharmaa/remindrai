@@ -7,7 +7,7 @@
  * Core rules:
  * - Intent is immutable (no updates)
  * - History is permanent (no deletions)
- * - User can only create or disable
+ * - User can only create or delete
  */
 
 import {
@@ -155,10 +155,10 @@ export async function updateReminder() {
 }
 
 /**
- * Disable reminder via backend callable.
+ * delete reminder via backend callable.
  * Returns deletion status from backend.
  */
-export async function disableReminder(uid, reminderId) {
+export async function deleteReminder(uid, reminderId) {
   if (!uid || !reminderId) {
     throw new Error("uid and reminderId are required");
   }
@@ -167,7 +167,7 @@ export async function disableReminder(uid, reminderId) {
     const res = await deleteReminderCallable({ reminderId });
     return res.data; // { status: "deleted" | "already_deleted" }
   } catch (err) {
-    console.error("disableReminder failed:", err);
+    console.error("deleteReminder failed:", err);
     throw err;
   }
 }
@@ -210,7 +210,7 @@ export function subscribeToReminders(uid, callback) {
 const defaultExport = {
   addReminder,
   updateReminder,
-  disableReminder,
+  deleteReminder,
   getReminder,
   listUserReminders,
   subscribeToReminders,
