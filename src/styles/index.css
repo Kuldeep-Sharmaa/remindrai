@@ -89,7 +89,8 @@
     color-scheme: light; /* Helps browser optimize text rendering */
 
     /* Enable global transition for smooth theme changes */
-    transition: background-color var(--theme-transition-duration)
+    transition:
+      background-color var(--theme-transition-duration)
         var(--theme-transition-easing),
       color var(--theme-transition-duration) var(--theme-transition-easing);
   }
@@ -738,71 +739,24 @@
   animation-duration: 0s !important;
 }
 
-/* EMPATY DRAFT */
+/* EMPATY STATE */
 
-/* Empty state: force Lottie/SVG to monochrome / neutral tone */
 .empty-eyes-animation,
 .empty-eyes-animation svg,
 .empty-eyes-animation path,
 .empty-eyes-animation g {
   filter: grayscale(1) saturate(0) opacity(0.95) !important;
-  /* Optionally adjust brightness/contrast if you want slightly lighter/darker: */
   filter: grayscale(1) saturate(0) contrast(0.95) brightness(0.98);
   transition: filter 180ms ease;
   color: inherit;
-  fill: currentColor; /* sometimes helps if the Lottie respects currentColor */
+  fill: currentColor;
 }
-
-/* ---------------------------------------------------------------------------
-  Hot-toast: force fixed top-center wrapper and polished toast animations
-  --------------------------------------------------------------------------- */
-/* Toast wrapper pedestrian override (we'll mutate wrapper inline too) */
-#_rht_toaster > div[style*="justify-content: center"] {
-  position: fixed !important;
-  top: 76px !important; /* slightly below topbar */
-  left: 50% !important; /* we will adjust translateX from JS */
-  transform: translateX(-50%) !important;
-  right: auto !important;
-  display: flex !important;
-  justify-content: center !important;
-  z-index: 99999 !important;
-  pointer-events: none !important;
-  padding: 0 !important;
-}
-
-/* Make card feel lighter and anchored */
-#_rht_toaster .demo-toast-root {
-  pointer-events: auto !important;
-  max-width: 520px !important; /* ensure toast is narrow */
-  margin: 0 8px !important; /* small outer margin */
-  border-radius: 12px !important;
-  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.6), 0 6px 24px rgba(2, 6, 23, 0.36);
-  backdrop-filter: blur(6px);
-}
-
-/* Snappier notification animation */
-.demo-toast-enter {
-  animation: notif-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-}
-.demo-toast-leave {
-  animation: notif-out 220ms ease-in forwards !important;
-}
-@keyframes notif-in {
-  0% {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.995);
-  }
-  60% {
-    transform: translateY(2px) scale(1.01);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
-}
-@keyframes notif-out {
-  to {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.995);
-  }
+.deliveries-empty-animation,
+.deliveries-empty-animation svg,
+.deliveries-empty-animation path,
+.deliveries-empty-animation g {
+  filter: grayscale(1) saturate(0) opacity(0.95) contrast(0.95) brightness(0.98);
+  transition: filter 180ms ease;
+  color: inherit;
+  fill: currentColor;
 }
