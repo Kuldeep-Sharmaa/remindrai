@@ -1,40 +1,92 @@
-// DraftListItem.
 import React from "react";
 import { motion } from "framer-motion";
-
-export default function DraftListItem({ draft, onClick }) {
+import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
+export default function DraftListItem({
+  draft,
+  reminderTitle,
+  reminderType,
+  isUnread,
+  onClick,
+}) {
   const timestamp = draft.createdAt?.toDate?.();
-  const preview = draft.content?.slice(0, 180) || "";
-  const hasMore = draft.content?.length > 180;
+  const formatTime = (date) => {
+    if (!date) return "";
+
+    const now = new Date();
+    const diff = now - date;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+
+    // Today times are most actionable
+    if (days === 0) {
+      return date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    }
+
+    if (days === 1) return "Yesterday";
+
+    if (days < 7) {
+      return date.toLocaleDateString("en-US", { weekday: "short" });
+    }
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const preview = draft.content?.slice(0, 100) || "Content ready";
+  const hasMore = draft.content?.length > 100;
+
+  const isAiDraft = reminderType === "ai";
+  const ReminderIcon = isAiDraft ? HiOutlineCpuChip : HiOutlineBookmark;
 
   return (
     <motion.button
       onClick={onClick}
-      className="w-full text-left bg-bgLight dark:bg-bgDark border border-border/30 
-                 rounded-lg p-5 hover:border-brand/40 transition-all duration-200
-                 group cursor-pointer"
+      className={`w-full text-left p-4 rounded-xl border transition-all
+                  hover:border-brand/40 hover:bg-brand/5
+                  ${
+                    isUnread
+                      ? "border-brand/30 bg-brand/5"
+                      : "border-border/20 bg-transparent"
+                  }`}
       whileHover={{ scale: 1.005 }}
-      whileTap={{ scale: 0.998 }}
+      whileTap={{ scale: 0.995 }}
     >
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <time className="text-xs font-inter text-muted">
-          {timestamp
-            ? new Intl.DateTimeFormat("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              }).format(timestamp)
-            : "Unknown"}
-        </time>
-        <div className="text-xs text-brand opacity-0 group-hover:opacity-100 transition-opacity">
-          View →
+      <div className="flex items-start gap-3">
+        <div
+          className={`mt-1 flex-shrink-0 ${isAiDraft ? "text-brand" : "text-muted"}`}
+        >
+          <ReminderIcon className="w-5 h-5" />
         </div>
-      </div>
 
-      <div className="text-textLight dark:text-textDark leading-relaxed">
-        {preview}
-        {hasMore && <span className="text-muted ml-1">...</span>}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {isUnread && (
+                <div
+                  className="w-2 h-2 rounded-full bg-brand flex-shrink-0"
+                  aria-label="Unread"
+                />
+              )}
+              <h3 className="font-grotesk font-semibold text-base text-textLight dark:text-textDark truncate">
+                {reminderTitle}
+              </h3>
+            </div>
+
+            <time className="text-xs text-muted whitespace-nowrap flex-shrink-0 mt-0.5">
+              {formatTime(timestamp)}
+            </time>
+          </div>
+
+          <p className="text-sm text-muted line-clamp-2 leading-relaxed">
+            {preview}
+            {hasMore && "..."}
+          </p>
+        </div>
       </div>
     </motion.button>
   );
