@@ -1,4 +1,10 @@
-// ReminderListItem.jsx — single-badge, meaningful title, anchor-rich preview
+/**
+ * ReminderListItem.jsx
+ *
+ * Individual reminder card with AI/Simple type indicators.
+ * Shows next run time, frequency, and delete confirmation.
+ */
+
 import React, {
   memo,
   useMemo,
@@ -10,11 +16,12 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { TrashIcon, EyeIcon, BoltIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EyeIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
 import { DateTime } from "luxon";
 import clsx from "clsx";
 
-/* Helpers */
+// Convert various timestamp formats to ISO string
 const toIsoString = (v) => {
   if (!v) return null;
   if (typeof v === "string") return v;
@@ -27,7 +34,7 @@ const formatNextRun = (isoString, timezone) => {
   if (!isoString) return "Not scheduled";
   try {
     const dt = DateTime.fromISO(isoString, { zone: "utc" }).setZone(
-      timezone || DateTime.local().zoneName
+      timezone || DateTime.local().zoneName,
     );
     return dt.toFormat("MMM d • h:mm a");
   } catch {
@@ -35,30 +42,18 @@ const formatNextRun = (isoString, timezone) => {
   }
 };
 
-const freqLabel = (reminder = {}, schedule = {}) => {
-  const raw =
-    reminder?.frequency ||
-    schedule?.frequency ||
-    schedule?.kind ||
-    (schedule?.rule && schedule.rule.frequency) ||
-    schedule?.recurrence ||
-    null;
-  if (!raw) return "One-time";
+const freqLabel = (reminder = {}) => {
+  const raw = reminder?.frequency || "one_time";
   const map = {
     one_time: "One-time",
-    onetime: "One-time",
-    oneTime: "One-time",
     daily: "Daily",
     weekly: "Weekly",
-    monthly: "Monthly",
-    hourly: "Hourly",
   };
-  const key = String(raw).toLowerCase();
-  return map[key] || String(raw).replace(/_/g, " ");
+  return map[String(raw).toLowerCase()] || String(raw).replace(/_/g, " ");
 };
 
-/* Confirm portal (with Escape & outside-click handling) */
-function ConfirmPortal({ open, anchorRect, onConfirm, onCancel }) {
+// Delete confirmation dialog
+function ConfirmDeletePortal({ open, anchorRect, onConfirm, onCancel }) {
   const popMotion = {
     initial: { opacity: 0, y: -6, scale: 0.98 },
     animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.12 } },
@@ -68,12 +63,10 @@ function ConfirmPortal({ open, anchorRect, onConfirm, onCancel }) {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => {
-      if (e.key === "Escape") onCancel?.();
-    };
-    const onClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) onCancel?.();
-    };
+    const onKey = (e) => (e.key === "Escape" ? onCancel?.() : null);
+    const onClick = (e) =>
+      ref.current && !ref.current.contains(e.target) ? onCancel?.() : null;
+
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousedown", onClick);
     return () => {
@@ -83,6 +76,7 @@ function ConfirmPortal({ open, anchorRect, onConfirm, onCancel }) {
   }, [open, onCancel]);
 
   if (!open || !anchorRect) return null;
+
   const padding = 8;
   const approxHeight = 110;
   const aboveTop = anchorRect.top - approxHeight - padding;
@@ -97,8 +91,7 @@ function ConfirmPortal({ open, anchorRect, onConfirm, onCancel }) {
       variants={popMotion}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="confirm-delete-title"
-      className="z-[9999] bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg"
+      className="z-[9999] bg-bgLight dark:bg-bgDark border border-border rounded-lg shadow-lg"
       style={{
         position: "fixed",
         top: Math.max(8, placeTop),
@@ -106,42 +99,38 @@ function ConfirmPortal({ open, anchorRect, onConfirm, onCancel }) {
         width: 280,
       }}
     >
-      <div ref={ref} className="p-3 text-sm text-gray-800 dark:text-gray-100">
-        <div id="confirm-delete-title" className="font-medium mb-1">
-          Delete Task?
+      <div ref={ref} className="p-3 text-sm text-textLight dark:text-textDark">
+        <div className="font-medium mb-1">Stop future deliveries?</div>
+
+        <div className="text-xs text-muted mb-3">
+          RemindrAI will no longer create or deliver new drafts for this.
+          <div className="text-muted mt-1">
+            Existing drafts will remain accessible, but no new ones will be
+            generated or sent. You can always create a new Prompt later.
+          </div>
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          This action cannot be undone.
-        </div>
+
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
-            className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+            className="px-2 py-1 text-xs rounded-md bg-bgLight dark:bg-bgDark border border-border text-textLight dark:text-textDark hover:brightness-95"
           >
             Cancel
           </button>
+
           <button
             onClick={onConfirm}
-            className="px-2 py-1 text-xs rounded-md bg-red-600 text-white hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+            className="px-2 py-1 text-xs rounded-md bg-brand text-white hover:brightness-110"
           >
-            Delete
+            Stop deliveries
           </button>
         </div>
       </div>
     </motion.div>,
-    document.body
+    document.body,
   );
 }
 
-/* Motion presets */
-const cardMotion = {
-  initial: { opacity: 0, y: -6, scale: 0.995 },
-  animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.14 } },
-  exit: { opacity: 0, y: 8, scale: 0.995, transition: { duration: 0.12 } },
-};
-const hoverMotion = { rest: { scale: 1 }, hover: { scale: 1.01 } };
-
-/* Component */
 const ReminderListItem = ({ reminder, onView, onDelete }) => {
   const {
     id,
@@ -156,237 +145,179 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
   const tz = schedule?.timezone || DateTime.local().zoneName;
   const nextIso = toIsoString(nextRunAtUTC);
 
-  // Content fields
-  const explicitTitle =
-    content?.title && String(content.title).trim().length > 0
-      ? String(content.title).trim()
-      : null;
-  const message = String(content?.message || content?.aiPrompt || "").trim();
-  const role = content?.role || "";
-  const tone = content?.tone || "";
-  const platform = content?.platform || "";
+  const isPendingBackend = enabled === true && !nextIso;
 
-  // --- Title selection
-
-  // --- aiPreviewSentence: keep your natural anchors ("I'm a...", "I prefer...", "for/on...") and connect to user prompt
+  // AI content preview
   const aiPreviewSentence = useMemo(() => {
     if (!isAI) return null;
-
-    // Build anchor pieces with natural-language grammar (preserve your original phrasing)
     const parts = [];
-    if (role) parts.push(`I'm a ${role}`);
-    if (tone) parts.push(`I prefer a ${tone} tone`);
-    // use "on" for platform reads more natural in sentence: "for LinkedIn" also works — use "on"
-    if (platform) parts.push(`on ${platform}`);
+    if (content.role) parts.push(`I'm a ${content.role}`);
+    if (content.tone) parts.push(`I prefer a ${content.tone} tone`);
+    if (content.platform) parts.push(`on ${content.platform}`);
+    const anchors = parts.join(". ");
+    const body =
+      String(content?.aiPrompt || "").trim() || "No prompt provided.";
+    return anchors ? `${anchors} — ${body.slice(0, 240)}…` : body.slice(0, 240);
+  }, [isAI, content]);
 
-    // Combine anchors into one readable clause using sentences (preserves your style)
-    const anchorsClause = parts.length ? parts.join(". ") : "";
-
-    // Body content (the actual message/prompt) — prefer explicit title if present
-    const body = message || explicitTitle || "No prompt provided.";
-    const truncatedBody =
-      body.length > 240 ? body.slice(0, 240).trim() + "…" : body;
-
-    // Final sentence: anchors (if any) + em dash + body.
-    // Example: "I'm a Founder. I prefer a casual tone. on LinkedIn — Write a short motivational post..."
-    if (anchorsClause) {
-      // ensure anchorsClause ends without extra punctuation
-      const normalizedAnchors = anchorsClause.replace(/\s+$/g, "");
-      return `${normalizedAnchors} — ${truncatedBody}`;
-    }
-
-    // If no anchors, just return the body
-    return truncatedBody;
-  }, [isAI, role, tone, platform, message, explicitTitle]);
-
-  // For simple reminders show the message plainly under title
+  // Simple content preview
   const simplePreview = useMemo(() => {
     if (isAI) return null;
-    if (message)
-      return message.length > 200
-        ? message.slice(0, 200).trim() + "…"
-        : message;
-    return explicitTitle || "No message provided.";
-  }, [isAI, message, explicitTitle]);
+    const message = String(content?.message || "").trim();
+    return message.length > 200
+      ? message.slice(0, 200) + "…"
+      : message || "No message.";
+  }, [isAI, content]);
 
-  const nextLabel = formatNextRun(nextIso, tz);
-  const frequencyLabel = freqLabel(reminder, schedule);
-
-  /* delete confirm */
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const deleteBtnRef = useRef(null);
+  const DeleteBtnRef = useRef(null);
   const [anchorRect, setAnchorRect] = useState(null);
 
   const handleView = useCallback(
     (e) => {
-      e?.stopPropagation?.();
-      if (typeof onView === "function") onView(id);
+      e?.stopPropagation();
+      if (onView) onView(id);
     },
-    [id, onView]
+    [id, onView],
   );
-
-  const handleCardClick = useCallback(() => {
-    if (typeof onView === "function") onView(id);
-  }, [id, onView]);
-
-  const stop = useCallback((e) => e?.stopPropagation?.(), []);
 
   const handleDeleteClick = useCallback(
     (e) => {
-      stop(e);
-      const rect = deleteBtnRef.current?.getBoundingClientRect?.();
-      setAnchorRect(rect || null);
+      e?.stopPropagation();
+      if (!enabled) return;
+      setAnchorRect(DeleteBtnRef.current?.getBoundingClientRect() || null);
       setConfirmOpen(true);
     },
-    [stop]
+    [enabled],
   );
 
   const confirmDelete = useCallback(
     (e) => {
-      stop(e);
+      e?.stopPropagation();
       setConfirmOpen(false);
-      setAnchorRect(null);
-      if (typeof onDelete === "function") onDelete(id);
+      if (onDelete) onDelete(id);
     },
-    [id, onDelete, stop]
+    [id, onDelete],
   );
 
-  const cancelDelete = useCallback(
-    (e) => {
-      stop(e);
-      setConfirmOpen(false);
-      setAnchorRect(null);
-    },
-    [stop]
-  );
+  const cancelDelete = useCallback((e) => {
+    e?.stopPropagation();
+    setConfirmOpen(false);
+  }, []);
 
+  // Update anchor position on scroll/resize
   useLayoutEffect(() => {
     if (!confirmOpen) return;
-    const onResize = () => {
-      if (deleteBtnRef.current) {
-        setAnchorRect(deleteBtnRef.current.getBoundingClientRect());
-      }
-    };
-    const onScroll = () => {
-      if (deleteBtnRef.current) {
-        setAnchorRect(deleteBtnRef.current.getBoundingClientRect());
-      }
-    };
-    window.addEventListener("resize", onResize);
-    window.addEventListener("scroll", onScroll, true);
+    const updateRect = () =>
+      setAnchorRect(DeleteBtnRef.current?.getBoundingClientRect() || null);
+    window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateRect, true);
     return () => {
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateRect, true);
     };
   }, [confirmOpen]);
 
-  const badgeText = isAI ? "Brand consistent" : "Basic Task";
-
   return (
-    <>
-      <motion.article
-        layout
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={cardMotion}
-        className={clsx(
-          "rounded-xl overflow-visible w-full",
-          !enabled && "opacity-70"
-        )}
-        onClick={handleCardClick}
-        role="listitem"
-        tabIndex={0}
-        aria-labelledby={`reminder-${id}-title`}
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      className={clsx(
+        "rounded-xl w-full",
+        !enabled && "opacity-60 grayscale-[0.5]",
+      )}
+      onClick={() => enabled && onView?.(id)}
+      role="listitem"
+    >
+      <div
+        className="bg-bgLight  dark:bg-gray-900 border border-border rounded-xl px-4 sm:px-5 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-start gap-4 transition-shadow hover:shadow-sm"
+        style={{ cursor: enabled ? "pointer" : "default" }}
       >
-        <motion.div
-          variants={hoverMotion}
-          initial="rest"
-          whileHover="hover"
-          whileTap="rest"
-          className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-5 py-5 flex flex-col sm:flex-row sm:items-start gap-4"
-          style={{ cursor: "pointer" }}
-        >
-          {/* Left: badge + title + preview */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <span
-                    className={clsx(
-                      "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold select-none",
-                      isAI
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                    )}
-                    aria-hidden
-                  >
-                    <BoltIcon
-                      className={clsx(
-                        "w-4 h-4",
-                        isAI ? "text-white" : "text-blue-600"
-                      )}
-                    />
-                    <span className="truncate">{badgeText}</span>
-                  </span>
-                </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={clsx(
+                "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold",
+                isAI
+                  ? "bg-brand text-white"
+                  : "bg-bgLight dark:bg-bgDark border border-border text-muted",
+              )}
+            >
+              {isAI ? (
+                <HiOutlineCpuChip className="w-4 h-4" />
+              ) : (
+                <HiOutlineBookmark className="w-4 h-4" />
+              )}
+              {isAI ? "AI Draft" : "Simple Note"}
+            </span>
 
-                <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
-                  {isAI ? aiPreviewSentence : simplePreview}
-                </div>
-              </div>
-            </div>
+            {isPendingBackend && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-brand/10 text-brand border border-brand/20">
+                <ClockIcon className="w-3.5 h-3.5" />
+                Preparing
+              </span>
+            )}
           </div>
 
-          {/* Right: time, freq, actions */}
-          <div className="flex flex-col items-end justify-between gap-3 sm:gap-0 min-w-[160px]">
-            <div className="text-right">
-              <div className="text-sm sm:text-base text-gray-800 dark:text-gray-100 font-medium">
-                Next Run: {nextLabel}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Frequency: {frequencyLabel}
-              </div>
-            </div>
+          <div className="text-sm sm:text-base text-textLight dark:text-textDark mt-3 line-clamp-3 ">
+            {isAI ? aiPreviewSentence : simplePreview}
+          </div>
+        </div>
 
-            <div className="flex items-center gap-2 mt-2 sm:mt-0">
+        <div className="flex flex-col items-end justify-between min-w-[160px] sm:min-w-[180px]">
+          <div className="text-right">
+            <div className="text-sm font-medium text-textLight dark:text-textDark">
+              {!enabled
+                ? "Completed"
+                : isPendingBackend
+                  ? "Setting up"
+                  : `Delivers on: ${formatNextRun(nextIso, tz)}`}
+            </div>
+            <div className="text-xs text-muted mt-1">{freqLabel(reminder)}</div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-3 sm:mt-4">
+            <button
+              type="button"
+              onClick={handleView}
+              title="View details"
+              className="p-2 rounded-md hover:bg-bgLight/50 dark:hover:bg-bgDark/50 border border-transparent hover:border-border transition"
+            >
+              <EyeIcon className="w-5 h-5 text-muted" />
+            </button>
+
+            <div className="relative">
               <button
+                ref={DeleteBtnRef}
                 type="button"
-                onClick={(e) => {
-                  stop(e);
-                  handleView(e);
-                }}
-                title="View reminder"
-                aria-label="View reminder details"
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+                onClick={handleDeleteClick}
+                title={enabled ? "Stop future deliveries" : "Delivery stopped"}
+                aria-label={
+                  enabled ? "Stop future deliveries" : "Delivery stopped"
+                }
+                className={clsx(
+                  "p-2 rounded-md transition",
+                  enabled
+                    ? "hover:bg-brand/10 text-brand border border-transparent hover:border-brand/20"
+                    : "opacity-30 cursor-not-allowed text-muted",
+                )}
               >
-                <EyeIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <TrashIcon className="w-5 h-5" />
               </button>
 
-              <div className="relative">
-                <button
-                  ref={deleteBtnRef}
-                  type="button"
-                  onClick={handleDeleteClick}
-                  title="Delete reminder"
-                  aria-label="Delete reminder"
-                  className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
-                >
-                  <TrashIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
-                </button>
-
-                <ConfirmPortal
-                  open={confirmOpen}
-                  anchorRect={anchorRect}
-                  onConfirm={confirmDelete}
-                  onCancel={cancelDelete}
-                />
-              </div>
+              <ConfirmDeletePortal
+                open={confirmOpen}
+                anchorRect={anchorRect}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+              />
             </div>
           </div>
-        </motion.div>
-      </motion.article>
-    </>
+        </div>
+      </div>
+    </motion.article>
   );
 };
 
