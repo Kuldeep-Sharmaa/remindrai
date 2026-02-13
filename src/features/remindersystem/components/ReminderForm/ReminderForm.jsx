@@ -156,8 +156,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               Let <span className="text-brand">RemindrAI</span> create for you
             </h1>
             <p className="text-sm sm:text-base text-muted mt-2">
-              Consistency powered by AI — It prepares and delivers what you
-              need, right on time.
+              It prepares your next draft and has it ready when you need it.
             </p>
           </div>
 

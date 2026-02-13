@@ -24,7 +24,7 @@ export default function TimeSelector({
   const [date, setDate] = useState(schedule?.date || "");
   const [time, setTime] = useState(schedule?.timeOfDay || schedule?.time || "");
   const [weekdays, setWeekdays] = useState(
-    Array.isArray(schedule?.weekDays) ? schedule.weekDays : []
+    Array.isArray(schedule?.weekDays) ? schedule.weekDays : [],
   );
 
   // 1. Determine & normalize Timezone (Memoized for efficiency)
@@ -67,7 +67,7 @@ export default function TimeSelector({
       "[TimeSelector] normalized tz ->",
       tz,
       "raw schedule.timezone:",
-      schedule?.timezone
+      schedule?.timezone,
     );
   }
 
@@ -109,7 +109,7 @@ export default function TimeSelector({
         Object.keys(payload).reduce((acc, k) => {
           if (payload[k] !== undefined) acc[k] = payload[k];
           return acc;
-        }, {})
+        }, {}),
       );
     // Intentionally exclude `schedule` to avoid render loops
     // onChange stable (parent hook should be memoized)
@@ -140,9 +140,9 @@ export default function TimeSelector({
     error === null || typeof error === "undefined"
       ? null
       : typeof error === "string"
-      ? error
-      : // if object, attempt to extract message or stringify
-        error?.message || JSON.stringify(error);
+        ? error
+        : // if object, attempt to extract message or stringify
+          error?.message || JSON.stringify(error);
 
   return (
     <div className="space-y-4">
@@ -153,11 +153,11 @@ export default function TimeSelector({
             htmlFor="remindr-date"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Date
+            Delivery date
           </label>
           <input
             id="remindr-date"
-            type="date"
+            type="Delivery date"
             value={date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
@@ -175,7 +175,7 @@ export default function TimeSelector({
           htmlFor="remindr-time"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
         >
-          Time ({tz})
+          Delivery time ({tz})
         </label>
         <input
           id="remindr-time"
@@ -202,7 +202,7 @@ export default function TimeSelector({
       {frequency === "weekly" && (
         <div className="pt-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Days of the Week
+            Delivery days
           </label>
           <div className="flex gap-2 flex-wrap justify-start">
             {ISO_WEEKDAY_LABELS.map((label, i) => {
@@ -222,8 +222,8 @@ export default function TimeSelector({
                       isSelected
                         ? "bg-indigo-600 text-white border-indigo-700 shadow-md"
                         : isDisabled
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed opacity-60"
-                        : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed opacity-60"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }
                   `}
                   title={
@@ -239,7 +239,7 @@ export default function TimeSelector({
             })}
           </div>
           <div className="text-xs text-gray-500 mt-2">
-            Recurs weekly on selected days (Max {MAX_WEEKDAYS} days).
+            AI prepares a new draft on these days (Max {MAX_WEEKDAYS} days).
           </div>
         </div>
       )}

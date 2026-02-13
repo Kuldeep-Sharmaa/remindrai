@@ -24,11 +24,10 @@ export default function NextRunDisplay({
   const isWaiting = !isNextRunValid;
 
   const title = isWaiting
-    ? "Choose a time to continue."
+    ? "Choose when this should continue."
     : reminderMode === "ai"
-      ? "Your next draft will be ready:"
-      : "Your note will be there at:";
-
+      ? "Your next draft will be ready"
+      : "Your note will be ready";
   const Icon = reminderMode === "ai" ? HiOutlineCpuChip : HiOutlineBookmark;
 
   return (

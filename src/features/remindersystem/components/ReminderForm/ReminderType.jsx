@@ -25,7 +25,7 @@ export default function ReminderType({
   return (
     <div className={`space-y-3 ${className}`}>
       <h3 className="text-sm font-medium text-textLight dark:text-textDark">
-        Choose how you want RemindrAI to assist
+        What should we prepare next?
       </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -54,7 +54,7 @@ export default function ReminderType({
               </div>
 
               <p className="mt-1 text-xs text-muted">
-                Prepares and delivers an on-brand draft when it’s needed.
+                Prepares an on-brand draft and brings it to you when it’s ready.
               </p>
             </div>
           </div>

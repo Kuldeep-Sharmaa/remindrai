@@ -1,21 +1,3 @@
-// ============================================================================
-// 📁 FrequencySelector.jsx
-// ----------------------------------------------------------------------------
-// 🔹 Purpose:
-//   - Lets user select how often a reminder repeats (One-time / Daily / Weekly)
-//   - Accessible segmented control with keyboard navigation
-//   - Emits selected frequency to parent (form) for logic updates
-//
-// 🔹 Connected to:
-//   - useReminderForm → frequency, setFrequency, setSchedule
-//   - TimeSelector → determines what date/time fields are visible
-// ----------------------------------------------------------------------------
-// 🔹 Inside this component:
-//   - Frequency buttons (One-time, Daily, Weekly)
-//   - Keyboard navigation (Left / Right)
-//   - ARIA accessibility attributes
-// ============================================================================
-
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 
@@ -31,7 +13,7 @@ export default function FrequencySelector({ value, onChange }) {
     (id) => {
       onChange(id); // Parent handles schedule updates
     },
-    [onChange]
+    [onChange],
   );
 
   // Handles keyboard navigation between options
@@ -52,13 +34,13 @@ export default function FrequencySelector({ value, onChange }) {
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium text-gray-700 dark:text-gray-200">
-        Frequency
+        Tell us how often to prepare this
       </legend>
 
       <div
         className="flex gap-2"
         role="tablist"
-        aria-label="Reminder frequency"
+        aria-label="AI draft delivery timing"
       >
         {options.map((opt, i) => {
           const active = value === opt.id;
