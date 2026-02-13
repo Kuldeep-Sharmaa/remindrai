@@ -19,6 +19,8 @@ export default {
         /* Backgrounds */
         bgDark: "#000000",
         bgLight: "#ffffff",
+        bgImpact:
+          "#111827" /* For impcat important UI sections like cards , model, inbox etc */,
 
         /* Text */
         textDark: "#e5e7eb",
