@@ -48,7 +48,7 @@ export default function DraftModal({ draft, onClose }) {
         />
 
         <motion.div
-          className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-black
+          className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-bgImpact
                      border border-[#1f2933]/40 rounded-2xl shadow-2xl overflow-hidden"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

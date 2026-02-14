@@ -336,10 +336,13 @@ export default function TaskDetailModal({
                     </div>
                     <div>
                       <div className="text-[#9ca3af] mb-1">Next draft</div>
+
                       <div className="text-[#0f172a] dark:text-[#e5e7eb] font-medium">
-                        {isPendingBackend
-                          ? "Setting up..."
-                          : formatNext(nextIso, timezone)}
+                        {enabled
+                          ? isPendingBackend
+                            ? "Setting up..."
+                            : formatNext(nextIso, timezone)
+                          : "Nothing pending"}
                       </div>
                     </div>
                     <div>
