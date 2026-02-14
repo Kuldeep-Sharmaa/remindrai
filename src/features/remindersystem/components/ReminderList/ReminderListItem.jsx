@@ -288,32 +288,28 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
               <EyeIcon className="w-5 h-5 text-muted" />
             </button>
 
-            <div className="relative">
-              <button
-                ref={DeleteBtnRef}
-                type="button"
-                onClick={handleDeleteClick}
-                title={enabled ? "Stop future deliveries" : "Delivery stopped"}
-                aria-label={
-                  enabled ? "Stop future deliveries" : "Delivery stopped"
-                }
-                className={clsx(
-                  "p-2 rounded-md transition",
-                  enabled
-                    ? "hover:bg-brand/10 text-brand border border-transparent hover:border-brand/20"
-                    : "opacity-30 cursor-not-allowed text-muted",
-                )}
-              >
-                <TrashIcon className="w-5 h-5" />
-              </button>
+            {/* Show delete ONLY for active drafts */}
+            {enabled && (
+              <div className="relative">
+                <button
+                  ref={DeleteBtnRef}
+                  type="button"
+                  onClick={handleDeleteClick}
+                  title="Stop future deliveries"
+                  aria-label="Stop future deliveries"
+                  className="p-2 rounded-md transition hover:bg-brand/10 text-brand border border-transparent hover:border-brand/20"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
 
-              <ConfirmDeletePortal
-                open={confirmOpen}
-                anchorRect={anchorRect}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-              />
-            </div>
+                <ConfirmDeletePortal
+                  open={confirmOpen}
+                  anchorRect={anchorRect}
+                  onConfirm={confirmDelete}
+                  onCancel={cancelDelete}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
