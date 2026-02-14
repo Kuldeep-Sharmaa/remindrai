@@ -42,11 +42,12 @@ export const onReminderCreate = functions.firestore
       return;
     }
 
-    // Use merge to avoid NOT_FOUND when parent user doc is missing
     await snap.ref.set(
       {
         nextRunAtUTC,
         enabled: true,
+
+        createdAt: data.createdAt ?? FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
         initializedAt: FieldValue.serverTimestamp(),
       },
