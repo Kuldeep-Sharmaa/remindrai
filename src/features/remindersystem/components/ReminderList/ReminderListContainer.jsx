@@ -5,7 +5,7 @@
  * Handles optimistic deletes, modal state, and empty/error states.
  */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import ReminderListItem from "./ReminderListItem";
@@ -49,8 +49,25 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
   const { user } = useAuthContext();
 
   const [visibleReminders, setVisibleReminders] = useState(reminders || []);
+  const [showPast, setShowPast] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  // --- Semantic grouping: Active vs Past ---
+  const { activePrompts, pastPrompts } = useMemo(() => {
+    const active = [];
+    const past = [];
+
+    for (const r of visibleReminders || []) {
+      if (r?.enabled === false) {
+        past.push(r);
+      } else {
+        active.push(r);
+      }
+    }
+
+    return { activePrompts: active, pastPrompts: past };
+  }, [visibleReminders]);
 
   // Sync with upstream reminders, exclude deleted ones, prepend new items
   useEffect(() => {
@@ -140,24 +157,16 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
     );
   }
 
-  // Empty state
-  if (!visibleReminders || visibleReminders.length === 0) {
-    if (reminders === null) {
-      // Fall through to skeleton
-    } else {
-      return <EmptyState onCreate={onAddReminderClick} />;
-    }
-  }
-
+  const showEmptyActive = reminders !== null && activePrompts.length === 0;
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 overflow-hidden">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Your drafts
+          Upcoming drafts
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Active drafts prepared from your intent. The next one arrives when
-          it's ready.
+          Drafts your assistant is preparing from your intent. Each one appears
+          when it’s ready.
         </p>
       </div>
 
@@ -169,7 +178,8 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
         role="list"
       >
         <AnimatePresence initial={false}>
-          {visibleReminders.map((reminder) => (
+          {showEmptyActive && <EmptyState onCreate={onAddReminderClick} />}
+          {activePrompts.map((reminder) => (
             <motion.div
               key={reminder.id}
               layout
@@ -200,6 +210,45 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
           </>
         )}
       </motion.div>
+
+      {/* --- Past Prompts (collapsed) --- */}
+      {pastPrompts.length > 0 && (
+        <div className="mt-10">
+          <button
+            onClick={() => setShowPast((v) => !v)}
+            className="flex items-center justify-between w-full text-left"
+          >
+            <div>
+              <h3 className="text-sm font-medium text-muted">
+                Past drafts ({pastPrompts.length})
+              </h3>
+            </div>
+
+            <span className="text-muted text-sm">{showPast ? "▾" : "▸"}</span>
+          </button>
+
+          <AnimatePresence initial={false}>
+            {showPast && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="flex flex-col gap-4 mt-4"
+              >
+                {pastPrompts.map((reminder) => (
+                  <ReminderListItem
+                    key={reminder.id}
+                    reminder={{ ...reminder, enabled: false }}
+                    onView={handleViewDetails}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <TaskDetailModal
         isOpen={isModalOpen}
