@@ -33,7 +33,7 @@ Over time, this becomes less about reminders and more about having an AI assista
 ## Current Status
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
-![Target](https://img.shields.io/badge/v1%20target-feb%2016%2C%202025-blue?style=for-the-badge)
+![Target](https://img.shields.io/badge/v1%20target-mar%2011,%202026-blue?style=for-the-badge)
 
 ### What’s working
 
