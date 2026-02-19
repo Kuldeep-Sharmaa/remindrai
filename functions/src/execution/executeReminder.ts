@@ -88,7 +88,8 @@ export async function executeReminder(
       uid,
       reminderId,
       reminderType: "simple",
-      content: "[DUMMY DRAFT] Reminder executed successfully",
+      content:
+        "This is a dummy draft created for infrastructure testing purposes. its not real LLM content. API is not called. If you see this, it means the backend scheduler infrastructure is working! Congrats! 🎉",
       scheduledForUTC,
     });
 
