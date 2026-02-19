@@ -1,8 +1,8 @@
 /**
  * DraftDetailView.jsx
  *
- * Detailed view of AI-generated content.
- * Mobile-first, content-focused design.
+ * Refined value-moment experience.
+ * Focus: calm reassurance → clear content → simple handoff.
  */
 
 import React, { useState } from "react";
@@ -35,6 +35,15 @@ export default function DraftDetailView({ draft: deliveryItem }) {
   const timestamp = (createdAt || draft?.createdAt)?.toDate?.();
   const isAI = reminderType === "ai";
 
+  const formattedTime =
+    timestamp &&
+    new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(timestamp);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(draft.content);
@@ -48,56 +57,25 @@ export default function DraftDetailView({ draft: deliveryItem }) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header - Context at a glance */}
-      <div className="px-4 sm:px-6 pt-6 pb-4 border-b border-[#1f2933]/10">
-        <div className="flex items-center  gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-                isAI
-                  ? "bg-[#2563eb]/10 text-[#2563eb]"
-                  : "bg-[#9ca3af]/10 text-[#9ca3af]"
-              }`}
-            >
-              {isAI ? (
-                <HiOutlineCpuChip className="w-3.5 h-3.5" />
-              ) : (
-                <HiOutlineBookmark className="w-3.5 h-3.5" />
-              )}
-              {isAI ? "Draft" : "Note"}
-            </span>
+      {/* ================= Calm confirmation header ================= */}
+      <div className="px-5 sm:px-6 pt-6 pb-5 border-b border-[#1f2933]/10">
+        <div className="space-y-2">
+          {/* Emotional reassurance */}
+          <h2 className="text-lg sm:text-xl font-semibold text-[#0f172a] dark:text-[#e5e7eb]">
+            You’re all set.
+          </h2>
 
-            {enabled !== undefined && (
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs ${
-                  enabled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-[#9ca3af]"
-                }`}
-              >
-                <span
-                  className={`h-1 w-1 rounded-full ${enabled ? "bg-green-500" : "bg-[#9ca3af]"}`}
-                />
-                {enabled ? "Active" : "Completed"}
-              </span>
-            )}
-          </div>
-
-          <time className="text-xs text-[#9ca3af] tabular-nums">
-            {timestamp
-              ? new Intl.DateTimeFormat("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                }).format(timestamp)
-              : "Unknown"}
-          </time>
+          {/* Quiet context */}
+          <p className="text-sm text-[#9ca3af]">
+            {platform || "Content"} ready
+            {tone && ` • ${tone} tone`}
+            {formattedTime && ` • ${formattedTime}`}
+          </p>
         </div>
 
-        {/* Prompt - Always visible */}
+        {/* Original prompt (kept, but visually secondary) */}
         {prompt && (
-          <div className="pr-8">
+          <div className="mt-4">
             <div className="text-xs text-[#9ca3af] mb-1.5">Prompt</div>
             <p className="text-[15px] text-[#0f172a] dark:text-[#e5e7eb] leading-normal">
               {prompt}
@@ -106,25 +84,24 @@ export default function DraftDetailView({ draft: deliveryItem }) {
         )}
       </div>
 
-      {/* Content - Primary focus */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+      {/* ================= Draft content (primary focus) ================= */}
+      <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-6">
         <div className="max-w-2xl">
-          <div className="prose prose-slate dark:prose-invert max-w-none">
-            <div className="text-[15px] sm:text-base leading-relaxed text-[#0f172a] dark:text-[#e5e7eb] whitespace-pre-wrap font-inter">
-              {draft.content}
-            </div>
+          <div className="text-[15.5px] sm:text-base leading-relaxed whitespace-pre-wrap text-[#0f172a] dark:text-[#e5e7eb] font-inter">
+            {draft.content}
           </div>
 
-          {/* Additional metadata - Collapsible */}
+          {/* Collapsible metadata (quiet + optional) */}
           {(platform || tone || role || frequency) && (
-            <div className="mt-8 pt-6 border-t border-[#1f2933]/10">
+            <div className="mt-10 pt-6 border-t border-[#1f2933]/10">
               <button
                 onClick={() => setShowMoreDetails(!showMoreDetails)}
-                className="flex items-center justify-between w-full text-left group"
+                className="flex items-center justify-between w-full text-left"
               >
                 <span className="text-xs font-medium text-[#9ca3af] uppercase tracking-wide">
-                  More details
+                  Details
                 </span>
+
                 <motion.svg
                   width="16"
                   height="16"
@@ -154,45 +131,11 @@ export default function DraftDetailView({ draft: deliveryItem }) {
                     className="overflow-hidden"
                   >
                     <div className="pt-4 grid grid-cols-2 gap-3">
-                      {platform && (
-                        <div>
-                          <div className="text-xs text-[#9ca3af] mb-1">
-                            Platform
-                          </div>
-                          <div className="text-sm text-[#0f172a] dark:text-[#e5e7eb]">
-                            {platform}
-                          </div>
-                        </div>
-                      )}
-                      {tone && (
-                        <div>
-                          <div className="text-xs text-[#9ca3af] mb-1">
-                            Tone
-                          </div>
-                          <div className="text-sm text-[#0f172a] dark:text-[#e5e7eb]">
-                            {tone}
-                          </div>
-                        </div>
-                      )}
-                      {role && (
-                        <div>
-                          <div className="text-xs text-[#9ca3af] mb-1">
-                            Role
-                          </div>
-                          <div className="text-sm text-[#0f172a] dark:text-[#e5e7eb]">
-                            {role}
-                          </div>
-                        </div>
-                      )}
+                      {platform && <Meta label="Platform" value={platform} />}
+                      {tone && <Meta label="Tone" value={tone} />}
+                      {role && <Meta label="Role" value={role} />}
                       {frequency && (
-                        <div>
-                          <div className="text-xs text-[#9ca3af] mb-1">
-                            How often
-                          </div>
-                          <div className="text-sm text-[#0f172a] dark:text-[#e5e7eb]">
-                            {frequency}
-                          </div>
-                        </div>
+                        <Meta label="Frequency" value={frequency} />
                       )}
                     </div>
                   </motion.div>
@@ -203,8 +146,8 @@ export default function DraftDetailView({ draft: deliveryItem }) {
         </div>
       </div>
 
-      {/* Action bar */}
-      <div className="px-4 sm:px-6 py-4 border-t border-[#1f2933]/10 bg-bgLight dark:bg-bgImpact">
+      {/* ================= Action bar ================= */}
+      <div className="px-5 sm:px-6 py-4 border-t border-[#1f2933]/10 bg-bgLight dark:bg-bgImpact">
         <div className="flex items-center justify-between gap-4">
           <div className="text-xs text-[#9ca3af] hidden sm:block">
             {draft.content?.length || 0} characters
@@ -224,30 +167,40 @@ export default function DraftDetailView({ draft: deliveryItem }) {
               {copied ? (
                 <motion.span
                   key="check"
-                  initial={{ scale: 0.8, opacity: 0 }}
+                  initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
                   className="inline-flex items-center gap-2"
                 >
                   <CheckIcon className="w-4 h-4" />
-                  Copied
+                  Copied. Ready to post.
                 </motion.span>
               ) : (
                 <motion.span
                   key="copy"
-                  initial={{ scale: 0.8, opacity: 0 }}
+                  initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
                   className="inline-flex items-center gap-2"
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" />
-                  Copy
+                  Copy draft
                 </motion.span>
               )}
             </AnimatePresence>
           </motion.button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* Small helper for metadata */
+function Meta({ label, value }) {
+  return (
+    <div>
+      <div className="text-xs text-[#9ca3af] mb-1">{label}</div>
+      <div className="text-sm text-[#0f172a] dark:text-[#e5e7eb]">{value}</div>
     </div>
   );
 }

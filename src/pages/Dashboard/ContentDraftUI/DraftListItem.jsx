@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
+
 export default function DraftListItem({
   draft,
   reminderTitle,
@@ -9,6 +10,7 @@ export default function DraftListItem({
   onClick,
 }) {
   const timestamp = draft.createdAt?.toDate?.();
+
   const formatTime = (date) => {
     if (!date) return "";
 
@@ -17,7 +19,6 @@ export default function DraftListItem({
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
 
-    // Today times are most actionable
     if (days === 0) {
       return date.toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -37,7 +38,10 @@ export default function DraftListItem({
     });
   };
 
-  const preview = draft.content?.slice(0, 100) || "Content ready";
+  // Emotional preview fallback (important change)
+  const preview =
+    draft.content?.slice(0, 100) || "Prepared and ready when you are.";
+
   const hasMore = draft.content?.length > 100;
 
   const isAiDraft = reminderType === "ai";
@@ -50,7 +54,7 @@ export default function DraftListItem({
                   hover:border-brand/40 hover:bg-brand/5
                   ${
                     isUnread
-                      ? "border-brand/30 bg-brand/5"
+                      ? "border-brand/40 bg-brand/5"
                       : "border-border/20 bg-transparent"
                   }`}
       whileHover={{ scale: 1.005 }}
@@ -58,7 +62,9 @@ export default function DraftListItem({
     >
       <div className="flex items-start gap-3">
         <div
-          className={`mt-1 flex-shrink-0 ${isAiDraft ? "text-brand" : "text-muted"}`}
+          className={`mt-1 flex-shrink-0 ${
+            isAiDraft ? "text-brand" : "text-muted"
+          }`}
         >
           <ReminderIcon className="w-5 h-5" />
         </div>
@@ -72,6 +78,7 @@ export default function DraftListItem({
                   aria-label="Unread"
                 />
               )}
+
               <h3 className="font-grotesk font-semibold text-base text-textLight dark:text-textDark truncate">
                 {reminderTitle}
               </h3>
