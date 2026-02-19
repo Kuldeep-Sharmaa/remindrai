@@ -155,9 +155,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             >
               Let <span className="text-brand">RemindrAI</span> create for you
             </h1>
-            <p className="text-sm sm:text-base text-muted mt-2">
-              It prepares your next draft and has it ready when you need it.
-            </p>
           </div>
 
           {/* User preferences for AI mode */}
@@ -252,11 +249,9 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               }`}
             >
               {saving
-                ? reminderType === "ai"
-                  ? "Preparing draft…"
-                  : "Keeping note ready…"
+                ? "Setting this up…"
                 : reminderType === "ai"
-                  ? "Create draft"
+                  ? "Keep ready"
                   : "Save note"}
             </button>
           </div>

@@ -34,7 +34,7 @@ export default function FrequencySelector({ value, onChange }) {
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium text-gray-700 dark:text-gray-200">
-        Tell us how often to prepare this
+        How often should this be ready?
       </legend>
 
       <div

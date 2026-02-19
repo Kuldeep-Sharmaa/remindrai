@@ -25,7 +25,7 @@ export default function ReminderType({
   return (
     <div className={`space-y-3 ${className}`}>
       <h3 className="text-sm font-medium text-textLight dark:text-textDark">
-        What should we prepare next?
+        What should be ready next?
       </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

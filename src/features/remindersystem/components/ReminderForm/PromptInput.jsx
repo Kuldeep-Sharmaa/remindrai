@@ -125,7 +125,7 @@ export default function PromptInput({
         htmlFor="reminder-prompt"
         className="block text-sm font-medium text-gray-700 dark:text-gray-200"
       >
-        How should we prepare this?
+        What should it be about?
       </label>
 
       <textarea
