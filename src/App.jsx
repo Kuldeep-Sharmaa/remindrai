@@ -33,7 +33,7 @@ import Onboarding from "./pages/OnboardingSetup";
 import DashboardHome from "./pages/Dashboard/Overview";
 import Deliveries from "./pages/Dashboard/Content";
 import Insights from "./pages/Dashboard/Insights";
-import Studio from "./pages/Dashboard/Reminders";
+import Studio from "./pages/Dashboard/Studio";
 import SettingsIndex from "./pages/SettingsIndex";
 
 // Settings sub-pages
