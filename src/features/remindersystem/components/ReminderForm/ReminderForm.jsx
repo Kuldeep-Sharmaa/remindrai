@@ -113,7 +113,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
 
         toast.success(
           reminderType === "ai"
-            ? "Your AI draft is ready to begin."
+            ? "Delivery activated. A draft will be prepared."
             : "Your content note is set.",
         );
 
@@ -249,9 +249,9 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               }`}
             >
               {saving
-                ? "Setting this up…"
+                ? "Activating ..."
                 : reminderType === "ai"
-                  ? "Keep ready"
+                  ? "Start delivery"
                   : "Save note"}
             </button>
           </div>

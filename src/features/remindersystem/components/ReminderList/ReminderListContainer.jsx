@@ -162,11 +162,11 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 overflow-hidden">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Upcoming drafts
+          Active Prompts
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Drafts your assistant is preparing from your intent. Each one appears
-          when it’s ready.
+          Prompts that generate drafts for you. Each draft appears when it’s
+          delivered.
         </p>
       </div>
 
@@ -220,7 +220,7 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
           >
             <div>
               <h3 className="text-sm font-medium text-muted">
-                Past drafts ({pastPrompts.length})
+                Past Prompts ({pastPrompts.length})
               </h3>
             </div>
 
