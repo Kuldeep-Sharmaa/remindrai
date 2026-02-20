@@ -1,5 +1,5 @@
 /**
- * Reminders.jsx
+ * Studio.jsx
  *
  * Main reminders dashboard page.
  * Shows active drafts, slot usage, and creation CTA.
