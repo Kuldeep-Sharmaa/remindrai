@@ -1,17 +1,15 @@
-// useRemindrQuery.js
-
 import { useMemo } from "react";
 import { collection, query, orderBy } from "firebase/firestore";
-import { db } from "../../../../services/firebase"; // adapt path to your repo
+import { db } from "../../../../services/firebase";
 import useCollection from "../../../hooks/useCollection";
 
 export default function useRemindrQuery(userId) {
   const q = useMemo(() => {
     if (!userId) return null;
     return query(
-      collection(db, "users", userId, "reminders"), // 💡 CORRECTED ORDERING: Show the soonest action date first
+      collection(db, "users", userId, "reminders"),
       orderBy("nextRunAtUTC", "asc"),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
   }, [userId]);
 
