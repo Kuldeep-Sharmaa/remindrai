@@ -29,14 +29,13 @@ export default function EmptyState({
             speed={0.75}
           />
         </div>
-
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6">
-          No drafts yet
+          No active prompts yet
         </h3>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 max-w-md">
-          Create your first draft — we’ll remember your voice and deliver fresh
-          content when you choose.
+          Create a prompt and your assistant will begin preparing drafts for
+          you.
         </p>
       </div>
     </motion.div>
