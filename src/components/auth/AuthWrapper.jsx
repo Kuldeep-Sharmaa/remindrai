@@ -8,7 +8,7 @@ import LoginForm from "./login/LoginForm";
 import SignupForm from "./signup/SignupForm";
 import DynamicWords from "./DynamicWords";
 
-import loginanimation from "../../assets/Animation/Login.json";
+import loginanimation from "../../assets/Animation/login.json";
 import signupanimation from "../../assets/Animation/Agenda.json";
 
 const containerVariants = {
