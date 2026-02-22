@@ -2,7 +2,7 @@
   "name": "remindrai",
   "private": true,
   "version": "1.0.0",
-  "description": "AI-powered smart reminders & social media scheduling. Never forget to post again.",
+  "description": "A proactive AI content assistant that creates and delivers fresh, on-brand drafts at the right time.",
   "type": "module",
   "scripts": {
     "dev": "vite",
