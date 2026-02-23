@@ -1,11 +1,12 @@
 import React from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { motion } from "framer-motion";
+import eyesAnimation from "../../../../assets/Animation/Eyes.json";
 
 export default function EmptyState({
   onCreate,
   className = "",
-  animationSrc = "../../../src/assets/Animation/Eyes.json",
+  animationSrc = eyesAnimation,
 }) {
   const fade = {
     hidden: { opacity: 0, y: 6 },
@@ -29,6 +30,7 @@ export default function EmptyState({
             speed={0.75}
           />
         </div>
+
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6">
           No active prompts yet
         </h3>
