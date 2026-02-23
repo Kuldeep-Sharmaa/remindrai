@@ -1,17 +1,15 @@
 import React from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
-export default function DeliveriesEmptyState({
-  title,
-  description,
-  animationSrc = "/src/assets/Animation/DotsLoader.json",
-}) {
+import dotsLoader from "../../../assets/Animation/DotsLoader.json";
+
+export default function DeliveriesEmptyState({ title, description }) {
   return (
     <div className="w-full flex flex-col items-center justify-center text-center py-12">
       <div className="w-62 h-auto deliveries-empty-animation">
         <Player
           autoplay
           loop
-          src={animationSrc}
+          src={dotsLoader}
           style={{ width: "100%", height: "100%" }}
           speed={0.75}
         />
