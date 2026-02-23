@@ -45,7 +45,7 @@ const Experience = () => {
       const progressDots = gsap.utils.toArray(".progress-dot");
       const isMobile = window.innerWidth < 768;
       const isReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
+        "(prefers-reduced-motion: reduce)",
       ).matches;
 
       // Set initial states with force3D for hardware acceleration and will-change
@@ -83,7 +83,7 @@ const Experience = () => {
           onUpdate: (self) => {
             const currentIndex = Math.min(
               Math.floor(self.progress * stepsEls.length),
-              stepsEls.length - 1
+              stepsEls.length - 1,
             );
 
             // Only update if the active dot has changed
@@ -230,7 +230,7 @@ const Experience = () => {
 
             <div className="fade-in relative flex items-center justify-center w-56 h-56 sm:w-72 sm:h-72 lg:w-96 lg:h-80">
               <img
-                src={`/src/assets/svg/homepage/step-${i + 1}.svg`}
+                src={`/homepage/step-${i + 1}.svg`}
                 alt={step.title}
                 className="relative w-40 sm:w-80 lg:w-96 select-none"
                 loading="lazy"
