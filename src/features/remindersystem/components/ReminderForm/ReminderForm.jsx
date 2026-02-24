@@ -48,7 +48,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     openPreferences,
     isNextRunValid,
   } = form || {};
-
+  const [isActivating, setIsActivating] = useState(false);
   const [reminderType, setReminderType] = useState("ai");
 
   useEffect(() => {
@@ -109,18 +109,31 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
           : { reminderType: "simple", message: prompt };
 
       try {
+        setIsActivating(true);
+
+        const startTime = Date.now();
+
         await save(overrides);
 
-        toast.success(
-          reminderType === "ai"
-            ? "Delivery activated. A draft will be prepared."
-            : "Your content note is set.",
-        );
+        // Ensure minimum visible activation time (2 seconds)
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(2000 - elapsed, 0);
 
-        if (typeof onSuccess === "function") return onSuccess();
-        navigate("/dashboard/studio");
+        setTimeout(() => {
+          toast.success(
+            reminderType === "ai"
+              ? "Prompt is active. The next draft will be prepared automatically."
+              : "Note scheduled.",
+          );
+
+          setIsActivating(false);
+
+          if (typeof onSuccess === "function") return onSuccess();
+          navigate("/dashboard/studio");
+        }, remaining);
       } catch (err) {
         console.error("Save error:", err);
+        setIsActivating(false);
         toast.error(err?.message || "Failed to save.");
       }
     },
@@ -241,17 +254,17 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             </button>
             <button
               type="submit"
-              disabled={!isValid || saving}
+              disabled={!isValid || saving || isActivating}
               className={`w-full sm:w-auto px-4 py-2 text-sm sm:text-base font-semibold text-white rounded-md transition-colors duration-150 ${
-                !isValid || saving
+                !isValid || saving || isActivating
                   ? "bg-brand/40 cursor-not-allowed"
                   : "bg-brand hover:brightness-110"
               }`}
             >
-              {saving
-                ? "Activating ..."
+              {isActivating
+                ? "Activating..."
                 : reminderType === "ai"
-                  ? "Start delivery"
+                  ? "Activate Prompt"
                   : "Save note"}
             </button>
           </div>
