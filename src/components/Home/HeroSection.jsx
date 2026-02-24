@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import aiAnimationData from "../..//assets/Animation/ai.json";
+import aiAnimationData from "../../assets/Animation/ai.json";
 
 import GradientButton from "../Ui/GradientBtn";
 
@@ -30,7 +30,7 @@ const Hero = () => {
         {
           opacity: 0,
           y: 30,
-        }
+        },
       );
 
       gsap.set(lottieRef.current, {
@@ -60,7 +60,7 @@ const Hero = () => {
             duration: 0.8,
             ease: "back.out(1.7)",
           },
-          "-=0.4"
+          "-=0.4",
         )
 
         // Lottie entrance with sophisticated animation
@@ -74,7 +74,7 @@ const Hero = () => {
             duration: 1.2,
             ease: "elastic.out(1, 0.8)",
           },
-          "-=0.6"
+          "-=0.6",
         )
 
         // Subtext entrance
@@ -85,7 +85,7 @@ const Hero = () => {
             y: 0,
             duration: 0.8,
           },
-          "-=0.4"
+          "-=0.4",
         )
 
         // Button entrance
@@ -97,7 +97,7 @@ const Hero = () => {
             duration: 0.8,
             ease: "back.out(1.7)",
           },
-          "-=0.2"
+          "-=0.2",
         );
 
       // Scroll-triggered parallax effect
