@@ -8,20 +8,24 @@ const OverviewGreeting = ({
   hasError,
 }) => {
   const getStatusLine = () => {
-    if (hasError) return "There was an issue loading your schedule.";
-    if (isFirstTime) return "No drafts configured yet.";
+    if (hasError) return "Sync issue detected.";
+    if (isFirstTime) return "Let’s begin.";
     if (hasActiveDraft) return "Everything is on track.";
-    return "No active deliveries.";
+    return "Ready when you are.";
   };
 
   return (
-    <div className="space-y-1">
-      <p className="text-base sm:text-lg font-semibold text-textDark tracking-tight">
+    <section className="space-y-3">
+      {/* Primary Identity Line */}
+      <h1 className="text-xl sm:text-2xl font-semibold font-grotesk tracking-tight text-textLight dark:text-textDark">
         {greeting}, {userName}.
-      </p>
+      </h1>
 
-      <p className="text-sm text-muted">{getStatusLine()}</p>
-    </div>
+      {/* System State Line */}
+      <p className="text-sm sm:text-base font-inter text-muted leading-relaxed">
+        {getStatusLine()}
+      </p>
+    </section>
   );
 };
 

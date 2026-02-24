@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const FREQUENCY_LABELS = {
   daily: "Every day",
@@ -43,15 +44,25 @@ function formatLabels(isoString, timezone) {
     return {};
   }
 }
-
 const NextDeliveryPanel = ({ next }) => {
   if (!next) {
     return (
       <section className="w-full border-t border-border pt-8 mt-6">
-        <p className="text-lg font-semibold text-textDark mb-2">
-          Assistant inactive
-        </p>
-        <p className="text-sm text-muted">No active deliveries configured.</p>
+        <div className="space-y-6 max-w-md">
+          <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed">
+            Tell it what to prepare
+          </p>
+
+          <Link
+            to="/dashboard/studio/create"
+            className="flex items-center justify-center px-5 py-2.5 
+                     text-sm font-medium rounded-md
+                     bg-brand text-white hover:bg-brand-hover
+                     transition-colors duration-200"
+          >
+            Create First Preparation
+          </Link>
+        </div>
       </section>
     );
   }
@@ -73,38 +84,47 @@ const NextDeliveryPanel = ({ next }) => {
     ? next.content.platform.charAt(0).toUpperCase() +
       next.content.platform.slice(1)
     : null;
-
   return (
-    <section className="w-full border-t border-border pt-8 mt-6">
-      {/* Context Label */}
-      <p className="text-xs uppercase tracking-wider text-muted mb-4">
-        Upcoming draft
-      </p>
-
-      {/* Draft Preview (Primary Meaning) */}
-      <p className="text-base sm:text-lg font-medium text-textDark leading-relaxed mb-6 max-w-xl">
-        {preview}
-      </p>
-
-      {/* Time (Important but Balanced) */}
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-4 h-4 text-textDark" />
-        <p className="text-xl font-semibold text-textDark tracking-tight">
-          {dayLabel} · {timeStr}
+    <>
+      <section className="w-full border-t border-border pt-8 mt-6">
+        {/* Context Label */}
+        <p className="text-xs uppercase tracking-wider text-textLight dark:text-textDark mb-4">
+          In Preparation
         </p>
-      </div>
+        <p className="text-sm text-muted mb-4">Up next</p>
+        {/* Draft Preview (Primary Meaning) */}
+        <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed mb-6 max-w-xl">
+          {preview}
+        </p>
 
-      {/* Metadata */}
-      <div className="flex items-center gap-3 text-xs text-muted">
-        {freqLabel && <span>{freqLabel}</span>}
-        {platformLabel && (
-          <>
-            <span className="text-border">·</span>
-            <span>{platformLabel}</span>
-          </>
-        )}
+        {/* Readiness Time */}
+        <div className="flex items-center gap-2 mb-3">
+          <Clock className="w-4 h-4 text-muted" />
+          <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
+            Ready {dayLabel.toLowerCase()} at {timeStr}
+          </p>
+        </div>
+
+        {/* Metadata */}
+        <div className="flex items-center gap-3 text-xs text-muted">
+          {freqLabel && <span>{freqLabel}</span>}
+          {platformLabel && (
+            <>
+              <span className="text-border">·</span>
+              <span>{platformLabel}</span>
+            </>
+          )}
+        </div>
+      </section>
+      <div>
+        <Link
+          to="/dashboard/studio"
+          className="text-xs text-muted hover:text-brand transition-colors"
+        >
+          View all preparations →
+        </Link>
       </div>
-    </section>
+    </>
   );
 };
 

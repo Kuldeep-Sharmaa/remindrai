@@ -30,13 +30,10 @@ const Reminders = () => {
     navigate("/dashboard/studio/create");
   }, [navigate]);
 
-  const handleDeleteReminder = useCallback(async () => {
-    // Deletion logic handled inside list container or backend
-    // Keeping this minimal and clean
-  }, []);
+  const handleDeleteReminder = useCallback(async () => {}, []);
 
   const handleSettingsClick = useCallback(() => {
-    navigate("/dashboard/settings");
+    navigate("/dashboard/settings/preferences");
   }, [navigate]);
 
   const isAppLoading = isAuthLoading || isLoadingReminders;
@@ -108,11 +105,11 @@ const Reminders = () => {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm sm:text-base font-medium rounded-xl bg-brand hover:brightness-110 text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand"
             >
               <Plus className="w-4 h-4" />
-              Start a draft
+              Create new prompt
             </button>
           </motion.section>
 
-          {/* Reminder List */}
+          {/*  List */}
           <section className="mt-6">
             <ReminderListContainer
               reminders={reminders}
