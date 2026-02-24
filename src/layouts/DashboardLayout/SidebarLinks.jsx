@@ -31,16 +31,7 @@ export const SidebarLinks = [
     icon: <FileText size={20} />,
     href: "/dashboard/deliveries",
   },
-  {
-    label: "Consistency",
-    icon: <LineChart size={20} />,
-    href: "/dashboard/consistency",
-  },
-  {
-    label: "Insights",
-    icon: <BarChart3 size={20} />,
-    href: "/dashboard/insights",
-  },
+
   {
     label: "Settings",
     icon: <Settings size={20} />,

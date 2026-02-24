@@ -33,7 +33,7 @@ function SidebarNav({
         return false;
       }
     },
-    [location.pathname]
+    [location.pathname],
   );
 
   const handleLinkClick = useCallback(
@@ -52,7 +52,7 @@ function SidebarNav({
         }
       }
     },
-    [onLinkClick]
+    [onLinkClick],
   );
 
   const handleLogout = useCallback(() => {
