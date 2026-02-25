@@ -5,8 +5,6 @@ import PageTransition from "../../components/DashboardAnimations/PageTransition"
 import OverviewGreeting from "./OverviewUI/HeroGreeting";
 import NextDeliveryPanel from "./OverviewUI/NextDeliveryPanel";
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-
 function getNextActiveReminder(reminders) {
   if (!reminders?.length) return null;
 
@@ -34,15 +32,11 @@ function getTimeGreeting() {
   return "Late night";
 }
 
-// ─── inline loader ───────────────────────────────────────────────────────────
-
 const InlineSpinner = ({ text = "Loading…" }) => (
   <div className="flex flex-col items-center justify-center p-8 text-textLight dark:text-textDark">
     <Spinner size="w-6 h-6" color="text-blue-500" srText={text} />
   </div>
 );
-
-// ─── page ────────────────────────────────────────────────────────────────────
 
 const Overview = () => {
   const {
