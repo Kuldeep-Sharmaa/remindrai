@@ -1,3 +1,4 @@
+// Hook manages timezone synchronization between the user's device and their profile in Firebase.
 import { useState, useEffect, useCallback, useRef } from "react";
 import { IANAZone } from "luxon";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -106,7 +107,7 @@ function enqueueTimezoneUpdate(uid, tz) {
       const toRemove = sorted.slice(0, keys.length - 20);
       toRemove.forEach((r) => delete items[r.k]);
       console.log(
-        `enqueueTimezoneUpdate: trimmed ${toRemove.length} old items from queue`
+        `enqueueTimezoneUpdate: trimmed ${toRemove.length} old items from queue`,
       );
     }
 
@@ -146,7 +147,7 @@ async function flushTimezoneQueue({ rateLimitMs = 250 } = {}) {
 
       if (item.uid !== currentUid) {
         console.log(
-          `flushTimezoneQueue: skipping item for different user (current: ${currentUid}, item: ${item.uid})`
+          `flushTimezoneQueue: skipping item for different user (current: ${currentUid}, item: ${item.uid})`,
         );
         continue;
       }
@@ -177,7 +178,7 @@ async function flushTimezoneQueue({ rateLimitMs = 250 } = {}) {
             isAutoTimezone: true,
             updatedAt: serverTimestamp(),
           },
-          { merge: true }
+          { merge: true },
         );
 
         delete items[key];
@@ -198,7 +199,7 @@ async function flushTimezoneQueue({ rateLimitMs = 250 } = {}) {
               tz: item.tz,
               opId: item.opId,
               ts: Date.now(),
-            })
+            }),
           );
         } catch (e) {
           /* ignore */
@@ -224,12 +225,12 @@ async function flushTimezoneQueue({ rateLimitMs = 250 } = {}) {
           console.warn(
             "flushTimezoneQueue: permanent failure for queued item, marking as permanent",
             key,
-            err
+            err,
           );
         } else {
           // eslint-disable-next-line no-await-in-loop
           await new Promise((r) =>
-            setTimeout(r, Math.min(2000 * item.attempts, 15000))
+            setTimeout(r, Math.min(2000 * item.attempts, 15000)),
           );
         }
 
@@ -278,7 +279,7 @@ export default function useTimezoneSync({
       if (isDeclinedLocal(userProfile?.uid, deviceTimezone)) {
         console.info(
           "[useTimezoneSync] Detected TZ previously declined (local), skipping modal:",
-          deviceTimezone
+          deviceTimezone,
         );
         return;
       }
@@ -286,30 +287,30 @@ export default function useTimezoneSync({
       if (pendingDeviceTimezone === deviceTimezone) {
         console.debug(
           "[useTimezoneSync] pendingDeviceTimezone already staged:",
-          deviceTimezone
+          deviceTimezone,
         );
         return;
       }
 
       setPendingOriginalTimezone(
-        originalTimezone || userProfile?.timezone || null
+        originalTimezone || userProfile?.timezone || null,
       );
       setPendingDeviceTimezone(deviceTimezone);
       console.log(
         "[useTimezoneSync] Staging confirmation modal for device timezone:",
         deviceTimezone,
         "original:",
-        originalTimezone || userProfile?.timezone
+        originalTimezone || userProfile?.timezone,
       );
     },
-    [pendingDeviceTimezone, userProfile]
+    [pendingDeviceTimezone, userProfile],
   );
 
   const declineDeviceTimezone = useCallback(() => {
     if (pendingDeviceTimezone && firebaseUser?.uid) {
       markDeclinedLocal(firebaseUser.uid, pendingDeviceTimezone);
       console.log(
-        `[useTimezoneSync] Declined device TZ ${pendingDeviceTimezone} (local)`
+        `[useTimezoneSync] Declined device TZ ${pendingDeviceTimezone} (local)`,
       );
     }
     setPendingDeviceTimezone(null);
@@ -367,10 +368,10 @@ export default function useTimezoneSync({
                 isAutoTimezone: true,
                 updatedAt: serverTimestamp(),
               },
-              { merge: true }
+              { merge: true },
             );
             console.log(
-              `acceptDeviceTimezone: timezone written to profile: ${newTimezone}`
+              `acceptDeviceTimezone: timezone written to profile: ${newTimezone}`,
             );
 
             setUserProfile((prev) => ({
@@ -392,7 +393,7 @@ export default function useTimezoneSync({
 
             console.error(
               "acceptDeviceTimezone: failed to write profile, enqueued and re-staged:",
-              writeErr
+              writeErr,
             );
             return {
               status: "queued",
@@ -429,22 +430,22 @@ export default function useTimezoneSync({
                   status: "pending",
                   requester: "client",
                 },
-                { merge: true }
+                { merge: true },
               );
               console.log(
-                "acceptDeviceTimezone: queued recompute for server (too many reminders)"
+                "acceptDeviceTimezone: queued recompute for server (too many reminders)",
               );
               return { status: "queued", queuedForServer: true };
             } catch (qErr) {
               console.error(
                 "acceptDeviceTimezone: failed to write queue doc:",
-                qErr
+                qErr,
               );
               return { status: "error", error: String(qErr?.message || qErr) };
             }
           } else {
             console.log(
-              "acceptDeviceTimezone: server recompute disabled, returning queued status"
+              "acceptDeviceTimezone: server recompute disabled, returning queued status",
             );
             return { status: "queued", queuedForServer: true };
           }
@@ -462,13 +463,13 @@ export default function useTimezoneSync({
                 maxClientCount: MAX_CLIENT_RECOMPUTE_COUNT,
                 batchSize: RECOMPUTE_BATCH_SIZE,
                 progressCb,
-              }
+              },
             );
 
             if (res && res.status === "ok") {
               console.log(
                 "acceptDeviceTimezone: client recompute completed",
-                res
+                res,
               );
               return {
                 status: "ok",
@@ -480,7 +481,7 @@ export default function useTimezoneSync({
 
             if (res && res.status === "queued") {
               console.log(
-                "acceptDeviceTimezone: recompute queued for server by helper"
+                "acceptDeviceTimezone: recompute queued for server by helper",
               );
               return {
                 status: "queued",
@@ -491,7 +492,7 @@ export default function useTimezoneSync({
 
             console.warn(
               "acceptDeviceTimezone: recompute returned unexpected result",
-              res
+              res,
             );
             return {
               status: "error",
@@ -501,7 +502,7 @@ export default function useTimezoneSync({
           } catch (recomputeErr) {
             console.error(
               "acceptDeviceTimezone: client recompute failed:",
-              recomputeErr
+              recomputeErr,
             );
             if (ENABLE_REMINDER_RECOMPUTE) {
               try {
@@ -516,10 +517,10 @@ export default function useTimezoneSync({
                     requester: "client",
                     error: String(recomputeErr?.message || recomputeErr),
                   },
-                  { merge: true }
+                  { merge: true },
                 );
                 console.log(
-                  "acceptDeviceTimezone: recompute failed - queued job for server"
+                  "acceptDeviceTimezone: recompute failed - queued job for server",
                 );
                 return {
                   status: "queued",
@@ -529,7 +530,7 @@ export default function useTimezoneSync({
               } catch (qErr2) {
                 console.error(
                   "acceptDeviceTimezone: failed to queue after recompute error:",
-                  qErr2
+                  qErr2,
                 );
                 return {
                   status: "error",
@@ -561,7 +562,7 @@ export default function useTimezoneSync({
       userProfile?.timezone,
       stageDeviceTimezone,
       setUserProfile,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -587,7 +588,7 @@ export default function useTimezoneSync({
               setPendingOriginalTimezone(null);
               console.log(
                 "[useTimezoneSync] Same-tab: cleared pending modal after flush:",
-                successItem.tz
+                successItem.tz,
               );
             }
           });
@@ -699,14 +700,14 @@ export default function useTimezoneSync({
               lastSyncedTimezoneRef.current = payload.tz;
               console.log(
                 "[useTimezoneSync] Detected TZ accepted in another tab:",
-                payload.tz
+                payload.tz,
               );
             }
           }
         } catch (err) {
           console.warn(
             "onStorage: failed to parse TZ_ACCEPTED_KEY payload",
-            err
+            err,
           );
         }
       }
@@ -743,4 +744,3 @@ export default function useTimezoneSync({
     markLogout,
   };
 }
-
