@@ -72,7 +72,7 @@ const TimezoneChangeModal = () => {
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               We noticed your device timezone doesn’t match your saved timezone.
               <br />
-              Would you like to update it for accurate reminder delivery?
+              Would you like to update it for accurate Draft delivery?
             </p>
 
             {/* Timezone comparison box */}
@@ -92,7 +92,7 @@ const TimezoneChangeModal = () => {
             {/* Status feedback */}
             {status === "queued" && (
               <p className="text-xs text-amber-600">
-                You’re offline or have too many reminders — update queued for
+                You’re offline or have too many Propmts — update queued for
                 server sync.
               </p>
             )}
