@@ -33,7 +33,7 @@ export async function advanceReminder(
   const { reminderRef, reminderData, scheduledForUTC } = input;
 
   try {
-    const { frequency } = reminderData;
+    const { frequency, schedule } = reminderData;
 
     // One-time reminders stop after execution
     if (frequency === "one_time") {
@@ -50,7 +50,26 @@ export async function advanceReminder(
     }
 
     // Recurring reminders - compute next run from scheduled time
-    const nextRunAtUTC = computeNextRunAtUTC(frequency, scheduledForUTC);
+    const nextRunAtUTC = computeNextRunAtUTC(
+      frequency,
+      scheduledForUTC,
+      schedule,
+    );
+
+    // Handle invalid weekly configuration safely
+    if (frequency === "weekly" && !nextRunAtUTC) {
+      await reminderRef.update({
+        enabled: false,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      console.error(
+        "[advanceReminder] Weekly reminder disabled due to invalid weekDays",
+        { reminderId: reminderRef.id },
+      );
+
+      return;
+    }
 
     await reminderRef.update({
       nextRunAtUTC,
