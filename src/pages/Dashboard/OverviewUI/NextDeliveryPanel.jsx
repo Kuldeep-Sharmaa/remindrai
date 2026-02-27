@@ -44,6 +44,7 @@ function formatLabels(isoString, timezone) {
     return {};
   }
 }
+
 const NextDeliveryPanel = ({ next }) => {
   if (!next) {
     return (
@@ -67,11 +68,22 @@ const NextDeliveryPanel = ({ next }) => {
     );
   }
 
-  const preview = next.content?.aiPrompt
-    ? next.content.aiPrompt.length > 100
-      ? next.content.aiPrompt.slice(0, 100).trimEnd() + "…"
-      : next.content.aiPrompt
-    : "Draft in preparation";
+  // Get content based on reminder type
+  let content = "Draft in preparation";
+
+  if (next.content?.aiPrompt) {
+    // AI reminder - show prompt
+    content =
+      next.content.aiPrompt.length > 100
+        ? next.content.aiPrompt.slice(0, 100).trimEnd() + "…"
+        : next.content.aiPrompt;
+  } else if (next.content?.message) {
+    // Simple reminder - show message
+    content =
+      next.content.message.length > 100
+        ? next.content.message.slice(0, 100).trimEnd() + "…"
+        : next.content.message;
+  }
 
   const { dayLabel, timeStr } = formatLabels(
     next.nextRunAtUTC,
@@ -84,20 +96,19 @@ const NextDeliveryPanel = ({ next }) => {
     ? next.content.platform.charAt(0).toUpperCase() +
       next.content.platform.slice(1)
     : null;
+
   return (
     <>
       <section className="w-full border-t border-border pt-8 mt-6">
-        {/* Context Label */}
         <p className="text-xs uppercase tracking-wider text-textLight dark:text-textDark mb-4">
           In Preparation
         </p>
         <p className="text-sm text-muted mb-4">Up next</p>
-        {/* Draft Preview (Primary Meaning) */}
+
         <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed mb-6 max-w-xl">
-          {preview}
+          {content}
         </p>
 
-        {/* Readiness Time */}
         <div className="flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-muted" />
           <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
@@ -105,7 +116,6 @@ const NextDeliveryPanel = ({ next }) => {
           </p>
         </div>
 
-        {/* Metadata */}
         <div className="flex items-center gap-3 text-xs text-muted">
           {freqLabel && <span>{freqLabel}</span>}
           {platformLabel && (

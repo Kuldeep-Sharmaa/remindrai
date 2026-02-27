@@ -54,9 +54,9 @@ const freqLabel = (reminder = {}) => {
   const raw = reminder?.frequency || null;
   if (!raw) return "One-time";
   const map = {
-    one_time: "One Time",
-    daily: "Daily",
-    weekly: "Weekly",
+    daily: "Every day",
+    weekly: "Every week",
+    one_time: "One time",
   };
   return map[String(raw).toLowerCase()] || String(raw).replace(/_/g, " ");
 };

@@ -173,7 +173,7 @@ export default function DraftDetailView({ draft: deliveryItem }) {
                   className="inline-flex items-center gap-2"
                 >
                   <CheckIcon className="w-4 h-4" />
-                  Copied. Ready to post.
+                  Copied. Ready to share.
                 </motion.span>
               ) : (
                 <motion.span

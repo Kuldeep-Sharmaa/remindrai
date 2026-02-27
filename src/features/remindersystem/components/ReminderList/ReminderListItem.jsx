@@ -48,9 +48,9 @@ const formatNextRun = (isoString, timezone) => {
 const freqLabel = (reminder = {}) => {
   const raw = reminder?.frequency || "one_time";
   const map = {
-    one_time: "One-time",
-    daily: "Daily",
-    weekly: "Weekly",
+    one_time: "One time",
+    daily: "Every day",
+    weekly: "Every Week",
   };
   return map[String(raw).toLowerCase()] || String(raw).replace(/_/g, " ");
 };

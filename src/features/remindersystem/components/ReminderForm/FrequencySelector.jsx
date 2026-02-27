@@ -4,8 +4,8 @@ import PropTypes from "prop-types";
 export default function FrequencySelector({ value, onChange }) {
   const options = [
     { id: "one_time", label: "One time" },
-    { id: "daily", label: "Daily" },
-    { id: "weekly", label: "Weekly" },
+    { id: "daily", label: "Every day" },
+    { id: "weekly", label: "Every week" },
   ];
 
   const handleChange = useCallback(
