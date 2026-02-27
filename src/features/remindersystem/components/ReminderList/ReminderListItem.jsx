@@ -5,17 +5,9 @@
  * Shows next run time, frequency, and delete confirmation.
  */
 
-import React, {
-  memo,
-  useMemo,
-  useCallback,
-  useState,
-  useRef,
-  useLayoutEffect,
-} from "react";
+import React, { memo, useMemo, useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
-import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
 import { DateTime } from "luxon";
 import clsx from "clsx";
 
@@ -75,7 +67,6 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
 
   const isPendingBackend = enabled === true && !nextIso;
 
-  // AI preview
   const aiPreviewSentence = useMemo(() => {
     if (!isAI) return null;
 
@@ -91,7 +82,6 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
     return anchors ? `${anchors} — ${body.slice(0, 240)}…` : body.slice(0, 240);
   }, [isAI, content]);
 
-  // Simple preview
   const simplePreview = useMemo(() => {
     if (isAI) return null;
 
@@ -101,13 +91,8 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
       : message || "No message.";
   }, [isAI, content]);
 
-  // ─────────────────────────────────────────────
-  // Delete logic (UNCHANGED)
-  // ─────────────────────────────────────────────
-
+  // Delete state
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const deleteBtnRef = useRef(null);
-  const [anchorRect, setAnchorRect] = useState(null);
 
   const handleView = useCallback(
     (e) => {
@@ -121,8 +106,6 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
     (e) => {
       e?.stopPropagation();
       if (!enabled) return;
-
-      setAnchorRect(deleteBtnRef.current?.getBoundingClientRect() || null);
       setConfirmOpen(true);
     },
     [enabled],
@@ -142,112 +125,90 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
     setConfirmOpen(false);
   }, []);
 
-  // Keep anchor synced on scroll / resize
-  useLayoutEffect(() => {
-    if (!confirmOpen) return;
-
-    const updateRect = () =>
-      setAnchorRect(deleteBtnRef.current?.getBoundingClientRect() || null);
-
-    window.addEventListener("resize", updateRect);
-    window.addEventListener("scroll", updateRect, true);
-
-    return () => {
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("scroll", updateRect, true);
-    };
-  }, [confirmOpen]);
-
-  // ─────────────────────────────────────────────
-  // Render
-  // ─────────────────────────────────────────────
-
   return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
-      className={clsx(
-        "w-full border-t border-border py-8 transition-colors",
-        enabled && "hover:bg-bgImpact/20",
-        !enabled && "opacity-60",
-      )}
-      onClick={() => enabled && onView?.(id)}
-      role="listitem"
-    >
-      <div
-        className="flex flex-col gap-5"
-        style={{ cursor: enabled ? "pointer" : "default" }}
+    <>
+      <motion.article
+        layout
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        className={clsx(
+          "w-full border-t border-border py-8 transition-colors",
+          enabled && "hover:bg-bgImpact/20",
+          !enabled && "opacity-60",
+        )}
+        onClick={() => enabled && onView?.(id)}
+        role="listitem"
       >
-        {/* Meta Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] uppercase tracking-widest text-muted">
-              {isAI ? "AI Draft" : "Simple Note"}
-            </span>
+        <div
+          className="flex flex-col gap-5"
+          style={{ cursor: enabled ? "pointer" : "default" }}
+        >
+          {/* Meta Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] uppercase tracking-widest text-muted">
+                {isAI ? "AI Draft" : "Simple Note"}
+              </span>
 
-            {isPendingBackend && (
-              <span className="text-[11px] text-brand tracking-wide">
-                Preparing
+              {isPendingBackend && (
+                <span className="text-[11px] text-brand tracking-wide">
+                  Preparing
+                </span>
+              )}
+            </div>
+
+            {!enabled && (
+              <span className="text-[11px] text-muted tracking-wide">
+                Completed
               </span>
             )}
           </div>
 
-          {!enabled && (
-            <span className="text-[11px] text-muted tracking-wide">
-              Completed
-            </span>
-          )}
-        </div>
-
-        {/* Intent Preview (Primary Focus) */}
-        <div className="text-base sm:text-lg font-medium text-textDark leading-relaxed line-clamp-3">
-          {isAI ? aiPreviewSentence : simplePreview}
-        </div>
-
-        {/* Schedule (Secondary Metadata) */}
-        {enabled && (
-          <div className="text-xs text-muted tracking-wide">
-            Next · {formatNextRun(nextIso, tz)} · {freqLabel(reminder)}
+          {/* Intent Preview */}
+          <div className="text-base sm:text-lg font-medium text-textDark leading-relaxed line-clamp-3">
+            {isAI ? aiPreviewSentence : simplePreview}
           </div>
-        )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={handleView}
-            title="View details"
-            className="p-2 rounded-md hover:bg-bgImpact/40 transition"
-          >
-            <EyeIcon className="w-4 h-4 text-muted" />
-          </button>
-
+          {/* Schedule */}
           {enabled && (
-            <>
+            <div className="text-xs text-muted tracking-wide">
+              Next · {formatNextRun(nextIso, tz)} · {freqLabel(reminder)}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={handleView}
+              title="View details"
+              className="p-2 rounded-md hover:bg-bgImpact/40 transition"
+            >
+              <EyeIcon className="w-4 h-4 text-muted" />
+            </button>
+
+            {enabled && (
               <button
-                ref={deleteBtnRef}
                 type="button"
                 onClick={handleDeleteClick}
                 title="Stop future deliveries"
                 aria-label="Stop future deliveries"
-                className="p-2 rounded-md transition hover:bg-brand/10 text-brand"
+                className="p-2 rounded-md transition hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400"
               >
                 <TrashIcon className="w-4 h-4" />
               </button>
-
-              <ConfirmDeletePortal
-                open={confirmOpen}
-                anchorRect={anchorRect}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-              />
-            </>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </motion.article>
+      </motion.article>
+
+      <ConfirmDeletePortal
+        open={confirmOpen}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+    </>
   );
 };
 
