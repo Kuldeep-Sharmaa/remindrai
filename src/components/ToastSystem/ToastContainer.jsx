@@ -23,11 +23,18 @@ const ToastContainer = () => {
       position={isMobile ? "top-center" : "top-right"}
       reverseOrder={false}
       gutter={isMobile ? 10 : 8}
-      containerStyle={{
-        top: isMobile ? 16 : 20,
-        right: isMobile ? undefined : 20,
-        zIndex: 9999,
-      }}
+      containerStyle={
+        isMobile
+          ? {
+              top: 16,
+              zIndex: 9999,
+            }
+          : {
+              top: 20,
+              right: 20,
+              zIndex: 9999,
+            }
+      }
       toastOptions={{
         duration: 4000,
         style: {
@@ -35,19 +42,21 @@ const ToastContainer = () => {
           fontSize: "13.5px",
           lineHeight: "1.45",
           borderRadius: "10px",
-          background: "#0f172a",
+          background: "rgba(15, 23, 42, 0.92)",
           color: "#e2e8f0",
           fontWeight: 450,
           letterSpacing: "0.01em",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           border: "1px solid rgba(255,255,255,0.07)",
-          width: isMobile ? "calc(100vw - 32px)" : "auto",
-          maxWidth: isMobile ? "480px" : "400px",
+          width: isMobile ? "320px" : "auto",
+          maxWidth: isMobile ? "calc(100% - 32px)" : "400px",
           minWidth: isMobile ? "unset" : "300px",
           boxShadow: "0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.16)",
           textAlign: "left",
           willChange: "transform, opacity",
+          boxSizing: "border-box",
+          flexShrink: 0,
         },
 
         success: {
