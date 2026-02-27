@@ -1,4 +1,3 @@
-// src/components/ToastSystem/ToastContainer.jsx
 import React, { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
@@ -18,23 +17,30 @@ const ToastContainer = () => {
     };
   }, []);
 
+  const mobileToastStyle = {
+    // Fixed px width — never vw, never %, never calc(100vw - x)
+    // vw shifts when mobile browser chrome appears/disappears on scroll
+    width: "300px",
+    maxWidth: "300px",
+    minWidth: "300px",
+  };
+
+  const desktopToastStyle = {
+    width: "auto",
+    maxWidth: "400px",
+    minWidth: "300px",
+  };
+
   return (
     <Toaster
       position={isMobile ? "top-center" : "top-right"}
       reverseOrder={false}
       gutter={isMobile ? 10 : 8}
-      containerStyle={
-        isMobile
-          ? {
-              top: 16,
-              zIndex: 9999,
-            }
-          : {
-              top: 20,
-              right: 20,
-              zIndex: 9999,
-            }
-      }
+      containerStyle={{
+        top: isMobile ? 16 : 20,
+        ...(isMobile ? {} : { right: 20 }),
+        zIndex: 9999,
+      }}
       toastOptions={{
         duration: 4000,
         style: {
@@ -49,14 +55,12 @@ const ToastContainer = () => {
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           border: "1px solid rgba(255,255,255,0.07)",
-          width: isMobile ? "320px" : "auto",
-          maxWidth: isMobile ? "calc(100% - 32px)" : "400px",
-          minWidth: isMobile ? "unset" : "300px",
           boxShadow: "0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.16)",
           textAlign: "left",
           willChange: "transform, opacity",
           boxSizing: "border-box",
           flexShrink: 0,
+          ...(isMobile ? mobileToastStyle : desktopToastStyle),
         },
 
         success: {
@@ -65,6 +69,7 @@ const ToastContainer = () => {
             background: "#16a34a",
             color: "#fff",
             border: "none",
+            ...(isMobile ? mobileToastStyle : desktopToastStyle),
           },
         },
 
@@ -75,6 +80,7 @@ const ToastContainer = () => {
             background: "#dc2626",
             color: "#fff",
             border: "none",
+            ...(isMobile ? mobileToastStyle : desktopToastStyle),
           },
         },
 
@@ -84,6 +90,7 @@ const ToastContainer = () => {
             background: "#0f172a",
             color: "#94a3b8",
             border: "1px solid rgba(255,255,255,0.07)",
+            ...(isMobile ? mobileToastStyle : desktopToastStyle),
           },
         },
 
@@ -93,6 +100,7 @@ const ToastContainer = () => {
             background: "#1c1500",
             color: "#fef9c3",
             border: "1px solid #78350f",
+            ...(isMobile ? mobileToastStyle : desktopToastStyle),
           },
         },
 
@@ -102,6 +110,7 @@ const ToastContainer = () => {
             background: "#0a1628",
             color: "#dbeafe",
             border: "1px solid #1e3a5f",
+            ...(isMobile ? mobileToastStyle : desktopToastStyle),
           },
         },
       }}
