@@ -28,9 +28,7 @@ export function computeInitialNextRunAtUTC(
     return null;
   }
 
-  // ─────────────────────────────
   // ONE-TIME
-  // ─────────────────────────────
   if (frequency === "one_time") {
     if (!date) return null;
 
@@ -45,9 +43,7 @@ export function computeInitialNextRunAtUTC(
 
   const nowLocal = DateTime.now().setZone(timezone);
 
-  // ─────────────────────────────
   // DAILY
-  // ─────────────────────────────
   if (frequency === "daily") {
     let candidate = nowLocal
       .startOf("day")
@@ -60,9 +56,7 @@ export function computeInitialNextRunAtUTC(
     return candidate.toUTC().toISO();
   }
 
-  // ─────────────────────────────
   // WEEKLY (calendar-based)
-  // ─────────────────────────────
   if (frequency === "weekly") {
     if (!Array.isArray(weekDays) || weekDays.length === 0) {
       return null; // invalid weekly configuration
