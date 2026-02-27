@@ -55,7 +55,7 @@ export default function FrequencySelector({ value, onChange }) {
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand ${
                 active
                   ? "border border-brand text-brand bg-brand/10"
-                  : "border border-border text-muted hover:text-textDark dark:hover:text-textLight"
+                  : "border border-border  hover:text-brand dark:hover:text-brand"
               }`}
             >
               {opt.label}

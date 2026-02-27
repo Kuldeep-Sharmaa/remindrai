@@ -161,7 +161,7 @@ export default function TimeSelector({
             value={date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-sm focus:ring-brand focus:border-brand"
             aria-describedby={
               errorString ? "remindr-schedule-error" : undefined
             }
@@ -182,7 +182,7 @@ export default function TimeSelector({
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-sm focus:ring-brand focus:border-brand"
           aria-describedby={errorString ? "remindr-schedule-error" : undefined}
         />
       </div>
@@ -220,7 +220,7 @@ export default function TimeSelector({
                     w-10 h-10 rounded-full text-xs font-semibold border-2 transition-all duration-150 ease-in-out
                     ${
                       isSelected
-                        ? "bg-indigo-600 text-white border-indigo-700 shadow-md"
+                        ? "bg-brand text-white border-brand shadow-md"
                         : isDisabled
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed opacity-60"
                           : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
