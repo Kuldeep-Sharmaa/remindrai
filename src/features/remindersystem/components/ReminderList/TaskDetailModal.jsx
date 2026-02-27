@@ -54,13 +54,31 @@ const freqLabel = (reminder = {}) => {
   const raw = reminder?.frequency || null;
   if (!raw) return "One-time";
   const map = {
-    one_time: "One-time",
+    one_time: "One Time",
     daily: "Daily",
     weekly: "Weekly",
   };
   return map[String(raw).toLowerCase()] || String(raw).replace(/_/g, " ");
 };
+const formatWeekDays = (weekDays = []) => {
+  if (!Array.isArray(weekDays) || weekDays.length === 0) return null;
 
+  const map = {
+    1: "Mon",
+    2: "Tue",
+    3: "Wed",
+    4: "Thu",
+    5: "Fri",
+    6: "Sat",
+    7: "Sun",
+  };
+
+  return weekDays
+    .sort((a, b) => a - b)
+    .map((d) => map[d])
+    .filter(Boolean)
+    .join(", ");
+};
 // Modal animations
 const overlayMotion = {
   initial: { opacity: 0 },
@@ -166,7 +184,8 @@ export default function TaskDetailModal({
       toast.error("Unable to copy");
     }
   };
-
+  const weekDays = task?.schedule?.weekDays || [];
+  const weekDaysLabel = formatWeekDays(weekDays);
   if (!isOpen) return null;
 
   const isAI = task?.reminderType === "ai";
@@ -351,6 +370,14 @@ export default function TaskDetailModal({
                         {frequency}
                       </div>
                     </div>
+                    {task?.frequency === "weekly" && weekDaysLabel && (
+                      <div>
+                        <div className="text-[#9ca3af] mb-1">Delivery days</div>
+                        <div className="text-[#0f172a] dark:text-[#e5e7eb] font-medium">
+                          {weekDaysLabel}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
