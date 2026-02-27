@@ -1,11 +1,9 @@
 /**
- * scheduleUtils.ts
  *
  * Figures out when a reminder should run next based on its frequency.
  * Critical: Uses scheduledForUTC (when it was SUPPOSED to run), not actual execution time.
  * This prevents drift when backend is slow or offline.
  *
- * Pure functions - no side effects, no external state.
  */
 
 import { DateTime } from "luxon";
@@ -19,7 +17,7 @@ interface WeeklySchedule {
 }
 
 /**
- * Computes next run time for a reminder.
+ * Computes next run time for a draft.
  *
  * @param frequency - How often reminder should run
  * @param scheduledForUTC - When this execution was scheduled (NOT when it actually ran)
