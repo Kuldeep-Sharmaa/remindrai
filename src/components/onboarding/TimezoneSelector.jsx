@@ -1,12 +1,30 @@
-// src/components/onboarding/TimezoneSelector.jsx
-
 import React, { useEffect, useState, useCallback } from "react";
 import { Globe, HelpCircle } from "lucide-react";
 import { useTimezoneDetection } from "../../hooks/useTimezoneDetection";
 
+function formatTimeForTimezone(timezone) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(new Date());
+  } catch {
+    return "--:--:--";
+  }
+}
+
 const TimezoneSelector = ({ selectedTimezone, setSelectedTimezone }) => {
-  const { currentTime, detectedTimezone, isLoading, error } =
+  const { detectedTimezone, candidateTimezone, isStable } =
     useTimezoneDetection();
+  const displayTimezone = detectedTimezone || candidateTimezone || "UTC";
+  const [currentTime, setCurrentTime] = useState(() =>
+    formatTimeForTimezone(displayTimezone),
+  );
+  const isLoading =
+    !displayTimezone || (!isStable && candidateTimezone !== detectedTimezone);
 
   const [showMobileInfo, setShowMobileInfo] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -20,21 +38,28 @@ const TimezoneSelector = ({ selectedTimezone, setSelectedTimezone }) => {
     if (
       !isLoading &&
       !selectedTimezone &&
-      detectedTimezone &&
-      detectedTimezone !== "Loading..."
+      displayTimezone &&
+      displayTimezone !== "Loading..."
     ) {
       // Ensure setSelectedTimezone is indeed a function before calling
       if (typeof setSelectedTimezone === "function") {
-        setSelectedTimezone(detectedTimezone);
+        setSelectedTimezone(displayTimezone);
       } else {
         console.error(
           "setSelectedTimezone is not a function in TimezoneSelector!",
-          setSelectedTimezone
+          setSelectedTimezone,
         );
         // You might want to throw an error or handle this more gracefully depending on app needs
       }
     }
-  }, [isLoading, selectedTimezone, detectedTimezone, setSelectedTimezone]);
+  }, [isLoading, selectedTimezone, displayTimezone, setSelectedTimezone]);
+
+  useEffect(() => {
+    const tick = () => setCurrentTime(formatTimeForTimezone(displayTimezone));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [displayTimezone]);
 
   // Handle loading and error states for the UI
   if (isLoading) {
@@ -42,19 +67,6 @@ const TimezoneSelector = ({ selectedTimezone, setSelectedTimezone }) => {
       <div className="w-full max-w-md mx-auto p-4 sm:p-8 rounded-xl shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-center flex flex-col items-center justify-center h-48">
         <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
         <p className="mt-4 text-lg font-medium">Detecting your timezone...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full max-w-md mx-auto p-4 sm:p-8 rounded-xl shadow-lg bg-red-50/80 dark:bg-red-900/80 backdrop-blur-md border border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 text-center flex flex-col items-center justify-center h-48">
-        <HelpCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
-        <p className="mt-4 text-lg font-medium">Error detecting timezone.</p>
-        <p className="text-sm text-red-700 dark:text-red-300 mt-2">{error}</p>
-        <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-          Please check your browser settings.
-        </p>
       </div>
     );
   }
@@ -114,7 +126,7 @@ const TimezoneSelector = ({ selectedTimezone, setSelectedTimezone }) => {
       {/* Main timezone display */}
       <div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md">
         <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 transition-all duration-300">
-          {detectedTimezone}
+          {displayTimezone}
         </div>
         <div className="flex items-center justify-center gap-2 text-xl font-medium text-blue-600 dark:text-blue-400">
           {currentTime}

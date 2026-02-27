@@ -1,10 +1,41 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Globe, Clock, Info, Loader2, CheckCircle } from "lucide-react";
 import { useTimezoneDetection } from "../../../hooks/useTimezoneDetection";
 
+function formatTimeForTimezone(timezone) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(new Date());
+  } catch {
+    return "--:--:--";
+  }
+}
+
 const TimezoneSettingCard = () => {
-  const { currentTime, detectedTimezone, isLoading, error } =
+  const { detectedTimezone, candidateTimezone, isStable } =
     useTimezoneDetection();
+  const displayTimezone = useMemo(
+    () => detectedTimezone || candidateTimezone || "UTC",
+    [detectedTimezone, candidateTimezone],
+  );
+  const [currentTime, setCurrentTime] = useState(() =>
+    formatTimeForTimezone(displayTimezone),
+  );
+  const isLoading =
+    !displayTimezone || (!isStable && candidateTimezone !== detectedTimezone);
+
+  useEffect(() => {
+    const tick = () => setCurrentTime(formatTimeForTimezone(displayTimezone));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [displayTimezone]);
+
   const isAutoDetected = true; // placeholder for future manual override support
 
   return (
@@ -21,15 +52,6 @@ const TimezoneSettingCard = () => {
           <Loader2 className="w-5 h-5 animate-spin mr-2 text-blue-500" />
           <span>Detecting timezone...</span>
         </div>
-      ) : error ? (
-        /* Error State */
-        <div className="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
-          <Info className="w-5 h-5 flex-shrink-0 mr-3" />
-          <div>
-            <p className="font-medium">Timezone detection failed.</p>
-            <p className="text-sm">{error}</p>
-          </div>
-        </div>
       ) : (
         /* Success State */
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -42,7 +64,7 @@ const TimezoneSettingCard = () => {
               </span>
             </div>
             <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {detectedTimezone}
+              {displayTimezone}
             </p>
 
             {isAutoDetected && (
