@@ -2,16 +2,15 @@ import React, { useState, useEffect } from "react";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
+import { showToast } from "../../../components/ToastSystem/toastUtils";
 import {
   Loader2,
   CheckCircle,
-  XCircle,
   User,
   MessageCircle,
   Share2,
   ChevronDown,
   Check,
-  Brain,
   Target,
   Mic,
   Globe,
@@ -151,7 +150,6 @@ const Preferences = () => {
   });
   const [originalPreferences, setOriginalPreferences] = useState({});
   const [loading, setLoading] = useState(true); // Changed to true to show loading initially
-  const [message, setMessage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Enhanced Data with better icons and descriptions (retained as is)
@@ -225,11 +223,10 @@ const Preferences = () => {
     },
   ];
 
-  // Fetch preferences
   useEffect(() => {
     const fetchPreferences = async () => {
       if (!currentUser?.uid || !db) {
-        setLoading(false); // Stop loading if no user or db
+        setLoading(false);
         return;
       }
 
@@ -248,15 +245,14 @@ const Preferences = () => {
           setPreferences(fetchedPreferences);
           setOriginalPreferences(fetchedPreferences);
         } else {
-          // Initialize with empty preferences if no existing data
           setPreferences({ role: "", tone: "", platform: "" });
           setOriginalPreferences({ role: "", tone: "", platform: "" });
         }
       } catch (error) {
         console.error("Failed to fetch preferences:", error);
-        setMessage({
+        showToast({
           type: "error",
-          text: "Failed to load preferences. Please try again.",
+          message: "Failed to load preferences. Please try again.",
         });
       } finally {
         setLoading(false);
@@ -264,13 +260,20 @@ const Preferences = () => {
     };
 
     fetchPreferences();
-  }, [currentUser, db]);
+  }, [currentUser]);
 
-  // Handle changes
+  // Handle preference changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPreferences((prev) => ({ ...prev, [name]: value }));
-    setMessage(null); // Clear message on any change
+    setPreferences((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    setPreferences(originalPreferences);
   };
 
   // Check for changes
@@ -281,35 +284,27 @@ const Preferences = () => {
 
   // Save preferences
   const handleSave = async () => {
-    if (!currentUser?.uid || !hasChanges) return; // Prevent saving if no changes or no user
+    if (!currentUser?.uid || !hasChanges) return;
 
     setIsSaving(true);
-    setMessage(null); // Clear previous message before saving
     try {
       const userRef = doc(db, "users", currentUser.uid);
       await updateDoc(userRef, preferences);
 
-      setMessage({
+      showToast({
         type: "success",
-        text: "Preferences updated successfully!",
-      });
+        message: "Preferences updated successfully!",
+      }); // 2
       setOriginalPreferences(preferences);
     } catch (error) {
       console.error("Failed to update preferences:", error);
-      setMessage({
+      showToast({
         type: "error",
-        text: "Failed to update preferences. Please try again.",
-      });
+        message: "Failed to update preferences. Please try again.",
+      }); // 3
     } finally {
       setIsSaving(false);
-      setTimeout(() => setMessage(null), 6000); // Clear success/error message after 6 seconds
     }
-  };
-
-  // Cancel changes
-  const handleCancel = () => {
-    setPreferences(originalPreferences);
-    setMessage(null); // Clear message on cancel
   };
 
   if (!currentUser || loading) {
@@ -317,36 +312,8 @@ const Preferences = () => {
   }
 
   return (
-    <div className="min-h-screen  py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-10 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Notification */}
-        {message && (
-          <div className="mb-6">
-            <div
-              className={`p-4 rounded-xl border shadow-sm text-center ${
-                message.type === "success"
-                  ? "bg-gray-50 dark:bg-gray-900 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700"
-                  : "bg-gray-50 dark:bg-gray-900 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700"
-              }`}
-            >
-              <div className="flex justify-center items-center space-x-2">
-                {message.type === "success" ? (
-                  <CheckCircle
-                    size={18}
-                    className="text-green-600 dark:text-green-400"
-                  />
-                ) : (
-                  <XCircle
-                    size={18}
-                    className="text-red-600 dark:text-red-400"
-                  />
-                )}
-                <span className="font-medium">{message.text}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Preferences Card */}
         <section className="bg-white dark:bg-black rounded-2xl shadow-lg border border-gray-200 dark:border-neutral-800 p-6 sm:p-8">
           <div className="space-y-6">
