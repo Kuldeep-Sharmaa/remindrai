@@ -1,4 +1,4 @@
-// src/components/settings/AccountInfo.jsx - Production-Ready with Button Loading (Copy Button)
+// src/components/settings/AccountInfo.jsx - Production-Ready with Button Loading
 
 import React, { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore"; // Ensure getDoc is actually used if data fetched from Firestore
@@ -62,7 +62,7 @@ const AccountInfo = () => {
         console.error(
           "formatFirebaseDate: Could not parse date string/number:",
           dateValue,
-          e
+          e,
         );
         return "N/A";
       }
@@ -70,7 +70,7 @@ const AccountInfo = () => {
       console.warn(
         "formatFirebaseDate: Unknown date format:",
         typeof dateValue,
-        dateValue
+        dateValue,
       );
       return "N/A";
     }
@@ -78,7 +78,7 @@ const AccountInfo = () => {
     if (isNaN(date.getTime())) {
       console.warn(
         "formatFirebaseDate: Invalid Date object after parsing:",
-        dateValue
+        dateValue,
       );
       return "N/A";
     }
@@ -162,7 +162,7 @@ const AccountInfo = () => {
               currentUser.fullName ||
                 currentUser.displayName ||
                 currentUser.email?.split("@")[0] ||
-                "User Name"
+                "User Name",
             );
             setMemberSince(formatDateFromTimestamp(currentUser.createdAt));
             setTimezone(currentUser.timezone || "N/A"); // Default or from currentUser
@@ -188,7 +188,7 @@ const AccountInfo = () => {
           currentUser.fullName ||
             currentUser.displayName ||
             currentUser.email?.split("@")[0] ||
-            "User Name"
+            "User Name",
         );
         setMemberSince(formatDateFromTimestamp(currentUser.createdAt));
         setTimezone(currentUser.timezone || "N/A");
@@ -207,8 +207,8 @@ const AccountInfo = () => {
   const firstLetter = fullName
     ? fullName.charAt(0).toUpperCase()
     : currentUser?.email
-    ? currentUser.email.charAt(0).toUpperCase()
-    : "";
+      ? currentUser.email.charAt(0).toUpperCase()
+      : "";
 
   // Skeleton Loader
   if (loadingAuth || loadingPageData) {
