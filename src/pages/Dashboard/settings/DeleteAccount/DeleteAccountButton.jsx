@@ -7,7 +7,7 @@ import { useAuthContext } from "../../../../context/AuthContext";
 import { auth } from "../../../../services/firebase";
 import { showToast } from "../../../../components/ToastSystem/toastUtils";
 import ReauthenticateModal from "./Reauthenticatemodal";
-import DeleteConfirmPanel from "./DeleteConfirmPanel";
+import DeleteConfirmPanel from "./ConfirmPanel";
 
 const DeleteAccountButton = () => {
   const {
