@@ -76,7 +76,7 @@ function ConfirmDeletePortal({ open, onConfirm, onCancel }) {
               id="delete-modal-title"
               className="text-lg font-semibold text-textLight dark:text-textDark"
             >
-              Delete this?
+              Delete this prompt?
             </h2>
             <button
               onClick={onCancel}
