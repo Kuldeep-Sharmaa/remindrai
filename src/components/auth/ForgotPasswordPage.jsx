@@ -173,7 +173,7 @@ const ForgotPasswordPage = () => {
 
         <div className="text-sm text-center">
           <button
-            onClick={() => navigate("/Auth", { replace: true })}
+            onClick={() => navigate("/auth", { replace: true })}
             className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
           >
             Back to Login

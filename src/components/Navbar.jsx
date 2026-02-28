@@ -203,8 +203,8 @@ export default function Navbar() {
                     item.isLocked
                       ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
                       : item.isUnlocked
-                      ? "text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
-                      : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                        ? "text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
+                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                   onClick={
                     item.isLocked ? (e) => e.preventDefault() : undefined
@@ -228,7 +228,7 @@ export default function Navbar() {
               // Visitor CTA
               <div className="flex items-center gap-2">
                 <Link
-                  to="/Auth"
+                  to="/auth"
                   className="group flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 hover:from-green-700 hover:via-blue-700 hover:to-purple-700 text-white text-sm font-bold transition-all duration-300 shadow-xl hover:shadow-2xl transform relative overflow-hidden"
                   aria-label="Sign up for full access"
                 >
@@ -408,8 +408,8 @@ export default function Navbar() {
                     item.isLocked
                       ? "text-gray-400 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50"
                       : item.isUnlocked
-                      ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 font-semibold"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                   aria-label={`Navigate to ${item.label}`}
                 >
@@ -456,7 +456,7 @@ export default function Navbar() {
               {!isLoggedIn && (
                 <div className="pt-6 mt-6 border-t border-gray-200 dark:border-gray-800 space-y-3">
                   <Link
-                    to="/Auth"
+                    to="/auth"
                     onClick={closeMenu}
                     className="group flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg relative overflow-hidden"
                   >
