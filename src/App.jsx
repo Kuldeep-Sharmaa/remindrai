@@ -41,7 +41,7 @@ import SettingsLayout from "./layouts/SettingsLayout";
 import AccountInfo from "./pages/Dashboard/settings/AccountInfo";
 import Notification from "./pages/Dashboard/settings/NotificationPreferences";
 import Appearance from "./pages/Dashboard/settings/Appearance";
-import DeleteAccount from "./pages/Dashboard/settings/DeleteAccountButton";
+import DeleteAccount from "./pages/Dashboard/settings/DeleteAccount/DeleteAccountButton";
 import Preferences from "./pages/Dashboard/settings/Preferences";
 import Security from "./pages/Dashboard/settings/Security";
 import Aboutremindrai from "./pages/Dashboard/settings/AboutRemindrPost";
