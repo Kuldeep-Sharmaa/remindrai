@@ -4,7 +4,8 @@
 // that lives alongside each auth account.
 //
 // What lives here:
-//   signup, login, logout, sendPasswordReset, updateFirestoreProfile
+//   signup, login, loginWithGoogle, loginWithGithub, logout,
+//   sendPasswordReset, updateFirestoreProfile
 //   plus some helpers for retrying flaky network calls and classifying errors.
 //
 // What does NOT live here:
@@ -20,6 +21,11 @@ import {
   signOut,
 } from "firebase/auth";
 import {
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import {
   doc,
   getDoc,
   setDoc,
@@ -29,6 +35,14 @@ import {
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
+
+// OAuth Providers
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account",
+});
+
+const githubProvider = new GithubAuthProvider();
 
 /**
  * Retries a flaky async operation with exponential backoff.
@@ -239,6 +253,64 @@ export const login = async (email, password) => {
     return result;
   } catch (error) {
     console.error("Login error:", error);
+    const classification = classifyError(error);
+    throw {
+      success: false,
+      error: error.message,
+      code: error.code,
+      classification,
+    };
+  }
+};
+
+/**
+ * Logs in with Google via popup and writes/updates the Firestore profile.
+ * Throws a structured error object on failure — same shape as login errors.
+ */
+export const loginWithGoogle = async () => {
+  try {
+    const result = await retryOperation(async () => {
+      return await signInWithPopup(auth, googleProvider);
+    });
+
+    const user = result.user;
+
+    await createUserProfileDocument(user);
+
+    console.log("Google login successful");
+    return { success: true, user };
+  } catch (error) {
+    console.error("Google login error:", error);
+
+    const classification = classifyError(error);
+    throw {
+      success: false,
+      error: error.message,
+      code: error.code,
+      classification,
+    };
+  }
+};
+
+/**
+ * Logs in with GitHub via popup and writes/updates the Firestore profile.
+ * Throws a structured error object on failure — same shape as login errors.
+ */
+export const loginWithGithub = async () => {
+  try {
+    const result = await retryOperation(async () => {
+      return await signInWithPopup(auth, githubProvider);
+    });
+
+    const user = result.user;
+
+    await createUserProfileDocument(user);
+
+    console.log("GitHub login successful");
+    return { success: true, user };
+  } catch (error) {
+    console.error("GitHub login error:", error);
+
     const classification = classifyError(error);
     throw {
       success: false,
