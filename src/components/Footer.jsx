@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { Infinity } from "lucide-react";
@@ -131,7 +131,7 @@ const CraftBadge = () => (
     />
 
     <span className="text-xs text-muted font-inter">
-      A system that keeps work moving - when you donâ€™t.
+      A system that keeps work moving .
     </span>
   </div>
 );
@@ -215,7 +215,7 @@ const Footer = () => {
     w-full sm:w-auto
   "
           >
-            Â© {CURRENT_YEAR} RemindrAI â€” All rights reserved
+            © {CURRENT_YEAR} RemindrAI All rights reserved
           </p>
         </div>
       </div>
