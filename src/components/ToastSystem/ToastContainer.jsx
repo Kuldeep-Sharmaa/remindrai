@@ -18,8 +18,6 @@ const ToastContainer = () => {
   }, []);
 
   const mobileToastStyle = {
-    // Fixed px width — never vw, never %, never calc(100vw - x)
-    // vw shifts when mobile browser chrome appears/disappears on scroll
     width: "300px",
     maxWidth: "300px",
     minWidth: "300px",
