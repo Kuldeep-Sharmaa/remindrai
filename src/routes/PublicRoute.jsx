@@ -1,46 +1,37 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import FullScreenLoader from "../components/Loaders/FullScreenLoader";
 
+const AUTH_PAGES = ["/auth", "/login", "/signup", "/forgot-password"];
+
 const PublicRoute = ({ children }) => {
-  const { currentUser, hasLoadedProfile, isUserLoggingOut } = useAuthContext();
+  const { firebaseUser, currentUser, hasLoadedProfile, isAccountDeleting } =
+    useAuthContext();
+
   const location = useLocation();
+  const path = location.pathname;
 
-  // ✅ Define public & auth routes
-  const publicPaths = useMemo(
-    () => [
-      "/",
-      "/about",
-      "/features",
-      "/docs",
-      "/contact",
-      "/privacy",
-      "/terms",
-      "/gdpr",
-    ],
-    []
+  const isAuthPage = AUTH_PAGES.some(
+    (p) => path === p || path.startsWith(`${p}/`),
   );
 
-  const authPaths = useMemo(
-    () => ["/auth", "/login", "/signup", "/forgot-password"],
-    []
-  );
+  const isAuthenticated = !!firebaseUser && !!currentUser && hasLoadedProfile;
 
-  const isPublicPage = publicPaths.some((path) =>
-    new RegExp(`^${path}(/|$)`).test(location.pathname)
-  );
-  const isAuthPage = authPaths.some((path) =>
-    new RegExp(`^${path}(/|$)`).test(location.pathname)
-  );
-
-  if (!hasLoadedProfile) {
-    return isAuthPage ? <FullScreenLoader /> : children;
+  if (isAccountDeleting) {
+    return <FullScreenLoader text="Deleting your account..." />;
   }
 
-  // ✅ Redirect logged-in users away from auth/public pages
-  if (currentUser && !isPublicPage && !isUserLoggingOut) {
-    return <Navigate to="/dashboard" replace state={{ from: location }} />;
+  // Public pages render immediately — no identity check needed.
+  // A loader here would make the site feel gated before the user has done anything.
+  // Auth pages are the only exception: we must know if a session already exists
+  // before showing a login form, or a logged-in user flashes the form before redirect.
+  if (isAuthPage && !hasLoadedProfile) {
+    return <FullScreenLoader />;
+  }
+
+  if (isAuthenticated && isAuthPage) {
+    return <Navigate to="/workspace" replace />;
   }
 
   return children;
