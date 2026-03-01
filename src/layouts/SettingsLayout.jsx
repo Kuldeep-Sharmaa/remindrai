@@ -36,7 +36,7 @@ const SettingsLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isRoot = location.pathname === "/dashboard/settings";
+  const isRoot = location.pathname === "/workspace/settings";
   const key = location.pathname.split("/").pop();
   const meta = SETTINGS_META[key];
 
@@ -46,7 +46,7 @@ const SettingsLayout = () => {
       {!isRoot && meta && (
         <div className="px-5 pt-6 pb-4">
           <button
-            onClick={() => navigate("/dashboard/settings")}
+            onClick={() => navigate("/workspace/settings")}
             className="flex items-center gap-2 text-sm text-gray-500
                        hover:text-gray-900 dark:hover:text-white transition"
           >
