@@ -20,46 +20,46 @@ const SettingsPage = () => {
       title: "Profile & Account",
       description:
         "Your personal details and account registration information.",
-      path: "/dashboard/settings/accountinfo",
+      path: "/workspace/settings/accountinfo",
     },
     {
       icon: Key,
       title: "Security & Privacy",
       description:
         "Manage your password and enhance your account protection with 2FA.",
-      path: "/dashboard/settings/security",
+      path: "/workspace/settings/security",
     },
     {
       icon: Bell,
       title: "Notifications",
       description: "Configure alerts, emails, and notification preferences.",
-      path: "/dashboard/settings/notifications",
+      path: "/workspace/settings/notifications",
     },
     {
       icon: SlidersHorizontal,
       title: "AI & Content Preferences",
       description:
         "Update your role, tone, and content platform preferences for AI.",
-      path: "/dashboard/settings/preferences",
+      path: "/workspace/settings/preferences",
     },
     {
       icon: Palette,
       title: "Appearance & Display",
       description: "Customize theme, layout, and visual display settings.",
-      path: "/dashboard/settings/appearance",
+      path: "/workspace/settings/appearance",
     },
     {
       icon: Info,
       title: "About RemindrAI",
       description:
         "View version information, terms of service, and privacy policy.",
-      path: "/dashboard/settings/aboutremindrai",
+      path: "/workspace/settings/aboutremindrai",
     },
     {
       icon: Trash2,
       title: "Delete Account",
       description: "Permanently remove your account and all associated data.",
-      path: "/dashboard/settings/deleteaccount",
+      path: "/workspace/settings/deleteaccount",
       variant: "destructive",
     },
   ];
@@ -171,7 +171,7 @@ const SettingsPage = () => {
                 Documentation
               </a>
               <a
-                href="#"
+                href="/contact"
                 className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 Support
