@@ -1,9 +1,3 @@
-// components/Navbar.jsx
-//
-// Desktop:  [Logo]   [How it works | Docs | About]   [ThemeToggle  Get started]
-// Logged:   [Logo]   [● Dashboard  Docs | About | Support]   [ThemeToggle  [R Raj ▾]]
-// Mobile:   [Logo]   [ThemeToggle  ☰]  →  slide panel with NO logo, just links
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -13,13 +7,14 @@ import {
   User,
   Settings,
   LayoutDashboard,
+  Unlock,
+  Lock,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggleButton";
 import { useAuthContext } from "../context/AuthContext";
 
-// ─── Nav configs ────────────────────────────────────────────────────────────
-
 const VISITOR_NAV = [
+  { to: "/features", label: "Product" },
   { to: "/#how-it-works", label: "How it works" },
   { to: "/docs", label: "Docs" },
   { to: "/about", label: "About" },
@@ -31,14 +26,10 @@ const USER_NAV = [
   { to: "/contact", label: "Support" },
 ];
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
 const getInitial = (u) =>
   (u?.fullName || u?.email || "U").charAt(0).toUpperCase();
 const getFirstName = (u) =>
   u?.fullName?.split(" ")[0] || u?.email?.split("@")[0] || "there";
-
-// ─── Component ──────────────────────────────────────────────────────────────
 
 export default function Navbar() {
   const { currentUser, loading, hasLoadedProfile } = useAuthContext();
@@ -51,20 +42,17 @@ export default function Navbar() {
   const isLoggedIn = !loading && hasLoadedProfile && !!currentUser;
   const navItems = isLoggedIn ? USER_NAV : VISITOR_NAV;
 
-  // Scroll-aware border
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close everything on navigation
   useEffect(() => {
     setMobileOpen(false);
     setDropdownOpen(false);
   }, [location.pathname]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!dropdownOpen) return;
     const fn = (e) => {
@@ -74,7 +62,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", fn);
   }, [dropdownOpen]);
 
-  // Lock body scroll when mobile panel is open
+  // Prevent background page from scrolling while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -85,10 +73,9 @@ export default function Navbar() {
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  // ── Skeleton ─────────────────────────────────────────────────────────────
+  // Show a matching skeleton while auth resolves so the layout doesn't jump
   if (loading && !hasLoadedProfile) {
     return (
-      // h-16 matches the real navbar — no layout jump on hydration
       <header className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
           <div className="w-28 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse" />
@@ -106,7 +93,6 @@ export default function Navbar() {
     );
   }
 
-  // ── Navbar ────────────────────────────────────────────────────────────────
   return (
     <>
       <header
@@ -117,37 +103,34 @@ export default function Navbar() {
         }`}
       >
         {/*
-          3-column layout:
-          [Logo w-36]  [Nav flex-1 centered]  [Actions w-36]
-          Equal side widths keep center nav visually centered.
+          Three equal-width columns: logo | nav | actions.
+          Giving the logo and actions the same fixed width (w-36) keeps
+          the center nav optically centered without any JS measurements.
         */}
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center">
-          {/* Col 1 — Logo, no hover scale (static = confident) */}
           <div className="flex-shrink-0 w-36">
             <Link to="/" aria-label="RemindrAI home" className="inline-flex">
               <img
                 src="/transparent_logo.svg"
                 alt="RemindrAI"
-                className="h-7"
+                className="h-9 w-auto"
               />
             </Link>
           </div>
 
-          {/* Col 2 — Centered nav links */}
           <nav className="hidden lg:flex items-center justify-center gap-0.5 flex-1">
-            {/* Dashboard pill — logged-in only, calmer emerald-600 */}
             {isLoggedIn && (
               <Link
-                to="/dashboard"
+                to="/workspace"
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold font-grotesk transition-all duration-150 mr-2
                   ${
-                    isActive("/dashboard")
+                    isActive("/workspace")
                       ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/25"
                       : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20"
                   }`}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
-                Dashboard
+                Workspace
               </Link>
             )}
 
@@ -159,8 +142,7 @@ export default function Navbar() {
                   ${
                     isActive(to)
                       ? "text-brand dark:text-brand-soft font-medium"
-                      : // Slightly softened inactive — calmer visual hierarchy
-                        "text-gray-500/90 dark:text-gray-400/90 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+                      : "text-gray-500/90 dark:text-gray-400/90 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
                   }`}
               >
                 {label}
@@ -171,40 +153,73 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Col 3 — Right actions */}
           <div className="hidden lg:flex items-center justify-end gap-2.5 flex-shrink-0 w-36">
             <ThemeToggle />
 
             {!isLoggedIn ? (
-              // Visitor CTA — no icon, just clean text. Confidence.
+              // "Unlock" communicates access to something meaningful — not a feature, not a tool.
+              // Icon sits after the word: action → result, the natural English reading direction.
               <Link
                 to="/auth"
-                className="px-4 py-2 rounded-lg bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk transition-all duration-150 shadow-sm shadow-brand/20 hover:shadow-md hover:shadow-brand/25 hover:-translate-y-px"
+                className="
+    group relative inline-flex items-center justify-center
+    gap-3
+    px-5 py-2.5
+    rounded-xl
+    bg-brand hover:bg-brand-hover
+    text-white text-sm font-semibold font-grotesk
+    whitespace-nowrap
+    overflow-hidden
+    transition-all duration-200 ease-out
+    shadow-sm shadow-brand/20
+  "
               >
-                Get started
+                {/* Shimmer */}
+                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
+                {/* Label */}
+                <span className="relative z-10 leading-none">Unlock</span>
+
+                {/* Icon container */}
+                <span className="relative z-10 flex items-center justify-center w-4 h-4">
+                  {/* Locked */}
+                  <Lock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
+
+                  {/* Unlock */}
+                  <Unlock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-6" />
+                </span>
               </Link>
             ) : (
-              // User dropdown
               <div className="relative" data-dropdown>
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
                   aria-expanded={dropdownOpen}
-                  aria-label="Account menu"
-                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border transition-all duration-150
+                  aria-label="Open your workspace"
+                  className={`group flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 rounded-full border transition-all duration-200
                     ${
                       dropdownOpen
-                        ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
-                        : "border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 bg-white dark:bg-white/5"
+                        ? "border-brand/40 bg-brand/8 dark:bg-brand/15 shadow-sm shadow-brand/10"
+                        : "border-gray-200 dark:border-white/10 hover:border-brand/30 dark:hover:border-brand/30 bg-white dark:bg-white/5 hover:shadow-sm hover:shadow-brand/10"
                     }`}
                 >
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold font-grotesk flex-shrink-0">
-                    {getInitial(currentUser)}
+                  {/* Avatar — live green dot signals the system is still running */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold font-grotesk">
+                      {getInitial(currentUser)}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-[1.5px] border-white dark:border-black" />
                   </div>
-                  <span className="text-sm font-medium font-inter text-gray-700 dark:text-gray-300 max-w-[80px] truncate">
+
+                  <span className="text-sm font-medium font-inter max-w-[80px] truncate transition-colors duration-150 text-gray-600 dark:text-gray-400 group-hover:text-brand dark:group-hover:text-brand-soft">
                     {getFirstName(currentUser)}
                   </span>
+
                   <ChevronDown
-                    className={`w-3 h-3 text-muted flex-shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                    className={`w-3 h-3 flex-shrink-0 transition-all duration-200 ${
+                      dropdownOpen
+                        ? "rotate-180 text-brand"
+                        : "text-muted group-hover:text-brand"
+                    }`}
                   />
                 </button>
 
@@ -213,7 +228,6 @@ export default function Navbar() {
                     className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-bgImpact rounded-xl border border-gray-200 dark:border-white/10 shadow-xl shadow-black/10 py-1.5 z-50"
                     style={{ animation: "dropIn 0.14s ease forwards" }}
                   >
-                    {/* User identity */}
                     <div className="px-3.5 py-2.5 border-b border-gray-100 dark:border-white/5 mb-1">
                       <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -231,7 +245,7 @@ export default function Navbar() {
                     </div>
 
                     <Link
-                      to="/dashboard/settings/accountinfo"
+                      to="/workspace/settings/accountinfo"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
                     >
@@ -239,7 +253,7 @@ export default function Navbar() {
                       Profile
                     </Link>
                     <Link
-                      to="/dashboard/settings"
+                      to="/workspace/settings"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
                     >
@@ -252,7 +266,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile: burger only — ThemeToggle lives inside the panel */}
+          {/* ThemeToggle lives inside the mobile panel, not here */}
           <div className="lg:hidden ml-auto flex items-center">
             <button
               onClick={() => setMobileOpen((v) => !v)}
@@ -270,9 +284,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* ── Mobile panel ──────────────────────────────────────────────────── */}
-
-      {/* Backdrop */}
       <div
         onClick={() => setMobileOpen(false)}
         aria-hidden="true"
@@ -283,20 +294,13 @@ export default function Navbar() {
         }`}
       />
 
-      {/*
-        Side panel.
-        — No logo inside (spec requirement)
-        — No greeting text (premium = minimal)
-        — Just nav links with stagger, close X, user card at bottom for logged-in
-        — h-16 top padding matches navbar exactly so nothing is hidden under it
-      */}
       <aside
         className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           mobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
         aria-label="Navigation"
       >
-        {/* Panel top — close button only, NO logo */}
+        {/* h-16 matches the navbar height so the close button aligns with the burger */}
         <div className="h-16 flex items-center justify-end px-4 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
           <button
             onClick={() => setMobileOpen(false)}
@@ -307,16 +311,14 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Links */}
         <nav className="flex-1 overflow-y-auto px-3 pt-3 pb-6 flex flex-col gap-0.5">
-          {/* Dashboard pill — logged-in mobile */}
           {isLoggedIn && (
             <Link
-              to="/dashboard"
+              to="/workspace"
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold font-grotesk mb-1 transition-all duration-150
                 ${
-                  isActive("/dashboard")
+                  isActive("/workspace")
                     ? "bg-emerald-600 text-white"
                     : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"
                 }`}
@@ -328,7 +330,7 @@ export default function Navbar() {
               }}
             >
               <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
-              Dashboard
+              Workspace
             </Link>
           )}
 
@@ -357,12 +359,11 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Account links for logged-in */}
           {isLoggedIn && (
             <>
               <div className="my-3 border-t border-gray-100 dark:border-white/5" />
               <Link
-                to="/dashboard/settings/accountinfo"
+                to="/workspace/settings/accountinfo"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
@@ -370,7 +371,7 @@ export default function Navbar() {
                 Profile
               </Link>
               <Link
-                to="/dashboard/settings"
+                to="/workspace/settings"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
@@ -380,28 +381,25 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Visitor CTA */}
           {!isLoggedIn && (
             <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex flex-col gap-2">
               <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center px-4 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk transition-colors duration-150"
+                className="group relative flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk overflow-hidden transition-all duration-200"
               >
-                Get started
-              </Link>
-              <Link
-                to="/auth"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white transition-colors font-inter"
-              >
-                Sign in
+                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                <span className="relative z-10">Unlock</span>
+                <span className="relative z-10 flex items-center justify-center w-3.5 h-3.5">
+                  <Lock className="absolute inset-0 w-3.5 h-3.5 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
+                  <Unlock className="absolute inset-0 w-3.5 h-3.5 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-6" />
+                </span>
               </Link>
             </div>
           )}
         </nav>
 
-        {/* Panel footer — always rendered. ThemeToggle here for everyone, user info for logged-in. */}
+        {/* ThemeToggle is pinned here so it's always reachable with one thumb on mobile */}
         <div className="px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
           <div className="flex items-center justify-between">
             {isLoggedIn ? (
