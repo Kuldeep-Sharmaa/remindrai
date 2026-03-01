@@ -62,7 +62,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", fn);
   }, [dropdownOpen]);
 
-  // Prevent background page from scrolling while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -73,7 +72,6 @@ export default function Navbar() {
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  // Show a matching skeleton while auth resolves so the layout doesn't jump
   if (loading && !hasLoadedProfile) {
     return (
       <header className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
@@ -102,18 +100,13 @@ export default function Navbar() {
             : "border-b border-gray-100/50 dark:border-white/[0.06]"
         }`}
       >
-        {/*
-          Three equal-width columns: logo | nav | actions.
-          Giving the logo and actions the same fixed width (w-36) keeps
-          the center nav optically centered without any JS measurements.
-        */}
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center">
           <div className="flex-shrink-0 w-36">
-            <Link to="/" aria-label="RemindrAI home" className="inline-flex">
+            <Link to="/" aria-label="home" className="inline-flex">
               <img
                 src="/transparent_logo.svg"
                 alt="RemindrAI"
-                className="h-9 w-auto"
+                className="h-10 w-auto"
               />
             </Link>
           </div>
@@ -122,7 +115,7 @@ export default function Navbar() {
             {isLoggedIn && (
               <Link
                 to="/workspace"
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold font-grotesk transition-all duration-150 mr-2
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-base font-semibold font-grotesk transition-all duration-150 mr-2
                   ${
                     isActive("/workspace")
                       ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/25"
@@ -138,7 +131,7 @@ export default function Navbar() {
               <Link
                 key={to}
                 to={to}
-                className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-150 font-inter
+                className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
                   ${
                     isActive(to)
                       ? "text-brand dark:text-brand-soft font-medium"
@@ -157,8 +150,6 @@ export default function Navbar() {
             <ThemeToggle />
 
             {!isLoggedIn ? (
-              // "Unlock" communicates access to something meaningful — not a feature, not a tool.
-              // Icon sits after the word: action → result, the natural English reading direction.
               <Link
                 to="/auth"
                 className="
@@ -174,18 +165,15 @@ export default function Navbar() {
     shadow-sm shadow-brand/20
   "
               >
-                {/* Shimmer */}
                 <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-                {/* Label */}
-                <span className="relative z-10 leading-none">Unlock</span>
+                <span className="relative z-10 text-base leading-none">
+                  Unlock
+                </span>
 
-                {/* Icon container */}
                 <span className="relative z-10 flex items-center justify-center w-4 h-4">
-                  {/* Locked */}
                   <Lock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
 
-                  {/* Unlock */}
                   <Unlock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-6" />
                 </span>
               </Link>
@@ -202,7 +190,6 @@ export default function Navbar() {
                         : "border-gray-200 dark:border-white/10 hover:border-brand/30 dark:hover:border-brand/30 bg-white dark:bg-white/5 hover:shadow-sm hover:shadow-brand/10"
                     }`}
                 >
-                  {/* Avatar — live green dot signals the system is still running */}
                   <div className="relative flex-shrink-0">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold font-grotesk">
                       {getInitial(currentUser)}
@@ -266,7 +253,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ThemeToggle lives inside the mobile panel, not here */}
           <div className="lg:hidden ml-auto flex items-center">
             <button
               onClick={() => setMobileOpen((v) => !v)}
@@ -300,7 +286,6 @@ export default function Navbar() {
         }`}
         aria-label="Navigation"
       >
-        {/* h-16 matches the navbar height so the close button aligns with the burger */}
         <div className="h-16 flex items-center justify-end px-4 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
           <button
             onClick={() => setMobileOpen(false)}
@@ -316,7 +301,7 @@ export default function Navbar() {
             <Link
               to="/workspace"
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold font-grotesk mb-1 transition-all duration-150
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold font-grotesk mb-1 transition-all duration-150
                 ${
                   isActive("/workspace")
                     ? "bg-emerald-600 text-white"
@@ -339,7 +324,7 @@ export default function Navbar() {
               key={to}
               to={to}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 font-inter
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors duration-150 font-inter
                 ${
                   isActive(to)
                     ? "bg-brand/8 text-brand dark:text-brand-soft"
@@ -399,7 +384,6 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* ThemeToggle is pinned here so it's always reachable with one thumb on mobile */}
         <div className="px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
           <div className="flex items-center justify-between">
             {isLoggedIn ? (
