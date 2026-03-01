@@ -1,8 +1,3 @@
-// AuthContext - Central auth state management
-// - Listens to Firebase auth state changes
-// - Loads user profile from Firestore and merges with auth data
-// - Provides login, logout, signup, profile update, and account deletion functions
-// - Integrates timezone detection and Draft data for comprehensive user context
 import React, {
   createContext,
   useContext,
@@ -21,6 +16,8 @@ import {
   setDoc,
   getDoc,
   deleteDoc,
+  collection,
+  getDocs,
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
@@ -39,21 +36,17 @@ import { clearAllDeclinedForUser } from "./timezoneStorage";
 const AuthContext = createContext(undefined);
 
 export function AuthContextProvider({ children }) {
-  // Core auth state - raw from Firebase
   const [firebaseUser, setFirebaseUser] = useState(null);
-
-  // Merged profile (Firebase auth + Firestore doc)
   const [userProfile, setUserProfile] = useState(null);
-
   const [loading, setLoading] = useState(true);
   const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
   const [isAccountDeleting, setIsAccountDeleting] = useState(false);
 
-  // Used to block timezone modal during logout
+  // Blocks the timezone modal from firing during logout
   const isLoggingOutRef = useRef(false);
 
-  // Load all reminders for current user
-  // Must be called unconditionally (React rules), so we pass null if no user
+  // useUserReminders must be called unconditionally — React rules.
+  // We pass null when there's no user and let the hook handle it.
   const {
     reminders,
     isLoadingReminders,
@@ -71,8 +64,6 @@ export function AuthContextProvider({ children }) {
     isEmpty: remindersEmpty,
   } = useUserReminders(firebaseUser?.uid || null);
 
-  // Timezone detection + modal state
-  // Compares browser timezone to saved timezone, triggers modal if different
   const {
     detectedTimezone,
     isStable: isTimezoneStable,
@@ -92,7 +83,6 @@ export function AuthContextProvider({ children }) {
     setUserProfile,
   });
 
-  // Format timestamps for display
   const formatDateFromTimestamp = useCallback((dateValue) => {
     if (!dateValue) return "N/A";
 
@@ -102,7 +92,7 @@ export function AuthContextProvider({ children }) {
     } else if (typeof dateValue === "string") {
       try {
         date = new Date(dateValue);
-      } catch (e) {
+      } catch {
         return "N/A";
       }
     } else if (dateValue instanceof Date) {
@@ -123,59 +113,71 @@ export function AuthContextProvider({ children }) {
     });
   }, []);
 
-  // Update user profile in Firestore
   const updateUserProfileInFirestore = useCallback(
     async (data) => {
       if (!firebaseUser?.uid) {
-        console.error("❌ No authenticated user to update");
         return { success: false, error: "No authenticated user." };
       }
 
       try {
-        const result = await updateFirestoreProfile(firebaseUser.uid, data);
-        if (result.success) {
-          console.log("✅ Profile updated:", data);
-        } else {
-          console.error("❌ Profile update failed:", result.error);
-        }
-        return result;
+        return await updateFirestoreProfile(firebaseUser.uid, data);
       } catch (error) {
-        console.error("❌ Unexpected error updating profile:", error);
         return { success: false, error: error.message };
       }
     },
     [firebaseUser],
   );
 
-  // Delete user account (Firestore doc + Firebase auth)
   const deleteAccount = useCallback(async () => {
     if (!firebaseUser?.uid) {
-      console.error("❌ No user to delete");
       return { success: false, error: "No authenticated user." };
     }
 
     setIsAccountDeleting(true);
-    console.log("  Deleting account:", firebaseUser.uid);
+    const userId = firebaseUser.uid;
+
+    // If you add new subcollections under /users/{uid} in the future, add them here.
+    const subcollections = [
+      "reminders",
+      "drafts",
+      "executions",
+      "draftInteractions",
+      "reminderIdempotency",
+      "userPrefs",
+    ];
 
     try {
-      const userId = firebaseUser.uid;
-
-      // Try to delete Firestore doc first (best effort)
-      try {
-        await deleteDoc(doc(db, "users", userId));
-        console.log("✅ Firestore doc deleted");
-      } catch (firestoreError) {
-        console.error("⚠️ Firestore delete failed:", firestoreError);
-        // Continue anyway - auth deletion is more important
+      // Delete subcollections before the auth user — we need to still be authenticated
+      // when these Firestore delete requests land, otherwise rules will reject them.
+      for (const sub of subcollections) {
+        try {
+          const snap = await getDocs(collection(db, "users", userId, sub));
+          if (!snap.empty) {
+            await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
+          }
+        } catch (subErr) {
+          // One subcollection failing shouldn't stop the rest from being cleaned up.
+          console.warn(
+            `Could not delete subcollection "${sub}":`,
+            subErr.message,
+          );
+        }
       }
 
-      // Delete Firebase auth user (this logs them out)
+      try {
+        await deleteDoc(doc(db, "users", userId));
+      } catch (docErr) {
+        console.warn("Could not delete parent user doc:", docErr.message);
+      }
+
       await deleteUser(firebaseUser);
-      console.log("✅ Auth user deleted");
+
+      // Firebase Auth deletion takes a moment to propagate. Without this pause,
+      // signing up again immediately with the same email throws auth/email-already-in-use.
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       return { success: true };
     } catch (error) {
-      console.error("❌ Account deletion failed:", error);
       setIsAccountDeleting(false);
 
       if (error.code === "auth/requires-recent-login") {
@@ -189,29 +191,27 @@ export function AuthContextProvider({ children }) {
 
       return { success: false, error: error.message };
     }
+    // We intentionally don't reset isAccountDeleting on success.
+    // onAuthStateChanged fires right after and resets all state cleanly.
   }, [firebaseUser]);
 
-  // Logout with cleanup
-  // Important: clear declined timezone marks so modal shows again on next login
   const logout = useCallback(async () => {
     isLoggingOutRef.current = true;
     markLogout(true);
-    console.log("🚪 Logging out");
 
-    // Clear localStorage entries for declined timezones
-    // Without this, user never sees timezone modal again after declining once
+    // Without clearing these, a user who declined the timezone modal once
+    // will never see it again — even after logging out and back in.
     if (firebaseUser?.uid) {
       try {
         clearAllDeclinedForUser(firebaseUser.uid);
       } catch (e) {
-        console.warn("Failed to clear declined marks:", e);
+        console.warn("Failed to clear declined timezone marks:", e);
       }
     }
 
     try {
       return await authServiceLogout();
     } catch (error) {
-      console.error("❌ Logout failed:", error);
       return { success: false, error: error.message };
     } finally {
       isLoggingOutRef.current = false;
@@ -220,16 +220,11 @@ export function AuthContextProvider({ children }) {
     }
   }, [firebaseUser?.uid, markLogout, resetTimezoneState]);
 
-  // Main auth state listener
-  // Handles: login, logout, token refresh, profile loading
   useEffect(() => {
     let unsubscribeAuth = () => {};
     let unsubscribeFirestore = () => {};
 
     unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      console.log("🔐 Auth state changed. User:", user?.uid || "null");
-
-      // Clean up old Firestore listener to avoid memory leaks
       if (unsubscribeFirestore) {
         unsubscribeFirestore();
         unsubscribeFirestore = () => {};
@@ -239,9 +234,7 @@ export function AuthContextProvider({ children }) {
       setLoading(true);
       setHasLoadedProfile(false);
 
-      // No user - clear everything and bail
       if (!user) {
-        console.log("🚫 No user, clearing state");
         setFirebaseUser(null);
         setUserProfile(null);
         setLoading(false);
@@ -249,19 +242,17 @@ export function AuthContextProvider({ children }) {
         isLoggingOutRef.current = false;
         setIsAccountDeleting(false);
         resetTimezoneState();
-        console.log("✅ State cleared");
         return;
       }
 
-      // User exists - reload to get fresh token
-      // This catches cases where token expired or user was deleted server-side
+      // Force-reload the user so we're working with the freshest token and
+      // emailVerified status — stale tokens cause subtle bugs after password resets.
       try {
         await user.reload();
-        await user.getIdToken(true); // force refresh
+        await user.getIdToken(true);
         user = auth.currentUser;
 
         if (!user) {
-          console.log("⚠️ User disappeared after reload");
           setFirebaseUser(null);
           setUserProfile(null);
           setLoading(false);
@@ -270,23 +261,12 @@ export function AuthContextProvider({ children }) {
           resetTimezoneState();
           return;
         }
-
-        console.log(
-          "✅ User reloaded:",
-          user.displayName,
-          "verified:",
-          user.emailVerified,
-        );
       } catch (reloadError) {
-        console.error("❌ Reload failed:", reloadError);
-
-        // Token invalid - user needs to log in again
         if (
           reloadError.code === "auth/user-token-expired" ||
           reloadError.code === "auth/user-not-found" ||
           reloadError.code === "auth/invalid-user-token"
         ) {
-          console.log("⚠️ Invalid token, clearing state");
           setFirebaseUser(null);
           setUserProfile(null);
           setLoading(false);
@@ -295,18 +275,17 @@ export function AuthContextProvider({ children }) {
           resetTimezoneState();
           return;
         }
-        // Other errors - might be temporary, continue
+        // Other reload errors (network glitch etc.) — continue with what we have
       }
 
       setFirebaseUser(user);
 
       const userDocRef = doc(db, "users", user.uid);
 
-      // Create initial Firestore doc for new verified users
+      // First-time verified sign-in: Firestore doc won't exist yet, create it.
       try {
         const docSnap = await getDoc(userDocRef);
         if (user.emailVerified && !docSnap.exists()) {
-          console.log("📝 Creating initial profile");
           await setDoc(
             userDocRef,
             {
@@ -320,32 +299,22 @@ export function AuthContextProvider({ children }) {
             },
             { merge: true },
           );
-          console.log("✅ Initial profile created");
         }
       } catch (firestoreInitError) {
-        console.error(
-          "❌ Failed to create initial profile:",
-          firestoreInitError,
-        );
+        console.error("Failed to create initial profile:", firestoreInitError);
       }
 
-      // Listen to Firestore doc for real-time updates
       unsubscribeFirestore = onSnapshot(
         userDocRef,
         (latestDocSnap) => {
-          // Guard against race condition if user changed during snapshot
-          const currentUser = auth.currentUser;
-          if (!currentUser || currentUser.uid !== user.uid) {
-            console.log("⚠️ User changed during snapshot, ignoring");
-            return;
-          }
+          // Guard against a race where auth changed while we were waiting for this snapshot
+          const currentAuthUser = auth.currentUser;
+          if (!currentAuthUser || currentAuthUser.uid !== user.uid) return;
 
-          console.log("📡 Firestore snapshot for:", user.uid);
           const firestoreData = latestDocSnap.exists()
             ? latestDocSnap.data()
             : {};
 
-          // Merge Firebase auth data with Firestore data
           const profile = {
             uid: user.uid,
             email: user.email,
@@ -369,25 +338,17 @@ export function AuthContextProvider({ children }) {
             ...firestoreData,
           };
 
-          console.log("✅ Profile loaded:", {
-            verified: profile.emailVerified,
-            onboarded: profile.onboardingComplete,
-            timezone: profile.timezone,
-          });
-
           setUserProfile(profile);
           setLoading(false);
           setHasLoadedProfile(true);
         },
         (error) => {
-          console.error("❌ Firestore listener error:", error);
+          console.error("Firestore listener error:", error);
 
-          // Permission denied - shouldn't happen, clear state
           if (
             error.code === "permission-denied" ||
             error.code === "not-found"
           ) {
-            console.log("⚠️ Permission denied, clearing state");
             setUserProfile(null);
             setFirebaseUser(null);
             setLoading(false);
@@ -397,7 +358,8 @@ export function AuthContextProvider({ children }) {
             return;
           }
 
-          // Other errors - create fallback profile from auth data only
+          // For non-permission errors, fall back to a minimal profile built from
+          // auth data alone so the app doesn't completely break on a Firestore hiccup.
           setUserProfile({
             uid: user.uid,
             email: user.email,
@@ -415,35 +377,27 @@ export function AuthContextProvider({ children }) {
     });
 
     return () => {
-      console.log("🧹 Cleaning up listeners");
       unsubscribeAuth();
-      if (unsubscribeFirestore) {
-        unsubscribeFirestore();
-      }
+      if (unsubscribeFirestore) unsubscribeFirestore();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps intentional - only run once
+  }, []); // Intentionally empty — this listener should only mount once
 
-  // Memoize context value to prevent unnecessary re-renders
   const computedValues = useMemo(
     () => ({
-      // User state
       firebaseUser,
       user: userProfile,
       currentUser: userProfile,
 
-      // Loading flags
       loading,
       hasLoadedProfile,
       isAccountDeleting,
       isUserLoggingOut: isLoggingOutRef.current,
 
-      // Convenience accessors
       onboardingComplete: userProfile?.onboardingComplete || false,
       emailVerified: userProfile?.emailVerified || false,
       isFirstLoginSession: userProfile?.isFirstLoginSession || false,
 
-      // Timezone detection
       detectedTimezone,
       isTimezoneStable,
       pendingDeviceTimezone,
@@ -452,7 +406,6 @@ export function AuthContextProvider({ children }) {
       declineDeviceTimezone,
       acceptDeviceTimezone,
 
-      // Reminders data
       reminders,
       isLoadingReminders,
       remindersError,
@@ -468,16 +421,13 @@ export function AuthContextProvider({ children }) {
       nextRun,
       remindersEmpty,
 
-      // Auth actions
       login: authServiceLogin,
       logout,
       signup: authServiceSignup,
 
-      // Profile actions
       updateUserProfile: updateUserProfileInFirestore,
       deleteAccount,
 
-      // Utils
       formatDateFromTimestamp,
     }),
     [
