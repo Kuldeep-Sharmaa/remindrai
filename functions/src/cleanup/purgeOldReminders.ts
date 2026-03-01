@@ -17,8 +17,12 @@
  * ---------------------------------------------
  */
 
+import { getDb, serverTimestamp } from "../libs/firestoreClient";
+
 export interface PurgeOldDataOptions {
   olderThanDays?: number;
+  explicitApproval?: boolean;
+  batchSize?: number;
 }
 
 export interface PurgeOldDataResult {
@@ -26,14 +30,57 @@ export interface PurgeOldDataResult {
 }
 
 export async function purgeOldData(
-  options: PurgeOldDataOptions = {}
+  options: PurgeOldDataOptions = {},
 ): Promise<PurgeOldDataResult> {
-  const { olderThanDays: _olderThanDays = 365 } = options;
+  const {
+    olderThanDays = 365,
+    explicitApproval = false,
+    batchSize = 500,
+  } = options;
 
-  // TODO:
-  // - Implement safe archival or soft-delete pattern
-  // - Must NOT hard-delete without audit requirements
-  // - Must NOT be scheduled without explicit approval
+  if (!explicitApproval) {
+    return { purged: 0 };
+  }
 
-  return { purged: 0 };
+  const db = getDb();
+  const cutoff = new Date(
+    Date.now() - Math.max(1, olderThanDays) * 24 * 60 * 60 * 1000,
+  );
+  const chunkSize = Math.min(Math.max(1, batchSize), 500);
+
+  let purged = 0;
+
+  while (true) {
+    const snapshot = await db
+      .collectionGroup("reminders")
+      .where("enabled", "==", false)
+      .where("updatedAt", "<", cutoff)
+      .orderBy("updatedAt", "asc")
+      .limit(chunkSize)
+      .get();
+
+    if (snapshot.empty) {
+      break;
+    }
+
+    const batch = db.batch();
+
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, {
+        enabled: false,
+        retentionArchivedAt: serverTimestamp(),
+        retentionPurgeMode: "soft_delete",
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+    purged += snapshot.size;
+
+    if (snapshot.size < chunkSize) {
+      break;
+    }
+  }
+
+  return { purged };
 }
