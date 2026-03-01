@@ -1,22 +1,26 @@
-// src/components/auth/ForgotPasswordPage.jsx - UPDATED VERSION
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail } from "lucide-react";
-// ✅ Corrected import: Use 'sendPasswordReset' as it's the exported function from authService
 import { sendPasswordReset } from "../../services/authService";
-import { showToast } from "../ToastSystem/toastUtils"; // Assuming this path is correct
+import { showToast } from "../ToastSystem/toastUtils";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const redirectTimer = useRef(null);
 
-  const validateEmail = (emailAddress) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const valid = emailRegex.test(emailAddress);
+  // Clear any pending redirect timer on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
+    };
+  }, []);
+
+  const validate = (value) => {
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     setIsEmailValid(valid);
     return valid;
   };
@@ -24,7 +28,12 @@ const ForgotPasswordPage = () => {
   const handleChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-    validateEmail(value);
+    validate(value); // always validate so button activates as soon as pattern matches
+  };
+
+  const handleBlur = () => {
+    setIsTouched(true);
+    validate(email);
   };
 
   const handleSubmit = async (e) => {
@@ -41,145 +50,141 @@ const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      // ✅ Use the correctly imported 'sendPasswordReset' function
-      await sendPasswordReset(email); // This function handles the Firebase call internally
+      await sendPasswordReset(email);
 
-      // On success (or a generic message for security reasons, as Firebase does)
       showToast({
-        type: "success", // Using success here because the service call completed without a thrown error
+        type: "success",
         message:
-          "If an account exists for that email, a password reset link has been sent.",
+          "If an account exists for that email, a reset link has been sent. Please check your inbox or spam folder.",
       });
-      setTimeout(() => {
-        navigate("/", { replace: true }); // Redirect to login page
-      }, 3000); // Give user time to read the message
-    } catch (error) {
-      // Catch actual errors thrown by sendPasswordReset
-      console.error("Password reset error details:", error); // Log the actual error
-      showToast({
-        type: "error", // Use error type for actual errors caught
-        message:
-          "Failed to send reset email. Please check your email or try again later.",
-      });
-      // Optionally redirect even on explicit error after showing toast
-      setTimeout(() => {
-        navigate("/", { replace: true });
+
+      // Redirect to auth after success only — gives user time to read the toast
+      redirectTimer.current = setTimeout(() => {
+        navigate("/auth", { replace: true });
       }, 3000);
+    } catch (error) {
+      console.error("Password reset error:", error);
+      // Stay on page so user can retry
+      showToast({
+        type: "error",
+        message:
+          "Failed to send reset email. Please check your connection and try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const showError = isTouched && email.length > 0 && !isEmailValid;
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 p-10 rounded-xl shadow-lg transition-colors duration-200"
-      >
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Forgot Your Password?
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Enter your email address below and we'll send you a link to reset
-            your password.
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email Address
-            </label>
-            <div className="relative rounded-md shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail
-                  className="h-5 w-5 text-gray-400 dark:text-gray-400"
-                  aria-hidden="true"
-                />
-              </div>
+    <div className="min-h-screen flex flex-col bg-bgLight dark:bg-bgDark font-inter text-textLight dark:text-textDark">
+      {/* Top nav bar — matches AuthWrapper */}
+      <header className="w-full flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-border/50">
+        <img
+          src="/transparent_logo.svg"
+          alt="RemindrAI"
+          className="h-10 w-auto"
+          loading="eager"
+        />
+      </header>
+
+      <main className="flex-1 flex items-center text-center justify-center px-6 py-16">
+        <div className="w-full max-w-md">
+          {/* Heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="mb-8"
+          >
+            <h1 className="font-grotesk text-4xl font-semibold tracking-[-0.01em] leading-tight mb-2">
+              Reset your password
+            </h1>
+            <p className="text-base text-muted leading-relaxed">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+          </motion.div>
+
+          {/* Form */}
+          <motion.form
+            onSubmit={handleSubmit}
+            noValidate
+            className="space-y-5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut", delay: 0.05 }}
+          >
+            <div>
+              <label
+                htmlFor="reset-email"
+                className="block text-[12.5px] font-medium font-inter text-textLight/70 dark:text-textDark/60 mb-1.5"
+              >
+                Email address
+              </label>
               <input
-                id="email"
+                id="reset-email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className={`appearance-none relative block w-full pl-10 px-3 py-3 border rounded-md placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200
-                  ${
-                    email.length > 0 &&
-                    (isEmailValid ? "border-green-500" : "border-red-500")
-                  }
-                `}
-                placeholder="Enter your email address"
                 value={email}
                 onChange={handleChange}
-                onBlur={() => validateEmail(email)}
-                aria-invalid={email.length > 0 && !isEmailValid}
-                aria-describedby="email-error"
+                onBlur={handleBlur}
+                placeholder="you@example.com"
+                aria-invalid={showError}
+                aria-describedby={showError ? "reset-email-error" : undefined}
+                className={[
+                  "w-full h-[44px] px-3.5 rounded-xl text-[13.5px] font-inter outline-none",
+                  "bg-gray-50 dark:bg-white/[0.04]",
+                  "text-textLight dark:text-textDark placeholder:text-muted/60",
+                  "transition-all duration-150",
+                  showError
+                    ? "border border-red-400 dark:border-red-500 focus:ring-2 focus:ring-red-400/10"
+                    : "border border-gray-200 dark:border-border focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/10",
+                ].join(" ")}
               />
+              {showError && (
+                <p
+                  id="reset-email-error"
+                  className="mt-1.5 text-[11.5px] text-red-500 dark:text-red-400 font-inter"
+                >
+                  Please enter a valid email address.
+                </p>
+              )}
             </div>
-            {email.length > 0 && !isEmailValid && (
-              <p
-                id="email-error"
-                className="mt-2 text-sm text-red-600 dark:text-red-400"
-              >
-                Please enter a valid email address.
-              </p>
-            )}
-          </div>
 
-          <div>
             <button
               type="submit"
               disabled={!isEmailValid || isSubmitting}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-200
-                ${
-                  isEmailValid && !isSubmitting
-                    ? "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    : "bg-blue-400 dark:bg-blue-500 cursor-not-allowed opacity-70"
-                }`}
+              className={[
+                "w-full flex items-center justify-center gap-2",
+                "h-[44px] rounded-xl text-base font-grotesk font-semibold text-white",
+                "transition-all duration-200 outline-none select-none",
+                isSubmitting
+                  ? "bg-brand/70 cursor-not-allowed"
+                  : !isEmailValid
+                    ? "bg-brand/35 cursor-not-allowed"
+                    : "bg-brand hover:bg-brand-hover cursor-pointer active:scale-[0.985]",
+              ].join(" ")}
             >
-              {isSubmitting ? (
-                <span className="flex items-center">
-                  Sending...
-                  <svg
-                    className="animate-spin ml-2 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                </span>
-              ) : (
-                "Send Reset Link"
-              )}
+              {isSubmitting ? "Sending…" : "Send Reset Link"}
             </button>
-          </div>
-        </form>
+          </motion.form>
 
-        <div className="text-sm text-center">
-          <button
-            onClick={() => navigate("/auth", { replace: true })}
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
-          >
-            Back to Login
-          </button>
+          {/* Back to login */}
+          <p className="mt-6 text-center text-[12.5px] text-muted">
+            Remember your password?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/auth", { replace: true })}
+              className="font-medium text-textLight dark:text-textDark underline underline-offset-2 hover:opacity-70 transition-opacity duration-150 outline-none"
+            >
+              Back to sign in
+            </button>
+          </p>
         </div>
-      </motion.div>
+      </main>
     </div>
   );
 };

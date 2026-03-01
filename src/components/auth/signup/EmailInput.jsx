@@ -1,11 +1,10 @@
-import React from "react";
-import { Mail, CheckCircle, XCircle } from "lucide-react";
+import React, { useState } from "react";
 
 const EmailInput = ({ email, setEmail, isValid, setIsValid }) => {
-  const validateEmail = (emailAddress) => {
-    // Basic email regex for client-side validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const valid = emailRegex.test(emailAddress);
+  const [isTouched, setIsTouched] = useState(false);
+
+  const validate = (value) => {
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     setIsValid(valid);
     return valid;
   };
@@ -13,59 +12,51 @@ const EmailInput = ({ email, setEmail, isValid, setIsValid }) => {
   const handleChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-    validateEmail(value); // Validate on change
+    validate(value); // always validate so setIsValid stays in sync
   };
+
+  const handleBlur = () => {
+    setIsTouched(true);
+    validate(email);
+  };
+
+  // Only show error UI after user has interacted with the field
+  const showError = isTouched && email.length > 0 && !isValid;
 
   return (
     <div>
       <label
         htmlFor="email"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        className="block text-[12.5px] font-medium font-inter text-textLight/70 dark:text-textDark/60 mb-1.5"
       >
-        Email Address
+        Email address
       </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Mail className="h-5 w-5 text-gray-400 dark:text-gray-400" />
-        </div>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={email}
-          onChange={handleChange}
-          onBlur={() => validateEmail(email)} // Validate on blur
-          className={`w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200
-            ${
-              email.length > 0 &&
-              (isValid ? "border-green-500" : "border-red-500")
-            }
-          `}
-          placeholder="Enter your email"
-          required
-          aria-invalid={email.length > 0 && !isValid}
-          aria-describedby="email-error"
-        />
-        {email.length > 0 && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            {isValid ? (
-              <CheckCircle
-                className="h-5 w-5 text-green-500"
-                aria-label="Email is valid"
-              />
-            ) : (
-              <XCircle
-                className="h-5 w-5 text-red-500"
-                aria-label="Email is invalid"
-              />
-            )}
-          </div>
-        )}
-      </div>
-      {email.length > 0 && !isValid && (
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value={email}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="you@example.com"
+        required
+        autoComplete="email"
+        aria-invalid={showError}
+        aria-describedby={showError ? "email-error" : undefined}
+        className={[
+          "w-full h-[44px] px-3.5 rounded-xl text-[13.5px] font-inter outline-none",
+          "bg-gray-50 dark:bg-white/[0.04]",
+          "text-textLight dark:text-textDark placeholder:text-muted/60",
+          "transition-all duration-150",
+          showError
+            ? "border border-red-400 dark:border-red-500 focus:ring-2 focus:ring-red-400/10"
+            : "border border-gray-200 dark:border-border focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/10",
+        ].join(" ")}
+      />
+      {showError && (
         <p
           id="email-error"
-          className="mt-1 text-sm text-red-600 dark:text-red-400"
+          className="mt-1.5 text-[11.5px] text-red-500 dark:text-red-400 font-inter"
         >
           Please enter a valid email address.
         </p>

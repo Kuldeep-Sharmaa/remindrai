@@ -1,148 +1,88 @@
-import React, { useState, useRef } from "react";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import { showToast } from "../../ToastSystem/toastUtils"; // Import toast utility
+
+const shakeVariants = {
+  shake: {
+    x: [0, -5, 5, -5, 5, 0],
+    transition: { duration: 0.4, ease: "easeInOut" },
+  },
+  idle: { x: 0 },
+};
 
 const ConfirmPasswordInput = ({
   password,
   confirmPassword,
   setConfirmPassword,
   setIsValid,
-  passwordStrengthResult, // Receive password strength result
   shake,
 }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isTouched, setIsTouched] = useState(false); // To track if user has interacted
-  const toastShownRef = useRef(false); // Ref to track if the weak password toast has been shown
+  const [isTouched, setIsTouched] = useState(false);
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
+  const validate = (value) => {
+    const valid = value.length > 0 && password.length > 0 && password === value;
+    setIsValid(valid);
+    return valid;
   };
 
-  const handleConfirmPasswordChange = (e) => {
-    const newConfirmPassword = e.target.value;
-    setConfirmPassword(newConfirmPassword);
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
     setIsTouched(true);
-
-    // Validate if passwords match
-    const match = password === newConfirmPassword;
-    setIsValid(match);
-
-    // NEW: Show weak password toast immediately if conditions are met
-    // 1. Password and confirm password match
-    // 2. Both fields have content
-    // 3. Password strength result is available and indicates weakness (score < 2)
-    // 4. The toast hasn't been shown yet for this weak password state
-    if (
-      match &&
-      newConfirmPassword.length > 0 &&
-      passwordStrengthResult &&
-      passwordStrengthResult.score < 2 &&
-      !toastShownRef.current
-    ) {
-      showToast({
-        type: "warning",
-        message:
-          "Your password is weak. You can still continue, but we recommend a stronger one for better security.",
-        duration: 5000,
-      });
-      toastShownRef.current = true; // Mark toast as shown
-    } else if (
-      // Reset toastShownRef if conditions are no longer met (e.g., user makes password strong or clears field)
-      !match ||
-      newConfirmPassword.length === 0 ||
-      (passwordStrengthResult && passwordStrengthResult.score >= 2)
-    ) {
-      toastShownRef.current = false;
-    }
+    validate(value);
   };
 
-  // The onBlur is now a fallback, or for cases where user types quickly and leaves
   const handleBlur = () => {
-    // Re-evaluate toast on blur, in case the toast was dismissed or not shown
-    // AND ensure passwords match to prevent toast from showing for mismatch
-    if (
-      isTouched &&
-      password.length > 0 &&
-      password === confirmPassword && // Only show if they actually match
-      passwordStrengthResult &&
-      passwordStrengthResult.score < 2 &&
-      !toastShownRef.current // Only show if not already shown
-    ) {
-      showToast({
-        type: "warning",
-        message:
-          "Your password is weak. You can still continue, but we recommend a stronger one for better security.",
-        duration: 5000,
-      });
-      toastShownRef.current = true;
-    } else if (
-      // Reset toastShownRef if conditions are no longer met (e.g., user makes password strong or clears field)
-      password.length === 0 ||
-      (passwordStrengthResult && passwordStrengthResult.score >= 2)
-    ) {
-      toastShownRef.current = false;
-    }
+    setIsTouched(true);
+    validate(confirmPassword);
   };
 
-  const shakeVariants = {
-    shake: {
-      x: [0, -5, 5, -5, 5, 0],
-      transition: { duration: 0.4, ease: "easeInOut" },
-    },
-    noShake: {
-      x: 0,
-    },
-  };
+  const showMismatchError =
+    isTouched && confirmPassword.length > 0 && password !== confirmPassword;
 
-  // Determine border color based on match
-  const getBorderColorClass = () => {
-    if (confirmPassword.length === 0) {
-      return "border-gray-300 dark:border-gray-600";
-    }
-    // Only show red border for mismatch if both fields have content and are touched
-    if (isTouched && password.length > 0 && password !== confirmPassword) {
-      return "border-red-500";
-    }
-    // If they match and touched, can be neutral or green if desired for match confirmation
-    if (isTouched && password.length > 0 && password === confirmPassword) {
-      return "border-green-500"; // Green for a match
-    }
-    return "border-gray-300 dark:border-gray-600";
-  };
+  const borderClass =
+    confirmPassword.length === 0
+      ? "border border-gray-200 dark:border-border focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/10"
+      : showMismatchError
+        ? "border border-red-400 dark:border-red-500 focus:ring-2 focus:ring-red-400/10"
+        : isTouched && password === confirmPassword
+          ? "border border-green-500 dark:border-green-500 focus:ring-2 focus:ring-green-400/10"
+          : "border border-gray-200 dark:border-border focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/10";
 
   return (
-    <motion.div variants={shakeVariants} animate={shake ? "shake" : "noShake"}>
+    <motion.div variants={shakeVariants} animate={shake ? "shake" : "idle"}>
       <label
         htmlFor="confirm-password"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        className="block text-[12.5px] font-medium font-inter text-textLight/70 dark:text-textDark/60 mb-1.5"
       >
         Confirm Password
       </label>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Lock className="h-5 w-5 text-gray-400 dark:text-gray-400" />
-        </div>
         <input
           type={showConfirmPassword ? "text" : "password"}
           id="confirm-password"
           name="confirm-password"
           value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
-          onBlur={handleBlur} // Trigger on blur for the weak password warning
-          className={`w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-800/50 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200
-            ${getBorderColorClass()}
-          `}
+          onChange={handleChange}
+          onBlur={handleBlur}
           placeholder="Re-enter your password"
           required
-          aria-invalid={
-            isTouched && password.length > 0 && password !== confirmPassword
-          }
+          aria-invalid={showMismatchError}
+          aria-describedby="confirm-password-error"
+          className={[
+            "w-full h-[44px] px-3.5 pr-10 rounded-xl text-[13.5px] font-inter outline-none",
+            "bg-gray-50 dark:bg-white/[0.04]",
+            "text-textLight dark:text-textDark placeholder:text-muted/60",
+            "transition-all duration-150",
+            borderClass,
+          ].join(" ")}
         />
         <button
           type="button"
-          onClick={toggleConfirmPasswordVisibility}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+          tabIndex={-1}
+          onClick={() => setShowConfirmPassword((v) => !v)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-textLight dark:hover:text-textDark transition-colors outline-none"
           aria-label={
             showConfirmPassword
               ? "Hide confirm password"
@@ -150,14 +90,18 @@ const ConfirmPasswordInput = ({
           }
         >
           {showConfirmPassword ? (
-            <EyeOff className="h-5 w-5" />
+            <EyeOff className="h-4 w-4" />
           ) : (
-            <Eye className="h-5 w-5" />
+            <Eye className="h-4 w-4" />
           )}
         </button>
       </div>
-      {isTouched && password.length > 0 && password !== confirmPassword && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+
+      {showMismatchError && (
+        <p
+          id="confirm-password-error"
+          className="mt-1.5 text-[11.5px] text-red-500 dark:text-red-400 font-inter"
+        >
           Passwords do not match.
         </p>
       )}

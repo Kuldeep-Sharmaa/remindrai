@@ -1,9 +1,5 @@
-// src/Auth/components/signup/index.jsx (Final Version - CORRECTED error handling)
-
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import zxcvbn from "zxcvbn";
 
 import { useAuthContext } from "../../../context/AuthContext";
 
@@ -11,7 +7,6 @@ import NameInput from "./NameInput";
 import EmailInput from "./EmailInput";
 import PasswordInput from "./PasswordInput";
 import ConfirmPasswordInput from "./ConfirmPasswordInput";
-import TermsCheckbox from "./TermsCheckbox";
 import SubmitButton from "./SubmitButton";
 import SocialSignupButtons from "./SocialSignupButtons";
 
@@ -30,33 +25,39 @@ const SignupForm = ({ onSwitchToLogin }) => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const [passwordStrengthResult, setPasswordStrengthResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showTermsError, setShowTermsError] = useState(false);
   const [shakePasswordInput, setShakePasswordInput] = useState(false);
 
   const isFormValid =
     isFullNameValid &&
     isEmailValid &&
     isPasswordValid &&
-    isConfirmPasswordValid &&
-    termsAccepted;
+    isConfirmPasswordValid;
 
+  // Reset shake after animation completes
   useEffect(() => {
-    if (shakePasswordInput) {
-      const timer = setTimeout(() => setShakePasswordInput(false), 500);
-      return () => clearTimeout(timer);
-    }
+    if (!shakePasswordInput) return;
+    const timer = setTimeout(() => setShakePasswordInput(false), 500);
+    return () => clearTimeout(timer);
   }, [shakePasswordInput]);
+
+  // Keep isConfirmPasswordValid in sync whenever password or confirmPassword changes.
+  // Also handles the case where user clears the confirm field (resets to false).
+  useEffect(() => {
+    if (confirmPassword.length === 0) {
+      setIsConfirmPasswordValid(false);
+    } else {
+      setIsConfirmPasswordValid(
+        password.length > 0 && password === confirmPassword,
+      );
+    }
+  }, [password, confirmPassword]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setShowTermsError(true); // Show terms error if not accepted on submit attempt
-
-    // Pre-submission validation checks
     if (!isFullNameValid) {
       showToast({ type: "error", message: "Please enter your full name." });
       return;
@@ -77,44 +78,27 @@ const SignupForm = ({ onSwitchToLogin }) => {
       return;
     }
     if (password !== confirmPassword) {
-      // Direct check for password match
       showToast({ type: "error", message: "Passwords do not match." });
       setShakePasswordInput(true);
-      return;
-    }
-    if (!termsAccepted) {
-      showToast({
-        type: "error",
-        message:
-          "Please accept the Terms of Service and Privacy Policy to proceed.",
-      });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // --- CRITICAL: Ensure fullName is passed here ---
-      // The signup function now directly throws the { success, error, code } object
       await signup(email, password, fullName);
-
-      // If signup completes without throwing an error, it's successful
       showToast({
         type: "success",
         message: "Account created! Please check your email for verification.",
       });
-      console.log("User signed up. Email verification sent.");
       navigate("/verify-email", { replace: true });
     } catch (err) {
-      // Now, 'err' directly contains the { success: false, error: message, code: firebaseCode } object
-      console.error("Signup error:", err); // Log the full error object for debugging
+      console.error("Signup error:", err);
 
       let errorMessage =
         "An unexpected error occurred during signup. Please try again.";
 
-      // Handle specific error codes returned by authService.js
       if (err.code) {
-        // Check if 'err' has a 'code' property
         switch (err.code) {
           case "auth/email-already-in-use":
             errorMessage =
@@ -123,7 +107,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
           case "auth/weak-password":
             errorMessage =
               "Password is too weak. Please choose a stronger password.";
-            setShakePasswordInput(true); // Shake on weak password as well
+            setShakePasswordInput(true);
             break;
           case "auth/invalid-email":
             errorMessage = "The email address is not valid.";
@@ -133,10 +117,9 @@ const SignupForm = ({ onSwitchToLogin }) => {
               "Email/password accounts are not enabled. Please contact support.";
             break;
           default:
-            errorMessage = err.error || errorMessage; // Use the provided error message if available
+            errorMessage = err.error || errorMessage;
         }
       } else if (err.error) {
-        // Fallback if 'err' is just an object with an 'error' message but no code
         errorMessage = err.error;
       }
 
@@ -174,23 +157,18 @@ const SignupForm = ({ onSwitchToLogin }) => {
           confirmPassword={confirmPassword}
           setConfirmPassword={setConfirmPassword}
           setIsValid={setIsConfirmPasswordValid}
-          passwordStrengthResult={passwordStrengthResult}
           shake={shakePasswordInput && password !== confirmPassword}
         />
-        <TermsCheckbox
-          termsAccepted={termsAccepted}
-          setTermsAccepted={setTermsAccepted}
-          setIsValid={setTermsAccepted} // This seems redundant, termsAccepted is already managed
-          showValidationError={showTermsError}
-        />
         <SubmitButton isSubmitting={isSubmitting} isFormValid={isFormValid} />
-        <div className="relative my-6">
-          <div className="relative flex justify-center text-xs">
-            <span className="px-3 bg-white dark:bg-gray-800/30 text-gray-500 dark:text-gray-400 rounded-full">
-              sign up with
-            </span>
-          </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+          <span className="text-[11.5px] font-inter text-muted flex-shrink-0">
+            or continue with
+          </span>
+          <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
         </div>
+
         <SocialSignupButtons />
       </form>
     </div>

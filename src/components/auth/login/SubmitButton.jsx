@@ -1,32 +1,52 @@
-// src/components/auth/login/SubmitButton.jsx
-
 import React from "react";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 
-const SubmitButton = ({ isSubmitting, isFormValid }) => {
-  const buttonText = "Log In";
-  const loadingText = "Logging In...";
+const Spinner = () => (
+  <svg
+    className="w-[16px] h-[16px] animate-spin flex-shrink-0"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <circle
+      className="opacity-20"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="3"
+    />
+    <path
+      className="opacity-90"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+    />
+  </svg>
+);
 
-  return (
-    <motion.button
-      type="submit"
-      whileHover={{ scale: isFormValid && !isSubmitting ? 1.02 : 1 }}
-      whileTap={{ scale: isFormValid && !isSubmitting ? 0.98 : 1 }}
-      disabled={!isFormValid || isSubmitting}
-      className={`group w-full flex items-center justify-center py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60
-        ${
-          isFormValid && !isSubmitting
-            ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 cursor-pointer text-white font-medium"
-            : "bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-gray-200 dark:text-gray-400"
-        }
-      `}
-      aria-label={isSubmitting ? loadingText : buttonText}
-    >
-      <span>{isSubmitting ? loadingText : buttonText}</span>
-      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-    </motion.button>
-  );
-};
+const SubmitButton = ({ isSubmitting, isFormValid }) => (
+  <button
+    type="submit"
+    disabled={isSubmitting || !isFormValid}
+    aria-label={isSubmitting ? "Signing in" : "Sign in"}
+    className={[
+      "w-full flex items-center justify-center gap-2",
+      "h-[44px] rounded-xl text-base font-grotesk font-semibold text-white",
+      "transition-all duration-200 outline-none select-none",
+      isSubmitting
+        ? "bg-brand/70 cursor-not-allowed"
+        : !isFormValid
+          ? "bg-brand/35 cursor-not-allowed"
+          : "bg-brand hover:bg-brand-hover cursor-pointer active:scale-[0.985]",
+    ].join(" ")}
+  >
+    {isSubmitting ? (
+      <>
+        <Spinner />
+        <span>Signing in…</span>
+      </>
+    ) : (
+      "Sign in"
+    )}
+  </button>
+);
 
 export default SubmitButton;
