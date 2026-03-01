@@ -1,493 +1,441 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+// components/Navbar.jsx
+//
+// Desktop:  [Logo]   [How it works | Docs | About]   [ThemeToggle  Get started]
+// Logged:   [Logo]   [● Dashboard  Docs | About | Support]   [ThemeToggle  [R Raj ▾]]
+// Mobile:   [Logo]   [ThemeToggle  ☰]  →  slide panel with NO logo, just links
+
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
   ChevronDown,
   User,
   Settings,
-  LogOut,
-  UserCircle,
-  Crown,
-  Palette,
-  BarChart3,
-  Shield,
-  Lock,
-  LifeBuoy,
   LayoutDashboard,
-  Unlock,
-  Rocket,
-  FileText,
-  Loader2,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggleButton";
 import { useAuthContext } from "../context/AuthContext";
 
+// ─── Nav configs ────────────────────────────────────────────────────────────
+
+const VISITOR_NAV = [
+  { to: "/#how-it-works", label: "How it works" },
+  { to: "/docs", label: "Docs" },
+  { to: "/about", label: "About" },
+];
+
+const USER_NAV = [
+  { to: "/docs", label: "Docs" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Support" },
+];
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const getInitial = (u) =>
+  (u?.fullName || u?.email || "U").charAt(0).toUpperCase();
+const getFirstName = (u) =>
+  u?.fullName?.split(" ")[0] || u?.email?.split("@")[0] || "there";
+
+// ─── Component ──────────────────────────────────────────────────────────────
+
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const authContext = useAuthContext();
+  const { currentUser, loading, hasLoadedProfile } = useAuthContext();
+  const location = useLocation();
 
-  // Check if auth is still loading/initializing
-  const isAuthLoading =
-    authContext?.isLoading ||
-    authContext?.loading ||
-    authContext?.initializing ||
-    authContext === undefined ||
-    authContext === null;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  // Robust authentication checking with fallback options
-  const isLoggedIn =
-    !isAuthLoading &&
-    (authContext?.isAuthenticated ||
-      authContext?.authenticated ||
-      authContext?.loggedIn ||
-      !!authContext?.user ||
-      !!authContext?.currentUser ||
-      false);
+  const isLoggedIn = !loading && hasLoadedProfile && !!currentUser;
+  const navItems = isLoggedIn ? USER_NAV : VISITOR_NAV;
 
-  const user = authContext?.user || authContext?.currentUser;
-  const logout = authContext?.logout || authContext?.signOut;
-
-  const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => !prev);
-  }, []);
-
-  const toggleUserDropdown = useCallback(() => {
-    setShowUserDropdown((prev) => !prev);
-  }, []);
-
-  // Cleanup body overflow on unmount
+  // Scroll-aware border
   useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  // Close everything on navigation
+  useEffect(() => {
+    setMobileOpen(false);
+    setDropdownOpen(false);
+  }, [location.pathname]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const fn = (e) => {
+      if (!e.target.closest("[data-dropdown]")) setDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
+  }, [dropdownOpen]);
+
+  // Lock body scroll when mobile panel is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [mobileOpen]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".user-dropdown-container")) {
-        setShowUserDropdown(false);
-      }
-    };
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-    if (showUserDropdown) {
-      document.addEventListener("click", handleClickOutside);
-      return () => document.removeEventListener("click", handleClickOutside);
-    }
-  }, [showUserDropdown]);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [window.location.pathname]);
-
-  const closeMenu = useCallback(() => setIsMobileMenuOpen(false), []);
-
-  const handleLogout = useCallback(() => {
-    if (logout) {
-      logout();
-    }
-    setShowUserDropdown(false);
-    closeMenu();
-  }, [logout, closeMenu]);
-
-  // Navigation items for visitors (limited access)
-  const visitorNavItems = [
-    { to: "/features", label: "Features", icon: Rocket, isLocked: false },
-    { to: "/about", label: "About", icon: Shield, isLocked: false },
-    { to: "/contact", label: "Contact", icon: LifeBuoy, isLocked: false },
-    { to: "/docs", label: "Resources", icon: FileText, isLocked: false },
-  ];
-
-  // Navigation items for logged-in users (full access)
-  const userNavItems = [
-    {
-      to: "/dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      isUnlocked: true,
-    },
-    {
-      to: "/dashboard/insights",
-      label: "Insights",
-      icon: BarChart3,
-      isUnlocked: true,
-    },
-    { to: "/about", label: "About", icon: Shield },
-    { to: "/contact", label: "Support", icon: LifeBuoy },
-    { to: "/docs", label: "Docs", icon: FileText },
-  ];
-
-  const currentNavItems = isLoggedIn ? userNavItems : visitorNavItems;
-
-  // Show skeleton/loading state while auth is initializing
-  if (isAuthLoading) {
+  // ── Skeleton ─────────────────────────────────────────────────────────────
+  if (loading && !hasLoadedProfile) {
     return (
-      <header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/60 backdrop-blur-md border-b border-black/5 dark:border-white/5
-"
-      >
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="relative">
-              <img
-                src="/transparent_logo.svg"
-                alt="RemindrAI Logo"
-                className="h-8 sm:h-10 "
-              />
-            </div>
-          </Link>
-
-          {/* Loading Navigation Skeleton */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {[1, 2, 3, 4].map((item) => (
+      // h-16 matches the real navbar — no layout jump on hydration
+      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
+        <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
+          <div className="w-28 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse" />
+          <div className="hidden lg:flex items-center gap-6">
+            {[1, 2, 3].map((i) => (
               <div
-                key={item}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg"
-              >
-                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              </div>
+                key={i}
+                className="w-16 h-3 bg-gray-100 dark:bg-white/5 rounded animate-pulse"
+              />
             ))}
-          </nav>
-
-          {/* Loading Right Section */}
-          <div className="hidden lg:flex items-center gap-3">
-            <ThemeToggle />
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800">
-              <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-              <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            </div>
           </div>
-
-          {/* Mobile Menu Toggle */}
-          <button
-            className="p-2 rounded-lg lg:hidden bg-gray-100 dark:bg-gray-800"
-            disabled
-          >
-            <Menu className="w-5 h-5 text-gray-400" />
-          </button>
+          <div className="w-24 h-8 bg-gray-100 dark:bg-white/5 rounded-lg animate-pulse" />
         </div>
       </header>
     );
   }
 
+  // ── Navbar ────────────────────────────────────────────────────────────────
   return (
-    <div key={`navbar-${isLoggedIn}-${user?.id || "guest"}`}>
+    <>
       <header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/60 backdrop-blur-md border-b border-black/5 dark:border-white/5
-"
+        className={`fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md transition-all duration-300 ${
+          scrolled
+            ? "border-b border-gray-200 dark:border-white/10 shadow-sm shadow-black/[0.04]"
+            : "border-b border-gray-100/50 dark:border-white/[0.06]"
+        }`}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-          {/* Logo with Premium Status */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="relative">
+        {/*
+          3-column layout:
+          [Logo w-36]  [Nav flex-1 centered]  [Actions w-36]
+          Equal side widths keep center nav visually centered.
+        */}
+        <div className="max-w-6xl mx-auto px-5 h-full flex items-center">
+          {/* Col 1 — Logo, no hover scale (static = confident) */}
+          <div className="flex-shrink-0 w-36">
+            <Link to="/" aria-label="RemindrAI home" className="inline-flex">
               <img
                 src="/transparent_logo.svg"
-                alt="RemindrAI Logo"
-                className="h-8 sm:h-10 "
+                alt="RemindrAI"
+                className="h-7"
               />
-            </div>
-          </Link>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {currentNavItems.map((item) => (
-              <div key={item.to} className="relative group">
-                <Link
-                  to={item.isLocked ? "#" : item.to}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-medium relative ${
-                    item.isLocked
-                      ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                      : item.isUnlocked
-                        ? "text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
-                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+          {/* Col 2 — Centered nav links */}
+          <nav className="hidden lg:flex items-center justify-center gap-0.5 flex-1">
+            {/* Dashboard pill — logged-in only, calmer emerald-600 */}
+            {isLoggedIn && (
+              <Link
+                to="/dashboard"
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold font-grotesk transition-all duration-150 mr-2
+                  ${
+                    isActive("/dashboard")
+                      ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/25"
+                      : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20"
                   }`}
-                  onClick={
-                    item.isLocked ? (e) => e.preventDefault() : undefined
-                  }
-                  aria-label={`Navigate to ${item.label}`}
-                >
-                  {item.icon && <item.icon className="w-4 h-4" />}
-                  <span>{item.label}</span>
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Dashboard
+              </Link>
+            )}
 
-                  {item.isLocked && <Lock className="w-3 h-3 text-gray-400" />}
-                </Link>
-              </div>
+            {navItems.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-150 font-inter
+                  ${
+                    isActive(to)
+                      ? "text-brand dark:text-brand-soft font-medium"
+                      : // Slightly softened inactive — calmer visual hierarchy
+                        "text-gray-500/90 dark:text-gray-400/90 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+                  }`}
+              >
+                {label}
+                {isActive(to) && (
+                  <span className="absolute bottom-0.5 left-3.5 right-3.5 h-0.5 rounded-full bg-brand" />
+                )}
+              </Link>
             ))}
           </nav>
 
-          {/* Desktop Right Section */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Col 3 — Right actions */}
+          <div className="hidden lg:flex items-center justify-end gap-2.5 flex-shrink-0 w-36">
             <ThemeToggle />
 
             {!isLoggedIn ? (
-              // Visitor CTA
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/auth"
-                  className="group flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 hover:from-green-700 hover:via-blue-700 hover:to-purple-700 text-white text-sm font-bold transition-all duration-300 shadow-xl hover:shadow-2xl transform relative overflow-hidden"
-                  aria-label="Sign up for full access"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <Unlock className="w-4 h-4 relative z-10" />
-                  <span className="relative z-10">Unlock Full Access</span>
-                  <Crown className="w-4 h-4 relative z-10" />
-                </Link>
-              </div>
+              // Visitor CTA — no icon, just clean text. Confidence.
+              <Link
+                to="/auth"
+                className="px-4 py-2 rounded-lg bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk transition-all duration-150 shadow-sm shadow-brand/20 hover:shadow-md hover:shadow-brand/25 hover:-translate-y-px"
+              >
+                Get started
+              </Link>
             ) : (
-              // User Account Dropdown
-              <div className="relative user-dropdown-container">
+              // User dropdown
+              <div className="relative" data-dropdown>
                 <button
-                  onClick={toggleUserDropdown}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30 text-sm font-medium transition-all duration-200 border border-green-200 dark:border-green-800 shadow-sm"
-                  aria-label="User account menu"
-                  aria-expanded={showUserDropdown}
-                >
-                  <div className="relative">
-                    <div className="p-1 bg-gradient-to-r from-green-500 to-blue-600 rounded-full">
-                      <UserCircle className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-green-700 dark:text-green-300 font-bold">
-                      ACTIVE
-                    </span>
-                    <div className="w-2 h-2 bg-green-500 rounded-full " />
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                      showUserDropdown ? "rotate-180" : ""
+                  onClick={() => setDropdownOpen((v) => !v)}
+                  aria-expanded={dropdownOpen}
+                  aria-label="Account menu"
+                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border transition-all duration-150
+                    ${
+                      dropdownOpen
+                        ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
+                        : "border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 bg-white dark:bg-white/5"
                     }`}
+                >
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold font-grotesk flex-shrink-0">
+                    {getInitial(currentUser)}
+                  </div>
+                  <span className="text-sm font-medium font-inter text-gray-700 dark:text-gray-300 max-w-[80px] truncate">
+                    {getFirstName(currentUser)}
+                  </span>
+                  <ChevronDown
+                    className={`w-3 h-3 text-muted flex-shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
-                {showUserDropdown && (
-                  <>
-                    <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 py-3 animate-in slide-in-from-top-2 duration-200 overflow-hidden z-50">
-                      {/* Premium Status Header */}
-                      <div className="px-4 py-4 bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-900/20 dark:via-blue-900/20 dark:to-purple-900/20 border-b border-gray-100 dark:border-gray-800">
-                        <div className="flex items-center gap-3">
-                          <div className="relative p-3 bg-gradient-to-r from-green-500 via-blue-500 to-purple-600 rounded-xl text-white">
-                            <Crown className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-gray-900 dark:text-gray-100">
-                                {user?.name || "Premium User"}
-                              </span>
-                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs font-bold rounded-full">
-                                PRO
-                              </span>
-                            </div>
-                            <div className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
-                              <Unlock className="w-3 h-3" />
-                              Full Access Unlocked
-                            </div>
-                          </div>
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-bgImpact rounded-xl border border-gray-200 dark:border-white/10 shadow-xl shadow-black/10 py-1.5 z-50"
+                    style={{ animation: "dropIn 0.14s ease forwards" }}
+                  >
+                    {/* User identity */}
+                    <div className="px-3.5 py-2.5 border-b border-gray-100 dark:border-white/5 mb-1">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {getInitial(currentUser)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-gray-900 dark:text-white truncate font-grotesk">
+                            {currentUser?.fullName || "User"}
+                          </p>
+                          <p className="text-[11px] text-muted truncate font-inter">
+                            {currentUser?.email}
+                          </p>
                         </div>
                       </div>
-
-                      {/* Account Actions */}
-                      <div className="py-2">
-                        <Link
-                          to="/dashboard/settings/accountinfo"
-                          onClick={() => setShowUserDropdown(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150"
-                        >
-                          <User className="w-4 h-4 text-gray-500" />
-                          Profile Settings
-                        </Link>
-
-                        <Link
-                          to="/dashboard/settings"
-                          onClick={() => setShowUserDropdown(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150"
-                        >
-                          <Palette className="w-4 h-4 text-gray-500" />
-                          Settings
-                        </Link>
-                      </div>
                     </div>
-                    {/* Backdrop for dropdown */}
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowUserDropdown(false)}
-                      aria-hidden="true"
-                    />
-                  </>
+
+                    <Link
+                      to="/dashboard/settings/accountinfo"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+                    >
+                      <User className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+                      Profile
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+                      Settings
+                    </Link>
+                  </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-lg lg:hidden bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-            aria-label="Toggle mobile menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-5 h-5 text-gray-700 dark:text-gray-300 transform transition-transform duration-300 ease-in-out rotate-90 scale-110" />
-            ) : (
-              <Menu className="w-5 h-5 text-gray-700 dark:text-gray-300 transform transition-transform duration-300 ease-in-out rotate-0 scale-100" />
-            )}
-          </button>
+          {/* Mobile: burger only — ThemeToggle lives inside the panel */}
+          <div className="lg:hidden ml-auto flex items-center">
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors duration-150"
+            >
+              {mobileOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Mobile Slide-in Menu */}
+      {/* ── Mobile panel ──────────────────────────────────────────────────── */}
+
+      {/* Backdrop */}
       <div
-        className={`fixed top-16 right-0 w-80 max-w-[85vw] h-[calc(100vh-4rem)] bg-white dark:bg-black shadow-2xl border-l border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out z-40 lg:hidden ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] lg:hidden transition-opacity duration-300 ${
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
-        role="navigation"
-        aria-label="Mobile navigation menu"
+      />
+
+      {/*
+        Side panel.
+        — No logo inside (spec requirement)
+        — No greeting text (premium = minimal)
+        — Just nav links with stagger, close X, user card at bottom for logged-in
+        — h-16 top padding matches navbar exactly so nothing is hidden under it
+      */}
+      <aside
+        className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        aria-label="Navigation"
       >
-        <div className="flex flex-col h-full">
-          {/* Status Section */}
-          <div
-            className={`px-6 py-4 border-b border-gray-200 dark:border-gray-800 ${
-              isLoggedIn
-                ? "bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-900/20 dark:via-blue-900/20 dark:to-purple-900/20"
-                : "bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20"
-            }`}
+        {/* Panel top — close button only, NO logo */}
+        <div className="h-16 flex items-center justify-end px-4 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
+          <button
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+            className="p-2 rounded-lg text-muted hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
           >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Links */}
+        <nav className="flex-1 overflow-y-auto px-3 pt-3 pb-6 flex flex-col gap-0.5">
+          {/* Dashboard pill — logged-in mobile */}
+          {isLoggedIn && (
+            <Link
+              to="/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold font-grotesk mb-1 transition-all duration-150
+                ${
+                  isActive("/dashboard")
+                    ? "bg-emerald-600 text-white"
+                    : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"
+                }`}
+              style={{
+                animation: mobileOpen
+                  ? "slideIn 0.22s ease forwards 40ms"
+                  : "none",
+                opacity: 0,
+              }}
+            >
+              <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
+              Dashboard
+            </Link>
+          )}
+
+          {navItems.map(({ to, label }, i) => (
+            <Link
+              key={to}
+              to={to}
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 font-inter
+                ${
+                  isActive(to)
+                    ? "bg-brand/8 text-brand dark:text-brand-soft"
+                    : "text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              style={{
+                animation: mobileOpen
+                  ? `slideIn 0.22s ease forwards ${(i + (isLoggedIn ? 1 : 0)) * 45 + 60}ms`
+                  : "none",
+                opacity: 0,
+              }}
+            >
+              {label}
+              {isActive(to) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0" />
+              )}
+            </Link>
+          ))}
+
+          {/* Account links for logged-in */}
+          {isLoggedIn && (
+            <>
+              <div className="my-3 border-t border-gray-100 dark:border-white/5" />
+              <Link
+                to="/dashboard/settings/accountinfo"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+              >
+                <User className="w-4 h-4 text-muted flex-shrink-0" />
+                Profile
+              </Link>
+              <Link
+                to="/dashboard/settings"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+              >
+                <Settings className="w-4 h-4 text-muted flex-shrink-0" />
+                Settings
+              </Link>
+            </>
+          )}
+
+          {/* Visitor CTA */}
+          {!isLoggedIn && (
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex flex-col gap-2">
+              <Link
+                to="/auth"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center px-4 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk transition-colors duration-150"
+              >
+                Get started
+              </Link>
+              <Link
+                to="/auth"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white transition-colors font-inter"
+              >
+                Sign in
+              </Link>
+            </div>
+          )}
+        </nav>
+
+        {/* Panel footer — always rendered. ThemeToggle here for everyone, user info for logged-in. */}
+        <div className="px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
+          <div className="flex items-center justify-between">
             {isLoggedIn ? (
-              <div className="flex items-center gap-3">
-                <div className="relative p-2 bg-gradient-to-r from-green-500 via-blue-500 to-purple-600 rounded-xl text-white">
-                  <Crown className="w-6 h-6" />
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  {getInitial(currentUser)}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-gray-900 dark:text-white">
-                      {user?.name || "Premium User"}
-                    </p>
-                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs font-bold rounded-full">
-                      PRO
-                    </span>
-                  </div>
-                  <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
-                    <Unlock className="w-3 h-3" />
-                    Full Access Active
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white truncate font-grotesk">
+                    {currentUser?.fullName || "User"}
+                  </p>
+                  <p className="text-[11px] text-muted truncate font-inter">
+                    {currentUser?.email}
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl">
-                  <Lock className="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900 dark:text-white">
-                    Guest User
-                  </p>
-                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">
-                    Limited Access
-                  </p>
-                </div>
-              </div>
+              <span className="text-xs text-muted font-inter">RemindrAI</span>
             )}
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <div className="px-4 space-y-1">
-              {currentNavItems.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.isLocked ? "#" : item.to}
-                  onClick={
-                    item.isLocked ? (e) => e.preventDefault() : closeMenu
-                  }
-                  className={`flex items-center gap-2 px-4 py-4 rounded-xl transition-colors font-medium text-base relative ${
-                    item.isLocked
-                      ? "text-gray-400 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50"
-                      : item.isUnlocked
-                        ? "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 font-semibold"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
-                  aria-label={`Navigate to ${item.label}`}
-                >
-                  {item.icon && <item.icon className="w-5 h-5" />}
-                  <span>{item.label}</span>
-
-                  {item.isLocked && (
-                    <div className="flex-1 flex justify-end">
-                      <Lock className="w-4 h-4 text-gray-400" />
-                    </div>
-                  )}
-                </Link>
-              ))}
-
-              {/* Account Section (for logged-in users) */}
-              {isLoggedIn && (
-                <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
-                  <div className="px-4 pb-2">
-                    <h3 className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider flex items-center gap-2">
-                      <Crown className="w-3 h-3" />
-                      Premium Settings
-                    </h3>
-                  </div>
-                  <Link
-                    to="/dashboard/settings/accountinfo"
-                    onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                  >
-                    <User className="w-5 h-5 text-gray-500" />
-                    Profile
-                  </Link>
-                  <Link
-                    to="/dashboard/settings"
-                    onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                  >
-                    <Settings className="w-5 h-5 text-gray-500" />
-                    Settings
-                  </Link>
-                </div>
-              )}
-
-              {/* Auth CTA (for visitors) */}
-              {!isLoggedIn && (
-                <div className="pt-6 mt-6 border-t border-gray-200 dark:border-gray-800 space-y-3">
-                  <Link
-                    to="/auth"
-                    onClick={closeMenu}
-                    className="group flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg relative overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <Unlock className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Unlock Full Access</span>
-                    <Crown className="w-4 h-4 relative z-10" />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
-
-          {/* Footer Section */}
-          <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex items-center justify-between">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
-          onClick={closeMenu}
-          style={{ top: "4rem" }}
-          aria-hidden="true"
-        />
-      )}
-    </div>
+      <style>{`
+        @keyframes dropIn {
+          from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
+    </>
   );
 }
