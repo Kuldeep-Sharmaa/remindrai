@@ -155,7 +155,7 @@ export default function Navbar() {
                 className="
     group relative inline-flex items-center justify-center
     gap-3
-    px-5 py-2.5
+    pr-7 pl-6 py-2.5
     rounded-xl
     bg-brand hover:bg-brand-hover
     text-white text-sm font-semibold font-grotesk
@@ -371,7 +371,7 @@ export default function Navbar() {
               <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}
-                className="group relative flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-sm font-semibold font-grotesk overflow-hidden transition-all duration-200"
+                className="group relative flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-base font-semibold font-grotesk overflow-hidden transition-all duration-200"
               >
                 <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
                 <span className="relative z-10">Unlock</span>
