@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import Spinner from "../../components/Loaders/Spinner";
-import PageTransition from "../../components/DashboardAnimations/PageTransition";
+import PageTransition from "../../components/workspaceAnimations/PageTransition";
 import OverviewGreeting from "./OverviewUI/HeroGreeting";
 import NextDeliveryPanel from "./OverviewUI/NextDeliveryPanel";
 
@@ -81,3 +81,4 @@ const Overview = () => {
 };
 
 export default Overview;
+

@@ -380,7 +380,7 @@ const AccountInfo = () => {
               These preferences help our AI tailor content for you. Update them
               in{" "}
               <a
-                href="/dashboard/settings/preferences"
+                href="/workspace/settings/preferences"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 AI Preferences

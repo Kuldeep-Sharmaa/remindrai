@@ -1,9 +1,9 @@
 import { useAuthContext } from "../../context/AuthContext";
 import useUserReminders from "../../features/remindersystem/hooks/useUserReminders";
-import TimeOfDayChart from "../../pages/Dashboard/InsightsUI/Charts/TimeOfDayChart";
-import PlatformFocusChart from "../../pages/Dashboard/InsightsUI/Charts/PlatformFocusChart";
-import EngagementMixChart from "../../pages/Dashboard/InsightsUI/Charts/EngagementMixChart";
-import ActiveRemindersChart from "../../pages/Dashboard/InsightsUI/Charts/ActiveRemindersChart";
+import TimeOfDayChart from "../../pages/workspace/InsightsUI/Charts/TimeOfDayChart";
+import PlatformFocusChart from "../../pages/workspace/InsightsUI/Charts/PlatformFocusChart";
+import EngagementMixChart from "../../pages/workspace/InsightsUI/Charts/EngagementMixChart";
+import ActiveRemindersChart from "../../pages/workspace/InsightsUI/Charts/ActiveRemindersChart";
 import { Loader2, AlertCircle, BarChart3 } from "lucide-react";
 
 export default function Insights() {
@@ -92,3 +92,4 @@ export default function Insights() {
     </div>
   );
 }
+

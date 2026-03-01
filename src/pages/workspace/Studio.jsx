@@ -14,7 +14,7 @@ import Spinner from "../../components/Ui/LoadingSpinner";
 import UserPreferencesCard from "../../features/remindersystem/components/UserPreferencesCard";
 import ReminderListContainer from "../../features/remindersystem/components/ReminderList/ReminderListContainer";
 import { useAuthContext } from "../../context/AuthContext";
-import PageTransition from "../../components/DashboardAnimations/PageTransition";
+import PageTransition from "../../components/workspaceAnimations/PageTransition";
 
 const Reminders = () => {
   const navigate = useNavigate();
@@ -27,13 +27,13 @@ const Reminders = () => {
   } = useAuthContext();
 
   const handleAddReminderClick = useCallback(() => {
-    navigate("/dashboard/studio/create");
+    navigate("/workspace/studio/create");
   }, [navigate]);
 
   const handleDeleteReminder = useCallback(async () => {}, []);
 
   const handleSettingsClick = useCallback(() => {
-    navigate("/dashboard/settings/preferences");
+    navigate("/workspace/settings/preferences");
   }, [navigate]);
 
   const isAppLoading = isAuthLoading || isLoadingReminders;
@@ -125,3 +125,4 @@ const Reminders = () => {
 };
 
 export default Reminders;
+

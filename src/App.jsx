@@ -1,20 +1,30 @@
 // App.jsx
-// Central app router + providers
+// Central router + provider tree.
+//
+// Key decisions made here:
+// - Public pages (landing, /about, /features etc.) render IMMEDIATELY.
+//   They never wait for Firebase auth to resolve — visitors shouldn't see a spinner.
+// - Dashboard routes wait for auth via ProtectedRoute, which handles its own loading state.
+// - AnimatePresence is removed from this level — it belongs inside DashboardLayout
+//   around <Outlet /> so page transitions work without remounting the whole layout.
+// - /login, /signup, /forgot-password redirect to /auth — no duplicate route registrations.
+
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 
-// Auth & Layout
+// Auth & routing
 import { AuthContextProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
-import PublicLayout from "./layouts/PublicLayout";
-import DashboardLayout from "./layouts/DashboardLayout";
 
-// Theme Hook
+// Layouts
+import PublicLayout from "./layouts/PublicLayout";
+import DashboardLayout from "./layouts/workspaceLayout";
+
+// Theme
 import { useTheme } from "./hooks/useTheme";
 
-// Pages (public)
+// Public pages — these render immediately, no auth needed
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
@@ -23,318 +33,265 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import DocsPage from "./pages/Docs/index";
 
-// Legal
+// Legal pages
 import Privacy from "./pages/Legal/Privacy";
 import Terms from "./pages/Legal/Terms";
 import GDPR from "./pages/Legal/Gdpr";
 
-// Onboarding / Dashboard
+// Protected pages — only reachable after auth + onboarding
 import Onboarding from "./pages/OnboardingSetup";
-import DashboardHome from "./pages/Dashboard/Overview";
-import Deliveries from "./pages/Dashboard/Content";
-import Insights from "./pages/Dashboard/Insights";
-import Studio from "./pages/Dashboard/Studio";
+import DashboardHome from "./pages/workspace/Overview";
+import Deliveries from "./pages/workspace/Content";
+import Insights from "./pages/workspace/Insights";
+import Studio from "./pages/workspace/Studio";
 import SettingsIndex from "./pages/SettingsIndex";
 
 // Settings sub-pages
 import SettingsLayout from "./layouts/SettingsLayout";
-import AccountInfo from "./pages/Dashboard/settings/AccountInfo";
-import Notification from "./pages/Dashboard/settings/NotificationPreferences";
-import Appearance from "./pages/Dashboard/settings/Appearance";
-import DeleteAccount from "./pages/Dashboard/settings/DeleteAccount/DeleteAccountButton";
-import Preferences from "./pages/Dashboard/settings/Preferences";
-import Security from "./pages/Dashboard/settings/Security";
-import Aboutremindrai from "./pages/Dashboard/settings/AboutRemindrPost";
+import AccountInfo from "./pages/workspace/settings/AccountInfo";
+import Notification from "./pages/workspace/settings/NotificationPreferences";
+import Appearance from "./pages/workspace/settings/Appearance";
+import DeleteAccountPage from "./pages/workspace/settings/DeleteAccount/DeleteAccountButton";
+import Preferences from "./pages/workspace/settings/Preferences";
+import Security from "./pages/workspace/settings/Security";
+import Aboutremindrai from "./pages/workspace/settings/AboutRemindrPost";
 
-// Reminder screens (new)
+// Reminder flow
 import CreateReminderScreen from "./features/remindersystem/screens/CreateReminderScreen";
 
-// Components
+// Global UI
 import ToastContainer from "./components/ToastSystem/ToastContainer";
 import ScrollToTop from "./components/ScrollToTop";
-import Spinner from "./components/Ui/LoadingSpinner"; // small loading fallback
 
-// Timezone Provider (global) - NEW import
+// Timezone context — must sit inside AuthContextProvider since it reads auth state
 import { TimezoneProvider } from "./context/TimezoneProvider";
 
-/**
- * AppContent
- *
- * - Loads core systems (auth, profile, theme) before rendering app routes.
- * - Uses AnimatePresence + motion for entrance/exit animation but avoids remounting
- *   shared layout by NOT keying the top-level motion wrapper on location.pathname.
- *
- * ⚠️ Important: Removing the key here is the **primary fix** to stop full-dashboard remounts.
- *            If you want page-level transitions while keeping layout mounted, move the
- *            AnimatePresence + motion wrapper INSIDE DashboardLayout around <Outlet />.
- */
 function AppContent() {
-  const {
-    currentUser,
-    loading: authLoading,
-    hasLoadedProfile,
-    isUserLoggingOut,
-  } = useAuthContext();
+  const { currentUser, isUserLoggingOut } = useAuthContext();
 
-  const { isInitialized: themeInitialized } = useTheme();
-
-  // Core systems must be ready before showing main routes.
-  // This prevents a flash of broken UI while auth/profile/theme initialize.
-  const coreSystemsReady = !authLoading && hasLoadedProfile && themeInitialized;
-
-  // Short loading fallback while core systems initialize (prevents white-flash or broken UI)
-  if (!coreSystemsReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
+  // Theme hook initializes synchronously from localStorage in most setups.
+  // We don't block rendering on it — the theme flicker (if any) is handled
+  // by a class on <html> set before React hydrates, not by a spinner here.
+  useTheme();
 
   return (
     <>
-      {/* 
-        AnimatePresence + motion provides smooth entrance/exit animations.
-        NOTE: Do NOT key this motion.div with location.pathname — doing so forces React
-        to remount everything under it when the key changes (sidebar/topbar/layout included).
-        Keying by pathname is the cause of the "whole dashboard reloads" issue.
-      */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          // 🔧 key intentionally omitted to avoid remounting shared layout
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          className="min-h-screen"
+      {/* Keeps the window scrolled to top on every route change */}
+      <ScrollToTop />
+
+      <Routes>
+        {/* ============================================================
+            PUBLIC ROUTES
+            Render immediately — no auth check, no spinner, no waiting.
+            PublicRoute only redirects logged-in users away from auth pages.
+        ============================================================ */}
+
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Home />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/features"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Features />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/about"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <About />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/docs"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <DocsPage />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Contact />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/privacy"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Privacy />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/terms"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Terms />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/gdpr"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <GDPR />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        {/* Auth page — all auth flows live under /auth */}
+        <Route
+          path="/auth/*"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Auth />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+
+        {/* Redirect legacy/alias auth paths to /auth instead of duplicating the route.
+            This avoids registering the same component 4 times and keeps URLs canonical. */}
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/signup" element={<Navigate to="/auth" replace />} />
+        <Route
+          path="/forgot-password"
+          element={<Navigate to="/auth" replace />}
+        />
+
+        {/* ============================================================
+            PROTECTED ROUTES
+            ProtectedRoute handles all auth state + loading internally.
+            Nothing here blocks public pages from rendering.
+        ============================================================ */}
+
+        {/* Email verification — user is auth'd but not yet verified */}
+        <Route
+          path="/verify-email"
+          element={
+            <ProtectedRoute>
+              <PublicLayout>
+                <VerifyEmailPage />
+              </PublicLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Onboarding — verified but hasn't completed setup yet */}
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dashboard — fully authenticated + verified + onboarded users only.
+            DashboardLayout renders <Outlet /> for nested routes.
+            AnimatePresence for page transitions belongs INSIDE DashboardLayout
+            around <Outlet /> — not here — so the sidebar/topbar never remounts. */}
+        <Route
+          path="/workspace/*"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
         >
-          {/* ScrollToTop uses useLocation internally — keep it inside the app so it runs on route changes */}
-          <ScrollToTop />
+          <Route index element={<DashboardHome />} />
+          <Route path="studio" element={<Studio />} />
+          <Route path="studio/create" element={<CreateReminderScreen />} />
+          <Route path="deliveries" element={<Deliveries />} />
+          <Route path="insights" element={<Insights />} />
 
-          {/* ----------------- ROUTES ----------------- */}
-          <Routes>
-            {/* ----------------- PUBLIC ROUTES ----------------- */}
-            <Route
-              path="/"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Home />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/features"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Features />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/about"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <About />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/docs"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <DocsPage />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/privacy"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Privacy />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/gdpr"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <GDPR />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/terms"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Terms />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/contact"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Contact />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
+          <Route path="settings" element={<SettingsLayout />}>
+            <Route index element={<SettingsIndex />} />
+            <Route path="accountinfo" element={<AccountInfo />} />
+            <Route path="notifications" element={<Notification />} />
+            <Route path="security" element={<Security />} />
+            <Route path="preferences" element={<Preferences />} />
+            <Route path="appearance" element={<Appearance />} />
+            <Route path="aboutremindrai" element={<Aboutremindrai />} />
+            <Route path="deleteaccount" element={<DeleteAccountPage />} />
+          </Route>
+        </Route>
 
-            {/* Auth routes */}
-            <Route
-              path="/auth/*"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Auth />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Auth />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Auth />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <PublicRoute>
-                  <PublicLayout>
-                    <Auth />
-                  </PublicLayout>
-                </PublicRoute>
-              }
-            />
+        {/* ============================================================
+            CATCH-ALL
+            Unknown routes — send user somewhere sensible based on auth state.
+        ============================================================ */}
+        <Route
+          path="*"
+          element={
+            isUserLoggingOut ? (
+              <Navigate to="/" replace /> // mid-logout — go home
+            ) : currentUser ? (
+              <Navigate to="/workspace" replace /> // logged in — go to dashboard
+            ) : (
+              <Navigate to="/" replace />
+            ) // not logged in — go to landing page
+          }
+        />
+      </Routes>
 
-            {/* ----------------- PROTECTED / DASHBOARD ROUTES ----------------- */}
-            <Route
-              path="/dashboard/*"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* default dashboard page */}
-              <Route index element={<DashboardHome />} />
-
-              {/* Reminders list (route: /dashboard/studio) */}
-              <Route path="studio" element={<Studio />} />
-
-              {/* Create reminder (route: /dashboard/studio/create) */}
-              <Route path="studio/create" element={<CreateReminderScreen />} />
-
-              {/* Other dashboard routes */}
-              <Route path="deliveries" element={<Deliveries />} />
-              <Route path="insights" element={<Insights />} />
-
-              {/* Settings & nested settings routes */}
-
-              <Route path="settings" element={<SettingsLayout />}>
-                <Route index element={<SettingsIndex />} />
-                <Route path="accountinfo" element={<AccountInfo />} />
-                <Route path="notifications" element={<Notification />} />
-                <Route path="security" element={<Security />} />
-                <Route path="preferences" element={<Preferences />} />
-                <Route path="appearance" element={<Appearance />} />
-                <Route path="aboutremindrai" element={<Aboutremindrai />} />
-                <Route path="deleteaccount" element={<DeleteAccount />} />
-              </Route>
-            </Route>
-
-            {/* Email Verification (protected) */}
-            <Route
-              path="/verify-email"
-              element={
-                <ProtectedRoute>
-                  <PublicLayout>
-                    <VerifyEmailPage />
-                  </PublicLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Onboarding (protected) */}
-            <Route
-              path="/onboarding"
-              element={
-                <ProtectedRoute>
-                  <Onboarding />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Catch-all: smart redirect depending on auth state */}
-            <Route
-              path="*"
-              element={
-                isUserLoggingOut ? (
-                  <Navigate to="/" replace />
-                ) : currentUser ? (
-                  <Navigate to="/dashboard" replace />
-                ) : (
-                  <Navigate to="/auth" replace />
-                )
-              }
-            />
-          </Routes>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* ToastContainer kept outside AnimatePresence so toasts persist across route transitions
-          — otherwise toasts would unmount/remount as the animated subtree changes. */}
+      {/* Toast notifications sit outside the route tree so they survive
+          route transitions without unmounting mid-display */}
       <ToastContainer />
     </>
   );
 }
 
-// Memoize the app content so it doesn't re-render unnecessarily when parent uses provider re-renders
+// Memoized to prevent unnecessary re-renders when the provider tree above re-renders
 const MemoizedAppContent = React.memo(AppContent);
 
 export default function App() {
-  // 🔒 Core provider: keeps auth state and other app-level providers in the tree
   return (
+    // Provider order matters:
+    // 1. AuthContextProvider — outermost, everything else reads from it
+    // 2. TimezoneProvider — reads auth state so must be inside AuthContextProvider
+    // 3. MemoizedAppContent — reads auth state so must be inside AuthContextProvider
     <AuthContextProvider>
-      {/* 
-        ✅ CORRECT PROVIDER ORDER:
-        1. AuthContextProvider (outermost - provides useAuthContext)
-        2. TimezoneProvider (calls useAuthContext - must be inside AuthContextProvider)
-        3. MemoizedAppContent (calls useAuthContext - must be inside AuthContextProvider)
-      */}
       <TimezoneProvider saveProfileTz={false}>
         <MemoizedAppContent />
       </TimezoneProvider>
     </AuthContextProvider>
   );
 }
+

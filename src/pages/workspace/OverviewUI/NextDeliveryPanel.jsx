@@ -55,7 +55,7 @@ const NextDeliveryPanel = ({ next }) => {
           </p>
 
           <Link
-            to="/dashboard/studio/create"
+            to="/workspace/studio/create"
             className="flex items-center justify-center px-5 py-2.5 
                      text-sm font-medium rounded-md
                      bg-brand text-white hover:bg-brand-hover
@@ -128,7 +128,7 @@ const NextDeliveryPanel = ({ next }) => {
       </section>
       <div>
         <Link
-          to="/dashboard/studio"
+          to="/workspace/studio"
           className="text-xs text-muted hover:text-brand transition-colors"
         >
           View all preparations →
