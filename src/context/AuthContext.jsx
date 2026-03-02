@@ -41,6 +41,9 @@ export function AuthContextProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
   const [isAccountDeleting, setIsAccountDeleting] = useState(false);
+  // Tracks which provider the user authenticated with — "password", "google.com", or "github.com".
+  // Useful for showing the right UI (hiding password change for OAuth users).
+  const [authProvider, setAuthProvider] = useState(null);
 
   // Blocks the timezone modal from firing during logout
   const isLoggingOutRef = useRef(false);
@@ -237,6 +240,7 @@ export function AuthContextProvider({ children }) {
       if (!user) {
         setFirebaseUser(null);
         setUserProfile(null);
+        setAuthProvider(null);
         setLoading(false);
         setHasLoadedProfile(true);
         isLoggingOutRef.current = false;
@@ -275,10 +279,15 @@ export function AuthContextProvider({ children }) {
           resetTimezoneState();
           return;
         }
-        // Other reload errors (network glitch etc.) — continue with what we have
+        // Other reload errors (network glitch) — continue with what we have
       }
 
       setFirebaseUser(user);
+
+      // Firebase puts the primary provider first in providerData, so index 0 is always
+      // the one that matters. We fall back to "password" if providerData is somehow empty.
+      const providerId = user.providerData?.[0]?.providerId || "password";
+      setAuthProvider(providerId);
 
       const userDocRef = doc(db, "users", user.uid);
 
@@ -383,11 +392,22 @@ export function AuthContextProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty — this listener should only mount once
 
-  const computedValues = useMemo(
-    () => ({
+  const computedValues = useMemo(() => {
+    // Derive capability flags once here so no component ever has to do a
+    // raw provider string check. Add new OAuth providers here if you ever
+    // support more — the flags stay the same everywhere else in the app.
+    const isOAuthUser =
+      authProvider === "google.com" || authProvider === "github.com";
+
+    const hasPasswordAuth = authProvider === "password";
+
+    return {
       firebaseUser,
       user: userProfile,
       currentUser: userProfile,
+      authProvider,
+      isOAuthUser,
+      hasPasswordAuth,
 
       loading,
       hasLoadedProfile,
@@ -429,40 +449,40 @@ export function AuthContextProvider({ children }) {
       deleteAccount,
 
       formatDateFromTimestamp,
-    }),
-    [
-      firebaseUser,
-      userProfile,
-      loading,
-      hasLoadedProfile,
-      isAccountDeleting,
-      detectedTimezone,
-      isTimezoneStable,
-      pendingDeviceTimezone,
-      pendingOriginalTimezone,
-      reminders,
-      isLoadingReminders,
-      remindersError,
-      totalReminders,
-      aiReminders,
-      simpleReminders,
-      aiCount,
-      simpleCount,
-      activeReminders,
-      completedReminders,
-      activeCount,
-      completedCount,
-      nextRun,
-      remindersEmpty,
-      logout,
-      updateUserProfileInFirestore,
-      deleteAccount,
-      formatDateFromTimestamp,
-      stageDeviceTimezone,
-      declineDeviceTimezone,
-      acceptDeviceTimezone,
-    ],
-  );
+    };
+  }, [
+    firebaseUser,
+    userProfile,
+    loading,
+    hasLoadedProfile,
+    isAccountDeleting,
+    authProvider,
+    detectedTimezone,
+    isTimezoneStable,
+    pendingDeviceTimezone,
+    pendingOriginalTimezone,
+    reminders,
+    isLoadingReminders,
+    remindersError,
+    totalReminders,
+    aiReminders,
+    simpleReminders,
+    aiCount,
+    simpleCount,
+    activeReminders,
+    completedReminders,
+    activeCount,
+    completedCount,
+    nextRun,
+    remindersEmpty,
+    logout,
+    updateUserProfileInFirestore,
+    deleteAccount,
+    formatDateFromTimestamp,
+    stageDeviceTimezone,
+    declineDeviceTimezone,
+    acceptDeviceTimezone,
+  ]);
 
   return (
     <AuthContext.Provider value={computedValues}>
