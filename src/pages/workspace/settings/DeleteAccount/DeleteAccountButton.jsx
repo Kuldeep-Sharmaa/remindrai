@@ -1,7 +1,11 @@
-// src/components/settings/DeleteAccountButton.jsx
-
 import React, { useState, useEffect } from "react";
-import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import {
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../../context/AuthContext";
 import { auth } from "../../../../services/firebase";
@@ -15,6 +19,8 @@ const DeleteAccountButton = () => {
     loading: authLoading,
     deleteAccount,
     isAccountDeleting,
+    authProvider,
+    hasPasswordAuth,
   } = useAuthContext();
   const [confirming, setConfirming] = useState(false);
   const [showReauthModal, setShowReauthModal] = useState(false);
@@ -64,6 +70,8 @@ const DeleteAccountButton = () => {
         });
         navigate("/", { replace: true });
       } else if (result.requiresRecentLogin) {
+        // Firebase threw auth/requires-recent-login — user needs to re-verify
+        // before we can delete. Show the modal instead of a dead-end error.
         setError("For security, please re-enter your password to confirm.");
         setShowReauthModal(true);
       } else {
@@ -81,12 +89,16 @@ const DeleteAccountButton = () => {
     }
   };
 
+  // Firebase requires re-verification before account deletion regardless of
+  // how recently the user signed in. The method depends on how they signed up —
+  // password users re-enter their password, OAuth users go back through their
+  // provider's popup. Same security guarantee, different UX path.
   const handleReauthenticate = async (password) => {
     const user = auth.currentUser;
-    if (!user || !user.email) {
+    if (!user) {
       showToast({
         type: "error",
-        message: "Session expired. Please log in again and retry.",
+        message: "Session expired. Please log in again.",
       });
       return;
     }
@@ -94,29 +106,33 @@ const DeleteAccountButton = () => {
     setReauthLoading(true);
 
     try {
-      const credential = EmailAuthProvider.credential(user.email, password);
-      await reauthenticateWithCredential(user, credential);
+      if (hasPasswordAuth) {
+        const credential = EmailAuthProvider.credential(user.email, password);
+        await reauthenticateWithCredential(user, credential);
+      } else if (authProvider === "google.com") {
+        await reauthenticateWithPopup(user, new GoogleAuthProvider());
+      } else if (authProvider === "github.com") {
+        await reauthenticateWithPopup(user, new GithubAuthProvider());
+      }
+
       setShowReauthModal(false);
       await handleDeleteConfirmed();
     } catch (err) {
       console.error("Reauthentication error:", err);
-      const toastMessage =
-        err.code === "auth/wrong-password" ||
-        err.code === "auth/invalid-credential"
-          ? "Incorrect password. Please try again."
-          : err.code === "auth/user-not-found" ||
-              err.code === "auth/invalid-email"
-            ? "We couldn't find your account. Please log out and log back in."
-            : err.code === "auth/too-many-requests"
-              ? "Too many failed attempts. Please wait a moment and try again."
-              : "Verification failed. Please try again or contact support.";
-
-      showToast({ type: "error", message: toastMessage });
+      showToast({
+        type: "error",
+        message:
+          err.code === "auth/popup-closed-by-user"
+            ? "Authentication cancelled."
+            : "Verification failed. Please try again.",
+      });
     } finally {
       setReauthLoading(false);
     }
   };
 
+  // Button is disabled while auth is loading, if there's no valid user session,
+  // or if a deletion is already in progress.
   const isDisabled =
     authLoading || !currentUser || !currentUser.uid || isAccountDeleting;
   const loading = isAccountDeleting || reauthLoading;
@@ -124,7 +140,6 @@ const DeleteAccountButton = () => {
   return (
     <div className="w-full mt-6 max-w-2xl mx-auto">
       <div className="bg-gradient-to-r from-red-50/80 to-pink-50/80 dark:from-red-900/20 dark:to-pink-900/20 backdrop-blur-sm rounded-2xl border border-red-200/50 dark:border-red-800/50 p-6 sm:p-8 shadow-xl">
-        {/* Warning Banner */}
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-1">
             <svg
@@ -149,7 +164,8 @@ const DeleteAccountButton = () => {
           </p>
         </div>
 
-        {/* Error Message */}
+        {/* Only show inline error when the reauth modal is closed — otherwise
+            the modal itself handles the error feedback */}
         {error && !showReauthModal && (
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-6 animate-in fade-in slide-in-from-top-1">
             <div className="flex items-center gap-2">
@@ -171,7 +187,6 @@ const DeleteAccountButton = () => {
           </div>
         )}
 
-        {/* Action Area */}
         <div className="space-y-4">
           {!confirming ? (
             <button
@@ -232,7 +247,6 @@ const DeleteAccountButton = () => {
           )}
         </div>
 
-        {/* Disabled State Info */}
         {isDisabled && !loading && (
           <div className="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex items-start gap-2">
             <svg
@@ -256,12 +270,13 @@ const DeleteAccountButton = () => {
         )}
       </div>
 
-      {/* Reauthentication Modal */}
       {showReauthModal && (
         <ReauthenticateModal
           onClose={handleCancelDelete}
           onReauthenticate={handleReauthenticate}
           loading={reauthLoading}
+          hasPasswordAuth={hasPasswordAuth}
+          authProvider={authProvider}
         />
       )}
     </div>
