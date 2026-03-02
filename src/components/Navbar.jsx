@@ -350,7 +350,7 @@ export default function Navbar() {
               <Link
                 to="/workspace/settings/accountinfo"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-base text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
                 <User className="w-4 h-4 text-muted flex-shrink-0" />
                 Profile
@@ -358,7 +358,7 @@ export default function Navbar() {
               <Link
                 to="/workspace/settings"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-base text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
                 <Settings className="w-4 h-4 text-muted flex-shrink-0" />
                 Settings
