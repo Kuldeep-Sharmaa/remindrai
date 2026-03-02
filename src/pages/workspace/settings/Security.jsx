@@ -1,4 +1,3 @@
-// src/components/settings/Security.jsx
 import React, { useState, useEffect } from "react";
 import {
   EmailAuthProvider,
