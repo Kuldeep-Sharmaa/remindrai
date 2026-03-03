@@ -63,7 +63,7 @@ const SocialButton = ({ icon, label, onClick, ariaLabel }) => (
 const handleGoogleLogin = async () => {
   try {
     await loginWithGoogle();
-    showToast({ type: "success", message: "Logged in with Google" });
+    showToast({ type: "success", message: "You’re signed in." });
   } catch (err) {
     console.error("Google login error:", err);
     showToast({
