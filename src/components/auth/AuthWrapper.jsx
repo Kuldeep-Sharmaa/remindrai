@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import LoginForm from "./login/LoginForm";
@@ -15,12 +16,14 @@ const AuthWrapper = () => {
   return (
     <div className="min-h-screen flex flex-col bg-bgLight dark:bg-bgDark font-inter text-textLight dark:text-textDark">
       <header className="w-full flex items-center justify-between sm:py-6 lg:px-8 py-5 border-b border-gray-100 dark:border-border/50">
-        <img
-          src="/transparent_logo.svg"
-          alt="RemindrAI"
-          className="h-10 w-auto"
-          loading="eager"
-        />
+        <Link to="/">
+          <img
+            src="/transparent_logo.svg"
+            alt="RemindrAI"
+            className="h-10 w-auto"
+            loading="eager"
+          />
+        </Link>
 
         <div className="flex items-center gap-2 text-sm lg:text-base text-muted">
           <span>{isLogin ? "No account?" : "Have an account?"}</span>
