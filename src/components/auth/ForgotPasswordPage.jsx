@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { sendPasswordReset } from "../../services/authService";
 import { showToast } from "../ToastSystem/toastUtils";
@@ -81,12 +81,15 @@ const ForgotPasswordPage = () => {
     <div className="min-h-screen flex flex-col bg-bgLight dark:bg-bgDark font-inter text-textLight dark:text-textDark">
       {/* Top nav bar — matches AuthWrapper */}
       <header className="w-full flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-border/50">
-        <img
-          src="/transparent_logo.svg"
-          alt="RemindrAI"
-          className="h-10 w-auto"
-          loading="eager"
-        />
+        <Link to="/">
+          {" "}
+          <img
+            src="/transparent_logo.svg"
+            alt="RemindrAI"
+            className="h-10 w-auto"
+            loading="eager"
+          />
+        </Link>
       </header>
 
       <main className="flex-1 flex items-center text-center justify-center px-6 py-16">
