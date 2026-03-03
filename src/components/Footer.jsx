@@ -167,8 +167,6 @@ const Footer = () => {
           </p>
         </div>
 
-        <DrawLine />
-
         <div className="py-10 sm:py-12 grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
           {Object.entries(NAV).map(([section, links]) => (
             <div key={section}>
