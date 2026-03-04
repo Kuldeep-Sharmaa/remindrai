@@ -4,22 +4,19 @@ import { motion } from "framer-motion";
 export const Navbar = () => {
   return (
     <motion.nav
-      initial={{ opacity: 0, y: -50 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      // Fixed position, top, full width, high z-index to sit above everything
-      className="fixed top-0 left-0 w-full p-4 sm:px-6 lg:px-8 bg-white dark:bg-black/95   text-center shadow z-50"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="fixed top-0 left-0 w-full z-50 bg-bgDark dark:bg-bgDark border-b border-border"
     >
-      <div className="flex items-center justify-center max-w-7xl text-center mx-auto">
-        {/* Logo and App Name */}
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-center h-16 px-5">
+        <div className="flex items-center gap-2.5">
           <img
             src="/transparent_logo.svg"
-            alt="RemindrAI Logo"
-            className="h-8 sm:h-10"
+            alt="RemindrAI"
+            className="h-10 w-auto"
           />
         </div>
-        {/* You can add navigation links or other elements here if needed */}
       </div>
     </motion.nav>
   );
