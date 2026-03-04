@@ -59,11 +59,10 @@ function SidebarNav({
 
   return (
     <nav
-      className="flex flex-col h-[calc(100vh-80px)] mt-6 px-3 text-black dark:text-white"
+      className="flex flex-col flex-1 px-3 text-black dark:text-white overflow-hidden"
       aria-label="Main navigation"
     >
-      {/* Links scroll if they overflow — logout is never part of the scroll */}
-      <ul className="flex-1 overflow-y-auto space-y-2 scrollbar-none">
+      <ul className="flex-1 overflow-y-auto space-y-2 scrollbar-none pt-6">
         {SidebarLinks.map((link) => {
           if (link.label === "Logout") return null;
 
@@ -111,7 +110,6 @@ function SidebarNav({
         })}
       </ul>
 
-      {/* Logout — flex-shrink-0 so it's always visible, never pushed off screen */}
       <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700/50 pt-4 pb-6 px-0">
         <button
           onClick={handleLogout}
