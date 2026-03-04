@@ -1,14 +1,6 @@
-// 📁 src/layouts/workspaceLayout.jsx
-
-// App shell for authenticated dashboard
-// - Responsive sidebar + topbar
-// - Scroll management
-// - Logout flow
-// - Error boundary isolation
-// - Timezone sync modal
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 import Sidebar from "./workspaceLayout/Sidebar";
 import Topbar from "./workspaceLayout/Topbar";
@@ -22,15 +14,13 @@ const DashboardLayout = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 1024 : false
+    typeof window !== "undefined" ? window.innerWidth < 1024 : false,
   );
 
   const { logout } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const scrollRef = useRef(null);
-
-  // Responsive handling + body scroll lock
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -39,6 +29,7 @@ const DashboardLayout = () => {
 
     const handleResize = () => {
       clearTimeout(resizeTimer);
+      // Debounced so it doesn't thrash on every pixel during drag
       resizeTimer = setTimeout(() => {
         const mobile = window.innerWidth < 1024;
         setIsMobile(mobile);
@@ -61,7 +52,6 @@ const DashboardLayout = () => {
     };
   }, [sidebarExpanded, isMobile]);
 
-  // Logout flow
   const handleLogoutConfirm = useCallback(async () => {
     setIsLoggingOut(true);
     try {
@@ -83,7 +73,6 @@ const DashboardLayout = () => {
     setSidebarExpanded(false);
   }, []);
 
-  //  Scroll reset on route change
   useEffect(() => {
     try {
       if (scrollRef.current) {
@@ -94,17 +83,17 @@ const DashboardLayout = () => {
     } catch {}
   }, [location.pathname]);
 
-  // Toast alignment (UI utility)
-
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     let raf;
     let observer;
 
+    // Toast is rendered outside the sidebar — this keeps it visually centered
+    // inside the main content area regardless of sidebar width
     const realignToaster = () => {
       const wrapper = document.querySelector(
-        '#_rht_toaster > div[style*="justify-content: center"]'
+        '#_rht_toaster > div[style*="justify-content: center"]',
       );
       const main = document.querySelector("#main-scroll-container");
       if (!wrapper || !main) return;
@@ -141,12 +130,14 @@ const DashboardLayout = () => {
     };
   }, [sidebarExpanded]);
 
-  //  Layout render
-
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-black flex justify-center overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="min-h-screen w-full bg-bgLight dark:bg-bgDark flex justify-center overflow-hidden"
+    >
       <div className="w-full max-w-screen-2xl flex overflow-hidden">
-        {/* Sidebar */}
         <Sidebar
           expanded={sidebarExpanded}
           setExpanded={setSidebarExpanded}
@@ -154,7 +145,6 @@ const DashboardLayout = () => {
           onLinkClick={handleSidebarLinkClick}
         />
 
-        {/* Mobile overlay */}
         <div
           className={`fixed inset-0 z-20 lg:hidden bg-black/50 transition-opacity ${
             sidebarExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -162,7 +152,6 @@ const DashboardLayout = () => {
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* Main area */}
         <div
           className={`flex flex-col flex-1 min-h-screen overflow-hidden transition-all ${
             sidebarExpanded ? "lg:ml-64" : "lg:ml-20"
@@ -185,7 +174,6 @@ const DashboardLayout = () => {
           </main>
         </div>
 
-        {/* Logout Modal */}
         {showLogoutModal && (
           <LogoutModal
             isOpen
@@ -197,9 +185,8 @@ const DashboardLayout = () => {
       </div>
 
       <TimezoneChangeModal />
-    </div>
+    </motion.div>
   );
 };
 
 export default React.memo(DashboardLayout);
-
