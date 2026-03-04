@@ -1,10 +1,3 @@
-/**
- * ReminderForm.jsx
- *
- * Main form for creating reminders and AI drafts.
- * Handles validation, scheduling, and user preferences.
- */
-
 import React, {
   useCallback,
   useMemo,
@@ -14,6 +7,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 import useReminderForm from "../../hooks/useReminderForm";
 import PromptInput from "../ReminderForm/PromptInput";
@@ -23,11 +17,24 @@ import NextRunDisplay from "../ReminderForm/NextRunDisplay";
 import ReminderType from "../ReminderForm/ReminderType";
 import UserPreferencesCard from "../UserPreferencesCard";
 
+const ActivatingButton = ({ reminderType }) => (
+  <span className="flex items-center justify-center gap-2.5">
+    <span className="relative flex items-center justify-center w-4 h-4">
+      <span className="absolute inset-0 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+    </span>
+    <span className="text-white/90">
+      {reminderType === "ai" ? "Activating" : "Saving"}
+    </span>
+  </span>
+);
+
 export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   const navigate = useNavigate();
 
   const [promptTouched, setPromptTouched] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
+  const [reminderType, setReminderType] = useState("ai");
 
   const closeBtnRef = useRef(null);
 
@@ -48,8 +55,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     openPreferences,
     isNextRunValid,
   } = form || {};
-  const [isActivating, setIsActivating] = useState(false);
-  const [reminderType, setReminderType] = useState("ai");
 
   useEffect(() => {
     if (form?.reminderType && form.reminderType !== reminderType) {
@@ -95,7 +100,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   const handleOpenPreferences = useCallback(() => {
     if (typeof onOpenPreferences === "function") return onOpenPreferences();
     if (typeof openPreferences === "function") return openPreferences();
-    navigate("/dashboard/settings/preferences");
+    navigate("/workspace/settings/preferences");
   }, [onOpenPreferences, openPreferences, navigate]);
 
   const handleSave = useCallback(
@@ -112,12 +117,9 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
         setIsActivating(true);
 
         const startTime = Date.now();
-
         await save(overrides);
 
-        // Ensure minimum visible activation time (2 seconds)
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(2000 - elapsed, 0);
+        const remaining = Math.max(2000 - (Date.now() - startTime), 0);
 
         setTimeout(() => {
           toast.success(
@@ -125,11 +127,9 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               ? "Prompt is active. The next draft will be prepared automatically."
               : "Note scheduled.",
           );
-
           setIsActivating(false);
-
           if (typeof onSuccess === "function") return onSuccess();
-          navigate("/dashboard/studio");
+          navigate("/workspace/studio");
         }, remaining);
       } catch (err) {
         console.error("Save error:", err);
@@ -141,14 +141,13 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   );
 
   const handleCancel = useCallback(
-    () => navigate("/dashboard/studio"),
+    () => navigate("/workspace/studio"),
     [navigate],
   );
 
   const shouldShowValidationError =
     !isValid && (promptTouched || attemptedSave || scheduleFieldError);
 
-  // Show next run after user touches prompt or if editing existing reminder
   const showNextRun =
     promptTouched || (typeof prompt === "string" && prompt.trim().length > 0);
 
@@ -160,7 +159,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
           className="space-y-8 bg-bgLight/80 dark:bg-bgDark/50 backdrop-blur-lg rounded-2xl border border-border/40 shadow-xl p-5 sm:p-8 transition-all"
           aria-labelledby="remindr-form-title"
         >
-          {/* Header */}
           <div className="text-center sm:text-left">
             <h1
               id="remindr-form-title"
@@ -170,7 +168,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             </h1>
           </div>
 
-          {/* User preferences for AI mode */}
           {reminderType === "ai" && (
             <div className="mt-4">
               <UserPreferencesCard
@@ -194,7 +191,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             />
           </div>
 
-          {/* Frequency and time selection */}
           <div className="mt-4 space-y-3">
             <FrequencySelector value={frequency} onChange={setFrequency} />
             <TimeSelector
@@ -215,7 +211,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             )}
           </div>
 
-          {/* Validation errors */}
           {shouldShowValidationError &&
             validation?.errorCode &&
             !(
@@ -243,7 +238,6 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             </div>
           )}
 
-          {/* Form actions */}
           <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button
               type="button"
@@ -252,21 +246,46 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             >
               Cancel
             </button>
-            <button
+
+            <motion.button
               type="submit"
               disabled={!isValid || saving || isActivating}
-              className={`w-full sm:w-auto px-4 py-2 text-sm sm:text-base font-semibold text-white rounded-md transition-colors duration-150 ${
-                !isValid || saving || isActivating
-                  ? "bg-brand/40 cursor-not-allowed"
-                  : "bg-brand hover:brightness-110"
-              }`}
+              whileTap={
+                isValid && !saving && !isActivating ? { scale: 0.98 } : {}
+              }
+              className={`relative w-full sm:w-auto min-w-[140px] px-5 py-2.5 text-sm sm:text-base font-semibold rounded-md transition-all duration-200 overflow-hidden
+                ${
+                  !isValid || saving || isActivating
+                    ? "bg-brand/40 cursor-not-allowed"
+                    : "bg-brand hover:brightness-110"
+                }`}
             >
-              {isActivating
-                ? "Activating..."
-                : reminderType === "ai"
-                  ? "Activate Prompt"
-                  : "Save note"}
-            </button>
+              <AnimatePresence mode="wait">
+                {isActivating ? (
+                  <motion.span
+                    key="activating"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center justify-center"
+                  >
+                    <ActivatingButton reminderType={reminderType} />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="idle"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="text-white"
+                  >
+                    {reminderType === "ai" ? "Activate Prompt" : "Save note"}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
         </form>
       </div>
