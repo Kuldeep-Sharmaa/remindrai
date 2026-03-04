@@ -71,7 +71,6 @@ export const RoleSelector = ({ selectedRole, onSelect }) => {
                   : "bg-bgImpact border-border hover:border-brand/30"
               }`}
           >
-            {/* Icon container dims when unselected, lights up on selection */}
             <span
               className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200
               ${
