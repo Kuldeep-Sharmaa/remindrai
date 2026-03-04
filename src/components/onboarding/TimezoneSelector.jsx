@@ -78,7 +78,7 @@ const TimezoneSelector = ({ selectedTimezone, setSelectedTimezone }) => {
 
       {showInfo && (
         <p className="text-xs font-inter text-muted mb-3 leading-relaxed">
-          Used to schedule drafts at the right local time.
+          Used to deliver the drafts at the right local time.
         </p>
       )}
 
