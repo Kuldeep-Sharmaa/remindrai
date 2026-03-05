@@ -153,28 +153,24 @@ export default function Navbar() {
               <Link
                 to="/auth"
                 className="
-    group relative inline-flex items-center justify-center
-    gap-3
-    pr-7 pl-6 py-2.5
-    rounded-xl
-    bg-brand hover:bg-brand-hover
-    text-white text-sm font-semibold font-grotesk
-    whitespace-nowrap
-    overflow-hidden
-    transition-all duration-200 ease-out
-    shadow-sm shadow-brand/20
-  "
+      group relative inline-flex items-center justify-center gap-2
+      px-16 py-2.5 rounded-lg
+      bg-brand hover:bg-brand-hover
+      text-white text-lg font-semibold font-grotesk
+      whitespace-nowrap overflow-hidden
+      transition-all duration-200 ease-out
+      shadow-[0_0_0_1px_rgba(37,99,235,0.4),0_2px_8px_rgba(37,99,235,0.25)]
+      hover:shadow-[0_0_0_1px_rgba(37,99,235,0.6),0_4px_16px_rgba(37,99,235,0.35)]
+    "
               >
-                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                {/* shimmer */}
+                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <span className="relative z-10 text-base leading-none">
-                  Unlock
-                </span>
+                <span className="relative z-10 leading-none">Get access</span>
 
-                <span className="relative z-10 flex items-center justify-center w-4 h-4">
-                  <Lock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
-
-                  <Unlock className="absolute w-4 h-4 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-6" />
+                <span className="relative z-10 flex items-center justify-center w-3.5 h-3.5">
+                  <Lock className="absolute w-3.5 h-3.5 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
+                  <Unlock className="absolute w-3.5 h-3.5 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100" />
                 </span>
               </Link>
             ) : (
@@ -374,7 +370,7 @@ export default function Navbar() {
                 className="group relative flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-base font-semibold font-grotesk overflow-hidden transition-all duration-200"
               >
                 <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-                <span className="relative z-10">Unlock</span>
+                <span className="relative z-10">Get access</span>
                 <span className="relative z-10 flex items-center justify-center w-3.5 h-3.5">
                   <Lock className="absolute inset-0 w-3.5 h-3.5 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
                   <Unlock className="absolute inset-0 w-3.5 h-3.5 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-6" />
