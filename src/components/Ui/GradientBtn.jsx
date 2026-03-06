@@ -1,61 +1,98 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
-const GradientButton = ({
-  label = "See more",
+export default function Button({
+  children,
+  variant = "primary",
+  size = "md",
+  href,
   to,
-  onClick,
+  icon,
+  iconPosition = "right",
+  showArrow = false,
   className = "",
-}) => {
-  const baseClasses = `
-    group relative 
-    h-14 sm:h-16 
-    w-full sm:w-64 
-    border rounded-lg overflow-hidden 
-    flex items-center justify-center sm:justify-start 
-    px-4 font-grotesk 
-    text-sm sm:text-base font-bold 
-    transition-all duration-500
-
-    /* Light Theme */
-    bg-bgLight text-textLight border-gray-300
-    hover:text-primary hover:border-primary
-
-    /* Dark Theme */
-    dark:bg-bgDark dark:text-textDark dark:border-gray-700
-    dark:hover:text-secondary dark:hover:border-secondary
-
-    underline underline-offset-2 hover:underline hover:underline-offset-4
-
-    /* Glow Effect */
-    before:absolute before:w-12 before:h-12 before:content-[''] 
-    before:right-1 before:top-1 before:z-10 
-    before:bg-primary dark:before:bg-secondary
-    before:rounded-full before:blur-lg before:duration-500
-
-    after:absolute after:z-10 after:w-20 after:h-20 after:content-[''] 
-    after:bg-accent dark:after:bg-secondary
-    after:right-8 after:top-3 after:rounded-full after:blur-lg after:duration-500
-
-    hover:before:right-12 hover:before:-bottom-8 hover:before:blur
-    hover:after:-right-8
-
-    ${className}
+  ...props
+}) {
+  const base = `
+    relative inline-flex items-center justify-center gap-2
+    font-grotesk font-medium tracking-tight
+    transition-all duration-200 ease-out
+    select-none whitespace-nowrap
+    disabled:opacity-30 disabled:pointer-events-none
+    group
   `;
 
-  const ButtonElement = (
-    <button onClick={onClick} className={baseClasses}>
-      {label}
+  const sizes = {
+    sm: "text-xs px-3.5 py-2 rounded-lg",
+    md: "text-sm px-5 py-2.5 rounded-lg",
+    lg: "text-base px-6 py-3 rounded-xl",
+    icon: "p-2 rounded-lg",
+  };
+
+  const variants = {
+    primary: `
+      border border-black/15 dark:border-white/15
+      text-textLight dark:text-textDark
+      hover:border-black/30 dark:hover:border-white/30
+      hover:text-textLight dark:hover:text-white
+      bg-transparent
+    `,
+    ghost: `
+      border-none
+      text-textLight/40 dark:text-white/30
+      hover:text-textLight/80 dark:hover:text-white/70
+      bg-transparent px-0
+    `,
+    icon: `
+      border border-black/10 dark:border-white/10
+      text-textLight/40 dark:text-white/30
+      hover:border-black/20 dark:hover:border-white/20
+      hover:text-textLight/70 dark:hover:text-white/60
+      bg-transparent
+    `,
+  };
+
+  const classes = `${base} ${sizes[size]} ${variants[variant]} ${className}`;
+
+  const isIconOnly = variant === "icon";
+
+  const content = (
+    <>
+      {isIconOnly ? (
+        <span className="flex-shrink-0">{icon}</span>
+      ) : (
+        <>
+          {icon && iconPosition === "left" && (
+            <span className="flex-shrink-0">{icon}</span>
+          )}
+          <span className="leading-none">{children}</span>
+          {icon && iconPosition === "right" && (
+            <span className="flex-shrink-0">{icon}</span>
+          )}
+          {showArrow && (
+            <ArrowRight className="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+          )}
+        </>
+      )}
+    </>
+  );
+
+  if (to)
+    return (
+      <Link to={to} className={classes} {...props}>
+        {content}
+      </Link>
+    );
+  if (href)
+    return (
+      <a href={href} className={classes} {...props}>
+        {content}
+      </a>
+    );
+  return (
+    <button className={classes} {...props}>
+      {content}
     </button>
   );
-
-  return to ? (
-    <Link to={to} className="inline-block w-full sm:w-auto">
-      {ButtonElement}
-    </Link>
-  ) : (
-    ButtonElement
-  );
-};
-
-export default GradientButton;
+}
