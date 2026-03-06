@@ -10,8 +10,8 @@ import HeroSection from "../components/Home/HeroSection";
 import Background from "../components/Background";
 
 const Problem = lazy(() => import("../components/Home/Problem"));
-const Solution = lazy(() => import("../components/Home/Solution"));
-const Experience = lazy(() => import("../components/Home/Experience"));
+const Graph = lazy(() => import("../components/Home/Graph"));
+const Setup = lazy(() => import("../components/Home/SetUp"));
 const MiniFeature = lazy(() => import("../components/Home/MiniFeatures"));
 const CallToAction = lazy(() => import("../components/Home/CallToAction"));
 const WordMarquee = lazy(() => import("../components/Home/WordMarquee"));
@@ -28,9 +28,9 @@ const SectionSkeleton = () => (
 
 const SECTIONS = [
   "problem",
-  "solution",
+  "graph",
   "wordMarquee",
-  "experience",
+  "setup",
   "miniFeature",
   "callToAction",
 ];
@@ -85,7 +85,7 @@ const Home = () => {
       if (done) return;
       done = true;
       import("../components/Home/Problem").catch(() => {});
-      import("../components/Home/Solution").catch(() => {});
+      import("../components/Home/Graph").catch(() => {});
     };
     const events = ["pointerdown", "touchstart", "keydown"];
     events.forEach((e) =>
@@ -106,9 +106,9 @@ const Home = () => {
         </Suspense>
       </div>
 
-      <div data-section="solution">
+      <div data-section="graph">
         <Suspense fallback={<SectionSkeleton />}>
-          {visible.solution && <Solution />}
+          {visible.graph && <Graph />}
         </Suspense>
       </div>
 
@@ -118,9 +118,9 @@ const Home = () => {
         </Suspense>
       </div>
 
-      <div data-section="experience">
+      <div data-section="setup">
         <Suspense fallback={<SectionSkeleton />}>
-          {visible.experience && <Experience />}
+          {visible.setup && <Setup />}
         </Suspense>
       </div>
 
