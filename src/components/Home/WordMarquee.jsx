@@ -1,45 +1,40 @@
-// src/components/WordMarquee.jsx
 import React from "react";
 import Marquee from "react-fast-marquee";
-import { Calendar, Zap, Clock, Brain, Rocket } from "lucide-react";
+import {
+  RefreshCw,
+  FileText,
+  Repeat,
+  BookOpen,
+  Clock,
+  Layers,
+  CheckCircle,
+} from "lucide-react";
 
-const words = [
-  {
-    text: "Plan Smarter",
-
-    icon: Calendar,
-  },
-  {
-    text: "Automate Effortlessly",
-
-    icon: Zap,
-  },
-  {
-    text: "Never Miss Deadlines",
-
-    icon: Clock,
-  },
-  {
-    text: "AI-Powered Reminders",
-
-    icon: Brain,
-  },
-  { text: "Stay Ahead", gradient: "from-yellow-400 to-red-500", icon: Rocket },
+const ITEMS = [
+  { text: "Prepared Drafts", icon: FileText },
+  { text: "Content Ready", icon: CheckCircle },
+  { text: "Steady Output", icon: Layers },
+  { text: "Continuous Flow", icon: Repeat },
+  { text: "System Memory", icon: BookOpen },
+  { text: "No Gaps", icon: Clock },
+  { text: "Consistent Work", icon: RefreshCw },
 ];
 
 export default function WordMarquee() {
   return (
-    <div className="w-full py-6 overflow-hidden">
+    <div className="w-full pt-10 overflow-hidden">
       <Marquee gradient={false} speed={50} pauseOnHover>
-        {words.map((item, index) => (
-          <div key={index} className="flex items-center gap-3 mx-10 group">
-            <item.icon className="w-7 h-7  text-gray-300 dark:text-gray-600 transition-colors duration-300" />
-            <span
-              className={`text-2xl sm:text-3xl font-extrabold tracking-tight leading-none
-                         text-gray-300 dark:text-gray-600
-                         opacity-50 ${item.gradient}`}
-            >
+        {ITEMS.map((item, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2.5 mx-8 group cursor-default"
+          >
+            <item.icon className="w-auto h-6 text-textLight/20 dark:text-white/15 flex-shrink-0 group-hover:text-brand dark:group-hover:text-brand-soft transition-colors duration-300" />
+            <span className="lg:text-3xl text-2xl  font-fontFamily-grotesk font-medium tracking-wide text-textLight/30 dark:text-white/20 group-hover:text-textLight/60 dark:group-hover:text-white/45 transition-colors duration-300 whitespace-nowrap">
               {item.text}
+            </span>
+            <span className="ml-8 text-textLight/15 dark:text-white/10 font-inter select-none">
+              •
             </span>
           </div>
         ))}
