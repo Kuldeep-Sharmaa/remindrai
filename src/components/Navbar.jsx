@@ -72,6 +72,7 @@ export default function Navbar() {
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
+  /* ── Loading skeleton ───────────────────────────────────────── */
   if (loading && !hasLoadedProfile) {
     return (
       <header className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
@@ -91,31 +92,35 @@ export default function Navbar() {
     );
   }
 
+  /* ── Main navbar ────────────────────────────────────────────── */
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md transition-all duration-300 ${
-          scrolled
-            ? "border-b border-gray-200 dark:border-white/10 shadow-sm shadow-black/[0.04]"
-            : "border-b border-gray-100/50 dark:border-white/[0.06]"
-        }`}
+        className={`fixed top-0 inset-x-0 z-50 h-16
+          bg-white/80 dark:bg-black/80 backdrop-blur-md
+          transition-all duration-300
+          ${
+            scrolled
+              ? "border-b border-gray-200 dark:border-white/10 shadow-sm shadow-black/[0.04]"
+              : "border-b border-gray-100/50 dark:border-white/[0.06]"
+          }`}
       >
-        <div className="max-w-6xl mx-auto px-5 h-full flex items-center">
-          <div className="flex-shrink-0 w-36">
-            <Link to="/" aria-label="home" className="inline-flex">
-              <img
-                src="/transparent_logo.svg"
-                alt="RemindrAI"
-                className="h-10 w-auto"
-              />
-            </Link>
-          </div>
+        <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between gap-6">
+          {/* ── Logo ── */}
+          <Link to="/" aria-label="home" className="flex-shrink-0">
+            <img
+              src="/transparent_logo.svg"
+              alt="RemindrAI"
+              className="h-9 w-auto"
+            />
+          </Link>
 
-          <nav className="hidden lg:flex items-center justify-center gap-0.5 flex-1">
+          {/* ── Center nav ── */}
+          <nav className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
             {isLoggedIn && (
               <Link
                 to="/workspace"
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-base font-semibold font-grotesk transition-all duration-150 mr-2
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold font-grotesk transition-all duration-150 mr-2
                   ${
                     isActive("/workspace")
                       ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/25"
@@ -131,7 +136,7 @@ export default function Navbar() {
               <Link
                 key={to}
                 to={to}
-                className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
+                className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-150 font-inter
                   ${
                     isActive(to)
                       ? "text-brand dark:text-brand-soft font-medium"
@@ -146,28 +151,24 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center justify-end gap-2.5 flex-shrink-0 w-36">
+          {/* ── Right cluster: ThemeToggle + CTA/user ── */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
 
             {!isLoggedIn ? (
               <Link
                 to="/auth"
-                className="
-      group relative inline-flex items-center justify-center gap-2
-      px-16 py-2.5 rounded-lg
-      bg-brand hover:bg-brand-hover
-      text-white text-lg font-semibold font-grotesk
-      whitespace-nowrap overflow-hidden
-      transition-all duration-200 ease-out
-      shadow-[0_0_0_1px_rgba(37,99,235,0.4),0_2px_8px_rgba(37,99,235,0.25)]
-      hover:shadow-[0_0_0_1px_rgba(37,99,235,0.6),0_4px_16px_rgba(37,99,235,0.35)]
-    "
+                className="group relative inline-flex items-center justify-center gap-2
+                  px-4 py-2 rounded-lg
+                  bg-brand hover:bg-brand-hover
+                  text-white text-sm font-semibold font-grotesk
+                  whitespace-nowrap overflow-hidden
+                  transition-all duration-200 ease-out
+                  shadow-[0_0_0_1px_rgba(37,99,235,0.4),0_2px_8px_rgba(37,99,235,0.25)]
+                  hover:shadow-[0_0_0_1px_rgba(37,99,235,0.6),0_4px_16px_rgba(37,99,235,0.35)]"
               >
-                {/* shimmer */}
                 <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                <span className="relative z-10 leading-none">Get access</span>
-
+                <span className="relative z-10">Get access</span>
                 <span className="relative z-10 flex items-center justify-center w-3.5 h-3.5">
                   <Lock className="absolute w-3.5 h-3.5 transition-all duration-200 ease-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-75" />
                   <Unlock className="absolute w-3.5 h-3.5 transition-all duration-200 ease-out opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100" />
@@ -192,17 +193,11 @@ export default function Navbar() {
                     </div>
                     <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-[1.5px] border-white dark:border-black" />
                   </div>
-
-                  <span className="text-sm font-medium font-inter max-w-[80px] truncate transition-colors duration-150 text-gray-600 dark:text-gray-400 group-hover:text-brand dark:group-hover:text-brand-soft">
+                  <span className="text-sm font-medium font-inter max-w-[80px] truncate text-gray-600 dark:text-gray-400 group-hover:text-brand dark:group-hover:text-brand-soft transition-colors duration-150">
                     {getFirstName(currentUser)}
                   </span>
-
                   <ChevronDown
-                    className={`w-3 h-3 flex-shrink-0 transition-all duration-200 ${
-                      dropdownOpen
-                        ? "rotate-180 text-brand"
-                        : "text-muted group-hover:text-brand"
-                    }`}
+                    className={`w-3 h-3 flex-shrink-0 transition-all duration-200 ${dropdownOpen ? "rotate-180 text-brand" : "text-muted group-hover:text-brand"}`}
                   />
                 </button>
 
@@ -226,13 +221,12 @@ export default function Navbar() {
                         </div>
                       </div>
                     </div>
-
                     <Link
                       to="/workspace/settings/accountinfo"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
                     >
-                      <User className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+                      <User className="w-3.5 h-3.5 text-muted flex-shrink-0" />{" "}
                       Profile
                     </Link>
                     <Link
@@ -240,7 +234,7 @@ export default function Navbar() {
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
                     >
-                      <Settings className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+                      <Settings className="w-3.5 h-3.5 text-muted flex-shrink-0" />{" "}
                       Settings
                     </Link>
                   </div>
@@ -249,7 +243,8 @@ export default function Navbar() {
             )}
           </div>
 
-          <div className="lg:hidden ml-auto flex items-center">
+          {/* ── Mobile hamburger ── */}
+          <div className="lg:hidden">
             <button
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
@@ -266,20 +261,18 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* ── Mobile backdrop ── */}
       <div
         onClick={() => setMobileOpen(false)}
         aria-hidden="true"
-        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] lg:hidden transition-opacity duration-300 ${
-          mobileOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] lg:hidden transition-opacity duration-300
+          ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       />
 
+      {/* ── Mobile drawer ── */}
       <aside
-        className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+          ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
         aria-label="Navigation"
       >
         <div className="h-16 flex items-center justify-end px-4 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
@@ -348,15 +341,14 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-base text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
-                <User className="w-4 h-4 text-muted flex-shrink-0" />
-                Profile
+                <User className="w-4 h-4 text-muted flex-shrink-0" /> Profile
               </Link>
               <Link
                 to="/workspace/settings"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-base text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
               >
-                <Settings className="w-4 h-4 text-muted flex-shrink-0" />
+                <Settings className="w-4 h-4 text-muted flex-shrink-0" />{" "}
                 Settings
               </Link>
             </>
@@ -380,6 +372,7 @@ export default function Navbar() {
           )}
         </nav>
 
+        {/* Mobile bottom — user info + theme toggle */}
         <div className="px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
           <div className="flex items-center justify-between">
             {isLoggedIn ? (

@@ -1,5 +1,5 @@
-import React from "react";
-import { Copy, Clock } from "lucide-react";
+import React, { useState } from "react";
+import { Copy, Clock, Check } from "lucide-react";
 
 const LinkedInIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -8,48 +8,97 @@ const LinkedInIcon = ({ className }) => (
 );
 
 export default function DraftDeliveryCard() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
   return (
-    <div className="w-full rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-bgLight dark:bg-bgImpact flex flex-col">
-      <div className="flex items-start justify-between px-5 pt-4 pb-3.5 border-b border-black/[0.05] dark:border-white/[0.05]">
+    <div className="w-full rounded-2xl border border-black/[0.10] dark:border-white/[0.06] bg-white dark:bg-bgImpact flex flex-col shadow-[0_2px_12px_rgba(0,0,0,0.08)] dark:shadow-none">
+      {/* Header */}
+      <div className="flex items-start justify-between px-3.5 sm:px-5 pt-3 sm:pt-5 pb-2.5 sm:pb-4">
         <div>
-          <p className="text-[11px] font-grotesk font-semibold tracking-[0.13em] uppercase text-textLight/40 dark:text-muted/70">
-            Draft Ready
-          </p>
-          <div className="flex items-center gap-1.5 mt-1">
-            <Clock className="w-3 h-3 text-textLight/20 dark:text-white/20" />
-            <span className="text-[11px] font-inter text-textLight/30 dark:text-white/30">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-[10px] sm:text-[11px] font-grotesk font-semibold tracking-[0.14em] uppercase text-textLight/40 dark:text-white/30">
+              Draft Ready
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-textLight/25 dark:text-white/20" />
+            <span className="text-[10px] sm:text-[11px] font-inter text-textLight/35 dark:text-white/25">
               Prepared · Tue 9:00 AM
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#0A66C2]/10 border border-[#0A66C2]/20">
-          <LinkedInIcon className="w-3 h-3 text-[#0A66C2]" />
-          <span className="text-[10px] font-grotesk font-semibold text-[#5b9bd5] tracking-wide">
+        <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-lg bg-[#0A66C2]/[0.08] dark:bg-[#0A66C2]/[0.12] border border-[#0A66C2]/[0.18] dark:border-[#0A66C2]/[0.2]">
+          <LinkedInIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#0A66C2]" />
+          <span className="text-[9px] sm:text-[10px] font-grotesk font-semibold text-[#0A66C2] dark:text-[#5b9bd5] tracking-wide">
             LinkedIn
           </span>
         </div>
       </div>
 
-      <div className="px-5 py-4 space-y-2.5 flex-1">
-        <p className="text-sm text-textLight dark:text-gray-100 font-inter leading-relaxed">
+      {/* Divider */}
+      <div className="mx-3.5 sm:mx-5 h-px bg-black/[0.07] dark:bg-white/[0.04]" />
+
+      {/* Draft body */}
+      <div className="px-3.5 sm:px-5 pt-2.5 sm:pt-4 pb-2.5 sm:pb-4 flex-1 space-y-2 sm:space-y-2.5">
+        <p className="text-[11px] sm:text-sm text-textLight dark:text-textDark font-inter leading-relaxed">
           Consistency isn't about doing more. It's about not stopping when it
           gets uncomfortable.
         </p>
-        <p className="text-sm text-textLight/40 dark:text-gray-500 font-inter leading-relaxed">
+        <p className="text-[11px] sm:text-sm text-textLight/70 dark:text-textDark/60 font-inter leading-relaxed">
           Most founders quit just before the work compounds. Show up the same
           way on hard days as easy ones. That's the whole system.
         </p>
       </div>
 
-      <div className="px-5 pb-5 flex items-center justify-between mt-auto">
-        <span className="text-[11px] font-inter text-textLight/20 dark:text-white/20">
-          214 characters
-        </span>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-[11px] font-semibold font-grotesk transition-colors duration-150">
-          <Copy className="w-3 h-3" />
-          Copy draft
+      {/* Divider */}
+      <div className="mx-3.5 sm:mx-5 h-px bg-black/[0.07] dark:bg-white/[0.04]" />
+
+      {/* Meta + action */}
+      <div className="px-3.5 sm:px-5 pt-2.5 pb-3 sm:pb-5 flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <MetaTag label="direct" />
+          <MetaTag label="founder" />
+          <span className="text-[9px] sm:text-[10px] font-inter text-textLight/25 dark:text-white/15">
+            214 chars
+          </span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className={`
+            flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg
+            text-[10px] sm:text-[11px] font-semibold font-grotesk
+            transition-all duration-200
+            ${
+              copied
+                ? "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                : "bg-brand hover:bg-brand-hover text-white shadow-sm shadow-brand/20"
+            }
+          `}
+        >
+          {copied ? (
+            <>
+              <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Copied
+            </>
+          ) : (
+            <>
+              <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Copy draft
+            </>
+          )}
         </button>
       </div>
     </div>
+  );
+}
+
+function MetaTag({ label }) {
+  return (
+    <span className="text-[9px] sm:text-[10px] font-inter font-medium px-1.5 py-0.5 rounded-md bg-black/[0.05] dark:bg-white/[0.04] text-textLight/35 dark:text-white/20 border border-black/[0.07] dark:border-white/[0.05]">
+      {label}
+    </span>
   );
 }
