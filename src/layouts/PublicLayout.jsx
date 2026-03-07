@@ -1,9 +1,8 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
-const Background = lazy(() => import("../components/Background"));
+import Background from "../components/Background";
 
 const PublicLayout = ({ children }) => {
   const location = useLocation();
@@ -18,19 +17,17 @@ const PublicLayout = ({ children }) => {
   ];
 
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
-    location.pathname.startsWith(route)
+    location.pathname.startsWith(route),
   );
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden bg-transparent">
-      {/* Background loads without blocking content */}
+      {/* Background — direct import, no lazy, no flash */}
       <div className="fixed inset-0 z-10">
-        <Suspense fallback={null}>
-          <Background />
-        </Suspense>
+        <Background />
       </div>
 
-      {/*  Navbar */}
+      {/* Navbar */}
       {!shouldHideNavbar && (
         <div className="relative z-30">
           <Navbar />
