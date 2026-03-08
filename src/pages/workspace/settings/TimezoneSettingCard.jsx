@@ -36,10 +36,10 @@ const TimezoneSettingCard = () => {
     return () => clearInterval(timer);
   }, [displayTimezone]);
 
-  const isAutoDetected = true; // placeholder for future manual override support
+  const isAutoDetected = true;
 
   return (
-    <section className="bg-white/80 dark:bg-black/40 backdrop-blur-md border border-gray-300/40 dark:border-white/10 rounded-xl shadow-lg p-6 sm:p-8 space-y-6">
+    <section className="bg-white/80 dark:bg-black/40 backdrop-blur-md border border-gray-300/40 dark:border-white/10 rounded-xl shadow-lg mt-6 p-6 sm:p-8 space-y-6">
       {/* Header */}
       <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
         <Clock className="h-7 w-7 text-blue-600 dark:text-blue-400" /> Your
@@ -97,9 +97,9 @@ const TimezoneSettingCard = () => {
       <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/40 border border-gray-300/30 dark:border-white/10 rounded-lg flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
         <Info className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
         <p>
-          RemindrAI automatically syncs with your device's timezone to ensure
-          accurate scheduling. Keep your device settings correct for best
-          results.
+          RemindrAI uses your timezone to determine when drafts are prepared and
+          delivered. Make sure your device timezone is correct so reminders run
+          at the expected time.
         </p>
       </div>
     </section>

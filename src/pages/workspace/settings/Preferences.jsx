@@ -3,6 +3,7 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
 import { showToast } from "../../../components/ToastSystem/toastUtils";
+import SettingsSkeleton from "./SettingsSkeleton";
 import {
   Loader2,
   CheckCircle,
@@ -16,6 +17,76 @@ import {
   Globe,
 } from "lucide-react";
 
+const ROLES = [
+  {
+    value: "busy-founder",
+    name: "Busy Founder",
+    description: "Fast-paced founders needing consistent presence",
+  },
+  {
+    value: "solopreneur",
+    name: "Solopreneur",
+    description: "Solo business owners building their brand",
+  },
+  {
+    value: "career-builder",
+    name: "Career Builder",
+    description: "Professionals growing their personal brand",
+  },
+  {
+    value: "content-creator",
+    name: "Content Creator",
+    description: "High-volume creators reducing burnout",
+  },
+];
+
+const TONES = [
+  {
+    value: "professional",
+    name: "Professional",
+    description: "Clear, confident, and authoritative",
+  },
+  { value: "casual", name: "Casual", description: "Warm and conversational" },
+  {
+    value: "humorous",
+    name: "Humorous",
+    description: "Witty and charming content",
+  },
+  {
+    value: "informative",
+    name: "Informative",
+    description: "Educational and straightforward",
+  },
+  {
+    value: "inspirational",
+    name: "Inspirational",
+    description: "Uplifting and motivating",
+  },
+];
+
+const PLATFORMS = [
+  {
+    value: "linkedin",
+    name: "LinkedIn",
+    description: "Professional networking and B2B content",
+  },
+  {
+    value: "twitter",
+    name: "X (Twitter)",
+    description: "Real-time updates and thought leadership",
+  },
+  {
+    value: "facebook",
+    name: "Facebook",
+    description: "Community building and connections",
+  },
+  {
+    value: "threads",
+    name: "Threads",
+    description: "Engaging conversations and updates",
+  },
+];
+
 const Select = ({
   label,
   value,
@@ -24,6 +95,7 @@ const Select = ({
   placeholder,
   disabled,
   icon: Icon,
+  placement = "down",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selected = options.find((opt) => opt.value === value);
@@ -31,77 +103,73 @@ const Select = ({
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="w-full p-4 bg-white dark:bg-black border border-gray-200 dark:border-neutral-700 rounded-xl text-left transition-all duration-200 hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-sm focus:ring-2 focus:ring-neutral-400 disabled:opacity-50"
+        className="w-full p-4 bg-white dark:bg-bgDark border border-gray-200 dark:border-white/[0.08] rounded-xl text-left transition-colors duration-150 hover:border-gray-300 dark:hover:border-white/[0.15] disabled:opacity-50"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-1.5 rounded-md">
-              <Icon size={18} className="text-gray-500 dark:text-gray-400" />
-            </div>
-            <div className="text-left">
-              <div className="text-sm font-semibold text-black dark:text-white">
+          <div className="flex items-center gap-3">
+            <Icon size={16} className="text-muted flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-textLight dark:text-textDark font-grotesk">
                 {selected ? selected.name : placeholder}
-              </div>
+              </p>
               {selected && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-muted font-inter mt-0.5">
                   {selected.description}
-                </div>
+                </p>
               )}
             </div>
           </div>
           <ChevronDown
-            size={20}
-            className={`text-gray-400 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            size={16}
+            className={`text-muted flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           />
         </div>
       </button>
 
-      {/* Dropdown Options */}
       {isOpen && (
         <>
           <div
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute z-20 w-full mt-2 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-lg max-h-32 overflow-y-auto">
+          <div
+            className={`absolute z-20 w-full bg-white dark:bg-bgImpact border border-gray-200 dark:border-white/[0.08] rounded-xl shadow-lg max-h-48 overflow-y-auto ${placement === "up" ? "bottom-full mb-2" : "top-full mt-2"}`}
+          >
             {options.map((option) => (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => {
                   onChange({
                     target: { name: label.toLowerCase(), value: option.value },
                   });
                   setIsOpen(false);
                 }}
-                className={`w-full p-3.5 text-left transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl ${
-                  value === option.value
-                    ? "bg-neutral-100 dark:bg-neutral-800"
-                    : "hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
-                }`}
+                className={`w-full p-3.5 text-left transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl
+                  ${
+                    value === option.value
+                      ? "bg-brand/[0.06] dark:bg-brand/[0.1]"
+                      : "hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+                  }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div
-                      className={`font-medium text-sm ${
-                        value === option.value
-                          ? "text-black dark:text-white"
-                          : "text-gray-900 dark:text-gray-200"
-                      }`}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-medium font-grotesk ${value === option.value ? "text-brand dark:text-brand-soft" : "text-textLight dark:text-textDark"}`}
                     >
                       {option.name}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    </p>
+                    <p className="text-xs text-muted font-inter mt-0.5">
                       {option.description}
-                    </div>
+                    </p>
                   </div>
                   {value === option.value && (
                     <Check
-                      size={18}
-                      className="text-black dark:text-white ml-2"
+                      size={15}
+                      className="text-brand dark:text-brand-soft flex-shrink-0"
                     />
                   )}
                 </div>
@@ -114,33 +182,6 @@ const Select = ({
   );
 };
 
-// Loading Component
-const Loading = () => (
-  <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
-    <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl shadow-lg p-8 max-w-sm w-full">
-      <div className="flex flex-col items-center space-y-4">
-        {/* Spinner */}
-        <div className="relative">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-neutral-800 rounded-full flex items-center justify-center">
-            <Loader2 className="animate-spin w-8 h-8 text-black dark:text-white" />
-          </div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-400 dark:bg-gray-600 rounded-full animate-ping"></div>
-        </div>
-
-        {/* Text */}
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-black dark:text-white">
-            Loading Preferences
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Preparing your personalized settings...
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
 const Preferences = () => {
   const { currentUser } = useAuthContext();
   const [preferences, setPreferences] = useState({
@@ -149,281 +190,167 @@ const Preferences = () => {
     platform: "",
   });
   const [originalPreferences, setOriginalPreferences] = useState({});
-  const [loading, setLoading] = useState(true); // Changed to true to show loading initially
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Enhanced Data with better icons and descriptions (retained as is)
-  const roles = [
-    {
-      value: "busy-founder",
-      name: "Busy Founder",
-      description: "Fast-paced founders needing consistent presence",
-    },
-    {
-      value: "solopreneur",
-      name: "Solopreneur",
-      description: "Solo business owners building their brand",
-    },
-    {
-      value: "career-builder",
-      name: "Career Builder",
-      description: "Professionals growing their personal brand",
-    },
-    {
-      value: "content-creator",
-      name: "Content Creator",
-      description: "High-volume creators reducing burnout",
-    },
-  ];
-
-  const tones = [
-    {
-      value: "professional",
-      name: "Professional",
-      description: "Clear, confident, and authoritative",
-    },
-    { value: "casual", name: "Casual", description: "Warm and conversational" },
-    {
-      value: "humorous",
-      name: "Humorous",
-      description: "Witty and charming content",
-    },
-    {
-      value: "informative",
-      name: "Informative",
-      description: "Educational and straightforward",
-    },
-    {
-      value: "inspirational",
-      name: "Inspirational",
-      description: "Uplifting and motivating",
-    },
-  ];
-
-  const platforms = [
-    {
-      value: "linkedin",
-      name: "LinkedIn",
-      description: "Professional networking and B2B content",
-    },
-    {
-      value: "twitter",
-      name: "X (Twitter)",
-      description: "Real-time updates and thought leadership",
-    },
-    {
-      value: "facebook",
-      name: "Facebook",
-      description: "Community building and connections",
-    },
-    {
-      value: "threads",
-      name: "Threads",
-      description: "Engaging conversations and updates",
-    },
-  ];
 
   useEffect(() => {
     const fetchPreferences = async () => {
-      if (!currentUser?.uid || !db) {
-        setLoading(false);
-        return;
-      }
-
+      if (!currentUser?.uid || !db) return setLoading(false);
       setLoading(true);
       try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const snapshot = await getDoc(userRef);
-
+        const snapshot = await getDoc(doc(db, "users", currentUser.uid));
         if (snapshot.exists()) {
           const data = snapshot.data();
-          const fetchedPreferences = {
-            role: data.role || "",
-            tone: data.tone || "",
-            platform: data.platform || "",
+          // Some users have these saved under preferences.{} from onboarding,
+          // others have them at root from later saves — check both.
+          const fetched = {
+            role: data.role || data.preferences?.role || "",
+            tone: data.tone || data.preferences?.tone || "",
+            platform: data.platform || data.preferences?.platform || "",
           };
-          setPreferences(fetchedPreferences);
-          setOriginalPreferences(fetchedPreferences);
-        } else {
-          setPreferences({ role: "", tone: "", platform: "" });
-          setOriginalPreferences({ role: "", tone: "", platform: "" });
+          setPreferences(fetched);
+          setOriginalPreferences(fetched);
         }
-      } catch (error) {
-        console.error("Failed to fetch preferences:", error);
-        showToast({
-          type: "error",
-          message: "Failed to load preferences. Please try again.",
-        });
+      } catch {
+        showToast({ type: "error", message: "Failed to load preferences." });
       } finally {
         setLoading(false);
       }
     };
-
     fetchPreferences();
   }, [currentUser]);
 
-  // Handle preference changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPreferences((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setPreferences((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle cancel
-  const handleCancel = () => {
-    setPreferences(originalPreferences);
-  };
+  const handleCancel = () => setPreferences(originalPreferences);
 
-  // Check for changes
   const hasChanges =
     preferences.role !== originalPreferences.role ||
     preferences.tone !== originalPreferences.tone ||
     preferences.platform !== originalPreferences.platform;
 
-  // Save preferences
   const handleSave = async () => {
     if (!currentUser?.uid || !hasChanges) return;
-
     setIsSaving(true);
     try {
-      const userRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userRef, preferences);
-
-      showToast({
-        type: "success",
-        message: "Preferences updated successfully!",
-      }); // 2
+      await updateDoc(doc(db, "users", currentUser.uid), preferences);
+      showToast({ type: "success", message: "Preferences updated." });
       setOriginalPreferences(preferences);
-    } catch (error) {
-      console.error("Failed to update preferences:", error);
-      showToast({
-        type: "error",
-        message: "Failed to update preferences. Please try again.",
-      }); // 3
+    } catch {
+      showToast({ type: "error", message: "Failed to update preferences." });
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (!currentUser || loading) {
-    return <Loading />;
-  }
+  if (loading) return <SettingsSkeleton />;
 
   return (
-    <div className="min-h-screen py-10 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        {/* Preferences Card */}
-        <section className="bg-white dark:bg-black rounded-2xl shadow-lg border border-gray-200 dark:border-neutral-800 p-6 sm:p-8">
-          <div className="space-y-6">
-            {/* Professional Role */}
-            <div>
-              <div className="flex items-center space-x-3 mb-3">
-                <Target className="w-5 h-5 text-black dark:text-white" />
-                <div>
-                  <h3 className="text-lg font-semibold text-black dark:text-white">
-                    Professional Role
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Choose your professional identity to tailor strategies
-                  </p>
-                </div>
-              </div>
-              <Select
-                label="Role"
-                value={preferences.role}
-                onChange={handleChange}
-                options={roles}
-                placeholder="Select your professional role"
-                disabled={isSaving}
-                icon={User}
-              />
-            </div>
-
-            {/* Content Tone */}
-            <div>
-              <div className="flex items-center space-x-3 mb-3">
-                <Mic className="w-5 h-5 text-black dark:text-white" />
-                <div>
-                  <h3 className="text-lg font-semibold text-black dark:text-white">
-                    Content Tone
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Define your brand voice and communication style
-                  </p>
-                </div>
-              </div>
-              <Select
-                label="Tone"
-                value={preferences.tone}
-                onChange={handleChange}
-                options={tones}
-                placeholder="Select your content tone"
-                disabled={isSaving}
-                icon={MessageCircle}
-              />
-            </div>
-
-            {/* Primary Platform */}
-            <div>
-              <div className="flex items-center space-x-3 mb-3">
-                <Globe className="w-5 h-5 text-black dark:text-white" />
-                <div>
-                  <h3 className="text-lg font-semibold text-black dark:text-white">
-                    Primary Platform
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Choose where you'll primarily share your content
-                  </p>
-                </div>
-              </div>
-              <Select
-                label="Platform"
-                value={preferences.platform}
-                onChange={handleChange}
-                options={platforms}
-                placeholder="Select your primary platform"
-                disabled={isSaving}
-                icon={Share2}
-              />
-            </div>
+    <div className="py-4 max-w-2xl w-full mx-auto">
+      <div className="bg-white dark:bg-bgDark border border-gray-200 dark:border-white/[0.08] rounded-xl overflow-hidden">
+        {/* Professional Role */}
+        <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1">
+            <Target size={15} className="text-muted" />
+            <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
+              Professional Role
+            </h3>
           </div>
-        </section>
+          <p className="text-sm text-muted font-inter mb-3">
+            Choose your professional identity to tailor strategies
+          </p>
+          <Select
+            label="Role"
+            value={preferences.role}
+            onChange={handleChange}
+            options={ROLES}
+            placeholder="Select your professional role"
+            disabled={isSaving}
+            icon={User}
+          />
+        </div>
 
-        {/* Actions */}
-        <div className="mt-8">
-          <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-lg border border-gray-200 dark:border-neutral-800 p-6">
-            <div className="flex items-center justify-between mb-4">
-              {hasChanges && (
-                <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                  Unsaved changes
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+        {/* Content Tone */}
+        <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1">
+            <Mic size={15} className="text-muted" />
+            <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
+              Content Tone
+            </h3>
+          </div>
+          <p className="text-sm text-muted font-inter mb-3">
+            Define your brand voice and communication style
+          </p>
+          <Select
+            label="Tone"
+            value={preferences.tone}
+            onChange={handleChange}
+            options={TONES}
+            placeholder="Select your content tone"
+            disabled={isSaving}
+            icon={MessageCircle}
+          />
+        </div>
+
+        {/* Primary Platform */}
+        <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1">
+            <Globe size={15} className="text-muted" />
+            <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
+              Primary Platform
+            </h3>
+          </div>
+          <p className="text-sm text-muted font-inter mb-3">
+            Choose where you'll primarily share your content
+          </p>
+          <Select
+            label="Platform"
+            value={preferences.platform}
+            onChange={handleChange}
+            options={PLATFORMS}
+            placeholder="Select your primary platform"
+            disabled={isSaving}
+            icon={Share2}
+            placement="up"
+          />
+        </div>
+
+        {/* Save / Cancel — lives inside the card */}
+        <div className="px-5 py-4 bg-gray-50 dark:bg-white/[0.02]">
+          <div className="flex items-center justify-between gap-3">
+            {hasChanges && (
+              <span className="flex items-center gap-1.5 text-xs text-muted font-inter">
+                <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                Unsaved changes
+              </span>
+            )}
+            <div className="flex gap-2 ml-auto">
               <button
+                type="button"
                 onClick={handleCancel}
                 disabled={isSaving || !hasChanges}
-                className="flex-1 px-6 py-3 text-sm font-semibold text-black dark:text-white bg-gray-100 dark:bg-neutral-800 rounded-xl hover:bg-gray-200 dark:hover:bg-neutral-700 disabled:opacity-40 transition-all duration-200"
+                className="px-4 py-2 text-sm font-medium font-grotesk text-textLight dark:text-textDark bg-gray-100 dark:bg-white/[0.06] rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.1] disabled:opacity-40 transition-colors duration-150"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={isSaving || !hasChanges}
-                className="flex-1 px-6 py-3 text-sm font-semibold text-white bg-black dark:bg-white dark:text-black rounded-xl hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2 transition-all duration-200 shadow-lg"
+                className="px-4 py-2 text-bs font-medium font-grotesk text-white bg-brand hover:bg-brand-hover rounded-lg disabled:opacity-40 flex items-center gap-2 transition-colors duration-150"
               >
                 {isSaving ? (
                   <>
-                    <Loader2 className="animate-spin" size={18} />
-                    <span>Saving...</span>
+                    <Loader2 size={14} className="animate-spin" />
+                    Saving...
                   </>
                 ) : (
                   <>
-                    <CheckCircle size={18} />
-                    <span>Save Preferences</span>
+                    <CheckCircle size={14} />
+                    Save
                   </>
                 )}
               </button>
