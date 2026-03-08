@@ -72,7 +72,6 @@ export default function Navbar() {
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  /* ── Loading skeleton ───────────────────────────────────────── */
   if (loading && !hasLoadedProfile) {
     return (
       <header className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
@@ -92,7 +91,6 @@ export default function Navbar() {
     );
   }
 
-  /* ── Main navbar ────────────────────────────────────────────── */
   return (
     <>
       <header
@@ -106,16 +104,14 @@ export default function Navbar() {
           }`}
       >
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between gap-6">
-          {/* ── Logo ── */}
           <Link to="/" aria-label="home" className="flex-shrink-0">
             <img
               src="/transparent_logo.svg"
               alt="RemindrAI"
-              className="h-9 w-auto"
+              className="h-12 w-auto"
             />
           </Link>
 
-          {/* ── Center nav ── */}
           <nav className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
             {isLoggedIn && (
               <Link
@@ -136,7 +132,7 @@ export default function Navbar() {
               <Link
                 key={to}
                 to={to}
-                className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-150 font-inter
+                className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
                   ${
                     isActive(to)
                       ? "text-brand dark:text-brand-soft font-medium"
@@ -151,17 +147,15 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* ── Right cluster: ThemeToggle + CTA/user ── */}
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
-
             {!isLoggedIn ? (
               <Link
                 to="/auth"
                 className="group relative inline-flex items-center justify-center gap-2
                   px-4 py-2 rounded-lg
                   bg-brand hover:bg-brand-hover
-                  text-white text-sm font-semibold font-grotesk
+                  text-white text-base font-semibold font-grotesk
                   whitespace-nowrap overflow-hidden
                   transition-all duration-200 ease-out
                   shadow-[0_0_0_1px_rgba(37,99,235,0.4),0_2px_8px_rgba(37,99,235,0.25)]
@@ -224,7 +218,7 @@ export default function Navbar() {
                     <Link
                       to="/workspace/settings/accountinfo"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
+                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-inter"
                     >
                       <User className="w-3.5 h-3.5 text-muted flex-shrink-0" />{" "}
                       Profile
@@ -243,7 +237,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ── Mobile hamburger ── */}
           <div className="lg:hidden">
             <button
               onClick={() => setMobileOpen((v) => !v)}
@@ -261,7 +254,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* ── Mobile backdrop ── */}
       <div
         onClick={() => setMobileOpen(false)}
         aria-hidden="true"
@@ -269,9 +261,8 @@ export default function Navbar() {
           ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       />
 
-      {/* ── Mobile drawer ── */}
       <aside
-        className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-white dark:bg-black border-l border-gray-100 dark:border-white/5 lg:hidden flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
         aria-label="Navigation"
       >
@@ -372,28 +363,8 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Mobile bottom — user info + theme toggle */}
         <div className="px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            {isLoggedIn ? (
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {getInitial(currentUser)}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white truncate font-grotesk">
-                    {currentUser?.fullName || "User"}
-                  </p>
-                  <p className="text-[11px] text-muted truncate font-inter">
-                    {currentUser?.email}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <span className="text-xs text-muted font-inter">RemindrAI</span>
-            )}
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </aside>
 
