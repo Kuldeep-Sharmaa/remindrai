@@ -127,23 +127,16 @@ export default function Hero() {
       ref={sectionRef}
       className="relative w-full min-h-screen flex flex-col justify-center items-center px-5 sm:px-8 lg:px-12 pt-28 pb-20"
     >
-      <div className="relative z-10 mb-6 hi" style={{ "--d": "0s" }}>
-        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/[0.07] dark:border-white/[0.07] bg-black/[0.02] dark:bg-white/[0.02] text-[11px] font-grotesk font-medium text-textLight/40 dark:text-white/30 tracking-wide">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand opacity-80" />
-          Content drafts, prepared automatically
-        </span>
-      </div>
-
       <div
         ref={headlineRef}
         className="relative z-10 w-full max-w-4xl mx-auto mb-5"
       >
         <div className="hi text-center" style={{ "--d": "0.07s" }}>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold font-grotesk text-textLight dark:text-white leading-[1.06] tracking-tight">
-            Set the direction.
+            Set it once
             <br />
             <span className="text-brand dark:text-brand-soft">
-              Content keeps moving.
+              The system keeps it going
             </span>
           </h1>
         </div>
@@ -153,9 +146,9 @@ export default function Hero() {
         className="relative z-10 text-sm sm:text-base lg:text-lg text-textLight dark:text-white/60 font-inter max-w-lg mx-auto text-center leading-relaxed mb-14 hi"
         style={{ "--d": "0.14s" }}
       >
-        Define your role, tone, platform, and timing once.
+        Set your role, tone, platform, and timing once
         <br />
-        RemindrAI prepares drafts and delivers them when scheduled.
+        Drafts are prepared and ready at the chosen time.
       </p>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto">

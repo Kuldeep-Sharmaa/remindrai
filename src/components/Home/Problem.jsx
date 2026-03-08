@@ -114,7 +114,7 @@ const Problem = () => {
               <span className="word">when</span>{" "}
               <span className="word">consistency</span>{" "}
               <span className="word bg-red-700 bg-clip-text text-transparent">
-                breaks.
+                breaks
               </span>
             </h2>
 
