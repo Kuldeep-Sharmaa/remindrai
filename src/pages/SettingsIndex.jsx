@@ -10,9 +10,11 @@ import {
   Info,
   Key,
 } from "lucide-react";
+import { useAppInfo } from "../hooks/useAppInfo";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
+  const { version } = useAppInfo();
 
   const settingsItems = [
     {
@@ -179,7 +181,8 @@ const SettingsPage = () => {
             </div>
           </div>
           <p className="mt-4 text-xs text-gray-400 dark:text-gray-600">
-            © {new Date().getFullYear()} RemindrAI. All rights reserved.
+            © {new Date().getFullYear()} RemindrAI. {version} · All rights
+            reserved.
           </p>
         </div>
       </div>
