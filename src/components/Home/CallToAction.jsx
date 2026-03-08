@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import Button from "../UI/GradientBtn";
+import Button from "../Ui/GradientBtn";
 
 gsap.registerPlugin(ScrollTrigger);
 
