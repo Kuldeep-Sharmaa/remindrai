@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
-import { Infinity } from "lucide-react";
+import { ArrowUpRight, Infinity } from "lucide-react";
+import { useAppInfo } from "../hooks/useAppInfo";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 const NAV = {
-  Explore: [
+  LINKS: [
     { label: "Features", to: "/features" },
     { label: "About", to: "/about" },
     { label: "Docs", to: "/docs" },
@@ -19,6 +19,7 @@ const NAV = {
     { label: "Contact", to: "/contact" },
   ],
 };
+
 const DrawLine = ({ className = "" }) => (
   <div className={`relative h-px w-full overflow-hidden ${className}`}>
     <div className="absolute inset-0 bg-gray-100 dark:bg-white/[0.06]" />
@@ -34,6 +35,7 @@ const DrawLine = ({ className = "" }) => (
     `}</style>
   </div>
 );
+
 const AnimatedWordmark = () => {
   const [hovered, setHovered] = useState(false);
   const [hoverX, setHoverX] = useState(50);
@@ -75,7 +77,6 @@ const AnimatedWordmark = () => {
         >
           RemindrAI
         </span>
-
         <span
           className="flex flex-wrap"
           style={{
@@ -110,7 +111,6 @@ const AnimatedWordmark = () => {
           ))}
         </span>
       </h2>
-
       <div
         className="pointer-events-none absolute -inset-4 rounded-2xl"
         style={{
@@ -122,6 +122,7 @@ const AnimatedWordmark = () => {
     </div>
   );
 };
+
 const CraftBadge = () => (
   <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.02]">
     <Infinity
@@ -129,14 +130,15 @@ const CraftBadge = () => (
       strokeWidth={1.75}
       aria-hidden="true"
     />
-
     <span className="text-xs text-muted font-inter">
-      A system that keeps work moving .
+      A system that keeps work moving
     </span>
   </div>
 );
 
 const Footer = () => {
+  const { version } = useAppInfo();
+
   return (
     <footer className="relative bg-white dark:bg-black overflow-hidden">
       <div
@@ -147,73 +149,56 @@ const Footer = () => {
           backgroundSize: "28px 28px",
         }}
       />
-
       <div className="pointer-events-none absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-gray-50/60 dark:from-white/[0.015] to-transparent" />
 
       <DrawLine />
 
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="pt-14 pb-10 md:pt-20 md:pb-14">
-          <p className="text-[10px] sm:text-xs font-semibold tracking-[0.32em] uppercase text-muted mb-6 font-grotesk">
-            Making time work for you
-          </p>
-
-          <div className="overflow-hidden">
-            <AnimatedWordmark />
+        <div className="pt-14 pb-10 md:pt-20 md:pb-14 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold tracking-[0.32em] uppercase text-muted mb-6 font-grotesk">
+              Making time work for you
+            </p>
+            <div className="overflow-hidden">
+              <AnimatedWordmark />
+            </div>
+            <p className="mt-5 text-sm sm:text-[15px] text-muted max-w-xs sm:max-w-sm leading-relaxed font-inter">
+              Built for founders, creators, and focused people.
+            </p>
           </div>
 
-          <p className="mt-5 text-sm sm:text-[15px] text-muted max-w-xs sm:max-w-sm leading-relaxed font-inter">
-            Built for founders, creators, and focused people.
-          </p>
-        </div>
-
-        <div className="py-10 sm:py-12 grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
-          {Object.entries(NAV).map(([section, links]) => (
-            <div key={section}>
-              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-muted mb-4 sm:mb-5 font-grotesk">
-                {section}
-              </p>
-              <ul className="space-y-2.5 sm:space-y-3">
-                {links.map(({ label, to }) => (
-                  <li key={label}>
-                    <Link
-                      to={to}
-                      className="group inline-flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-brand transition-colors duration-150 font-inter"
-                    >
-                      {label}
-                      <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-0.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="flex flex-row gap-14 flex-shrink-0 lg:pb-2">
+            {Object.entries(NAV).map(([section, links]) => (
+              <div key={section}>
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-muted mb-4 sm:mb-5 font-grotesk">
+                  {section}
+                </p>
+                <ul className="space-y-2.5 sm:space-y-3">
+                  {links.map(({ label, to }) => (
+                    <li key={label}>
+                      <Link
+                        to={to}
+                        className="group inline-flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-brand transition-colors duration-150 font-inter"
+                      >
+                        {label}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-0.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
         <DrawLine />
 
-        <div
-          className="
-  py-5 sm:py-6
-  flex flex-col sm:flex-row
-  items-center sm:items-center
-  justify-center sm:justify-between
-  gap-3 sm:gap-4
-  text-center sm:text-left
-"
-        >
+        <div className="py-5 sm:py-6 flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-3 sm:gap-4 text-center sm:text-left">
           <div className="order-1 sm:order-2 flex justify-center sm:justify-end w-full sm:w-auto">
             <CraftBadge />
           </div>
-
-          <p
-            className="
-    text-xs text-muted font-inter
-    order-2 sm:order-1
-    w-full sm:w-auto
-  "
-          >
-            © {CURRENT_YEAR} RemindrAI All rights reserved
+          <p className="text-xs text-muted font-inter order-2 sm:order-1 w-full sm:w-auto">
+            © {CURRENT_YEAR} RemindrAI · {version} · All rights reserved
           </p>
         </div>
       </div>
