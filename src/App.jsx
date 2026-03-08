@@ -36,7 +36,7 @@ import Appearance from "./pages/workspace/settings/Appearance";
 import DeleteAccountPage from "./pages/workspace/settings/DeleteAccount/DeleteAccountButton";
 import Preferences from "./pages/workspace/settings/Preferences";
 import Security from "./pages/workspace/settings/Security";
-import Aboutremindrai from "./pages/workspace/settings/AboutRemindrai";
+import Aboutremindrai from "./pages/workspace/settings/AboutRemindrAi";
 
 import CreateReminderScreen from "./features/remindersystem/screens/CreateReminderScreen";
 
