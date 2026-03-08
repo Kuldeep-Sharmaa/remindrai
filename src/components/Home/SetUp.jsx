@@ -1,6 +1,10 @@
 import React, { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Step1Preview from "./steps/step1";
+import Step2Preview from "./steps/step2";
+import Step3Preview from "./steps/step3";
+import Step4Preview from "./steps/step4";
 
 gsap.defaults({ overwrite: "auto" });
 gsap.registerPlugin(ScrollTrigger);
@@ -8,33 +12,34 @@ gsap.registerPlugin(ScrollTrigger);
 const steps = [
   {
     number: "01",
-    title: "Configure once",
-    text: "Set your role, tone, and platforms. The system uses this setup for every draft it prepares. You don’t repeat it.",
+    title: "Set your direction",
+    text: "Choose your role, tone, and platform. Every draft follows this setup.",
   },
   {
     number: "02",
-    title: "Choose the timing",
-    text: "Decide when drafts should be ready — once, daily, or on selected days. The system follows this timing automatically.",
+    title: "Set the timing",
+    text: "Choose how often and when drafts should be ready.",
   },
   {
     number: "03",
-    title: "Drafts are prepared",
+    title: "Drafts prepare automatically",
     text: "At the chosen time, a new draft is prepared using your setup. No tool to open. No prompt to write.",
   },
   {
     number: "04",
-    title: "Review when ready",
-    text: "A draft is waiting when you open the app. Edit it, use it as is, or build from it.",
+    title: "Draft ready on time",
+    text: "At the chosen time, a draft is ready for you. Review it, edit it, or use it as it is.",
   },
 ];
 
+const STEP_PREVIEWS = [Step1Preview, Step2Preview, Step3Preview, Step4Preview];
 const PROGRESS_HEIGHT = 180;
 
 const Setup = () => {
   const sectionRef = useRef(null);
   const pinnedRef = useRef(null);
   const textRefs = useRef([]);
-  const imageRefs = useRef([]);
+  const previewRefs = useRef([]);
   const lineFillRef = useRef(null);
   const dotRefs = useRef([]);
   const activeStepRef = useRef(0);
@@ -52,9 +57,9 @@ const Setup = () => {
         gsap.set(el, { opacity: i === 0 ? 1 : 0, y: 0, force3D: true });
       });
 
-      imageRefs.current.forEach((el, i) => {
+      previewRefs.current.forEach((el, i) => {
         if (!el) return;
-        gsap.set(el, { opacity: i === 0 ? 1 : 0, force3D: true });
+        gsap.set(el, { opacity: i === 0 ? 1 : 0, y: 0, force3D: true });
       });
 
       dotRefs.current.forEach((dot, i) => {
@@ -72,7 +77,6 @@ const Setup = () => {
       function showStep(index) {
         const prev = activeStepRef.current;
         if (prev === index) return;
-
         const dir = index > prev ? 1 : -1;
 
         textRefs.current.forEach((el, i) => {
@@ -81,35 +85,37 @@ const Setup = () => {
           if (i !== index) gsap.set(el, { opacity: 0, y: 0, force3D: true });
         });
 
-        imageRefs.current.forEach((el, i) => {
+        previewRefs.current.forEach((el, i) => {
           if (!el) return;
           gsap.killTweensOf(el);
-          if (i !== index) gsap.set(el, { opacity: 0, force3D: true });
+          if (i !== index) gsap.set(el, { opacity: 0, y: 0, force3D: true });
         });
 
         if (textRefs.current[index]) {
           gsap.fromTo(
             textRefs.current[index],
-            { opacity: 0, y: isReducedMotion ? 0 : 32 * dir },
+            { opacity: 0, y: isReducedMotion ? 0 : 24 * dir },
             {
               opacity: 1,
               y: 0,
-              duration: isReducedMotion ? 0.05 : 0.55,
+              duration: isReducedMotion ? 0.05 : 0.5,
               ease: "power3.out",
               force3D: true,
             },
           );
         }
 
-        if (imageRefs.current[index]) {
+        if (previewRefs.current[index]) {
           gsap.fromTo(
-            imageRefs.current[index],
-            { opacity: 0 },
+            previewRefs.current[index],
+            { opacity: 0, y: isReducedMotion ? 0 : 16 * dir },
             {
               opacity: 1,
-              duration: isReducedMotion ? 0.05 : 0.45,
-              ease: "power2.out",
+              y: 0,
+              duration: isReducedMotion ? 0.05 : 0.55,
+              ease: "power3.out",
               force3D: true,
+              delay: 0.05,
             },
           );
         }
@@ -162,12 +168,9 @@ const Setup = () => {
 
   return (
     <section ref={sectionRef} className="relative">
-      <div
-        ref={pinnedRef}
-        className="relative w-full h-screen overflow-hidden "
-      >
-        <div className="absolute top-8 left-0 right-0 flex justify-center z-10">
-          <span className="inline-flex items-center font-grotesk text-xs tracking-widest text-muted border border-border rounded-full px-3 py-1">
+      <div ref={pinnedRef} className="relative w-full h-screen overflow-hidden">
+        <div className="absolute top-20 left-0 right-0 flex justify-center z-10">
+          <span className="nline-flex items-center gap-2 px-3 pt-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase text-brand">
             How it works
           </span>
         </div>
@@ -191,41 +194,41 @@ const Setup = () => {
           ))}
         </div>
 
+        {/* Steps */}
         <div className="relative w-full h-full">
-          {steps.map((step, i) => (
-            <div
-              key={i}
-              className="absolute inset-0 flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-16 xl:gap-24 px-6 sm:px-10 lg:px-24  lg:pt-0 lg:pb-0"
-            >
+          {steps.map((step, i) => {
+            const StepPreview = STEP_PREVIEWS[i];
+            return (
               <div
-                ref={(el) => (imageRefs.current[i] = el)}
-                className="flex items-center justify-center order-first lg:order-last lg:flex-1"
+                key={i}
+                className="absolute inset-0 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-20 px-6 sm:px-10 lg:pl-28 lg:pr-16 xl:pl-32 xl:pr-20 pt-16 lg:pt-0"
               >
-                <img
-                  src={`/homepage/step-${i + 1}.svg`}
-                  alt={step.title}
-                  className="w-auto h-64 lg:h-96 object-contain select-none"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
+                {/* Left — text */}
+                <div
+                  ref={(el) => (textRefs.current[i] = el)}
+                  className="flex flex-col gap-3 text-center lg:text-left lg:flex-none lg:w-[38%] xl:w-[36%]"
+                >
+                  <span className="font-grotesk text-xs tracking-widest text-muted">
+                    {step.number} / {String(steps.length).padStart(2, "0")}
+                  </span>
+                  <h2 className="font-grotesk text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-textLight dark:text-textDark tracking-tight leading-[1.05]">
+                    {step.title}
+                  </h2>
+                  <p className="font-inter text-sm sm:text-base text-muted leading-relaxed max-w-sm mx-auto lg:mx-0">
+                    {step.text}
+                  </p>
+                </div>
 
-              <div
-                ref={(el) => (textRefs.current[i] = el)}
-                className="flex flex-col gap-3 sm:gap-4 text-center lg:text-left lg:flex-1"
-              >
-                <span className="font-grotesk text-xs tracking-widest text-muted">
-                  {step.number} / {String(steps.length).padStart(2, "0")}
-                </span>
-                <h2 className="font-grotesk text-3xl sm:text-4xl lg:text-7xl font-bold text-textLight dark:text-textDark tracking-tight leading-tight">
-                  {step.title}
-                </h2>
-                <p className="font-inter text-base sm:text-lg text-muted max-w-sm sm:max-w-md leading-relaxed mx-auto lg:mx-0">
-                  {step.text}
-                </p>
+                {/* Right — preview panel */}
+                <div
+                  ref={(el) => (previewRefs.current[i] = el)}
+                  className="w-full lg:flex-1 max-w-sm sm:max-w-md lg:max-w-lg"
+                >
+                  <StepPreview />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
