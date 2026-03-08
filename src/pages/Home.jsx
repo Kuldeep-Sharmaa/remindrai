@@ -12,7 +12,6 @@ import Background from "../components/Background";
 const Problem = lazy(() => import("../components/Home/Problem"));
 const Graph = lazy(() => import("../components/Home/Graph"));
 const Setup = lazy(() => import("../components/Home/SetUp"));
-const MiniFeature = lazy(() => import("../components/Home/MiniFeatures"));
 const CallToAction = lazy(() => import("../components/Home/CallToAction"));
 const WordMarquee = lazy(() => import("../components/Home/WordMarquee"));
 
@@ -26,14 +25,7 @@ const SectionSkeleton = () => (
   </div>
 );
 
-const SECTIONS = [
-  "problem",
-  "graph",
-  "wordMarquee",
-  "setup",
-  "miniFeature",
-  "callToAction",
-];
+const SECTIONS = ["problem", "graph", "wordMarquee", "setup", "callToAction"];
 
 const Home = () => {
   const [visible, setVisible] = useState({ hero: true });
@@ -121,12 +113,6 @@ const Home = () => {
       <div data-section="setup">
         <Suspense fallback={<SectionSkeleton />}>
           {visible.setup && <Setup />}
-        </Suspense>
-      </div>
-
-      <div data-section="miniFeature">
-        <Suspense fallback={<SectionSkeleton />}>
-          {visible.miniFeature && <MiniFeature />}
         </Suspense>
       </div>
 
