@@ -14,7 +14,7 @@ import ThemeToggle from "./ThemeToggleButton";
 import { useAuthContext } from "../context/AuthContext";
 
 const VISITOR_NAV = [
-  { to: "/features", label: "Product" },
+  { to: "/features", label: "Features" },
   { to: "/#how-it-works", label: "How it works" },
   { to: "/docs", label: "Docs" },
   { to: "/about", label: "About" },
