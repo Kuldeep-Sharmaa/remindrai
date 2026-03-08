@@ -1,30 +1,15 @@
-// App.jsx
-// Central router + provider tree.
-//
-// Key decisions made here:
-// - Public pages (landing, /about, /features etc.) render IMMEDIATELY.
-//   They never wait for Firebase auth to resolve — visitors shouldn't see a spinner.
-// - Dashboard routes wait for auth via ProtectedRoute, which handles its own loading state.
-// - AnimatePresence is removed from this level — it belongs inside DashboardLayout
-//   around <Outlet /> so page transitions work without remounting the whole layout.
-// - /login, /signup, /forgot-password redirect to /auth — no duplicate route registrations.
-
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// Auth & routing
 import { AuthContextProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 
-// Layouts
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/workspaceLayout";
 
-// Theme
 import { useTheme } from "./hooks/useTheme";
 
-// Public pages — these render immediately, no auth needed
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
@@ -33,12 +18,10 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import DocsPage from "./pages/Docs/index";
 
-// Legal pages
 import Privacy from "./pages/Legal/Privacy";
 import Terms from "./pages/Legal/Terms";
 import GDPR from "./pages/Legal/Gdpr";
 
-// Protected pages — only reachable after auth + onboarding
 import Onboarding from "./pages/OnboardingSetup";
 import DashboardHome from "./pages/workspace/Overview";
 import Deliveries from "./pages/workspace/Content";
@@ -46,7 +29,6 @@ import Insights from "./pages/workspace/Insights";
 import Studio from "./pages/workspace/Studio";
 import SettingsIndex from "./pages/SettingsIndex";
 
-// Settings sub-pages
 import SettingsLayout from "./layouts/SettingsLayout";
 import AccountInfo from "./pages/workspace/settings/AccountInfo";
 import Notification from "./pages/workspace/settings/NotificationPreferences";
@@ -54,37 +36,30 @@ import Appearance from "./pages/workspace/settings/Appearance";
 import DeleteAccountPage from "./pages/workspace/settings/DeleteAccount/DeleteAccountButton";
 import Preferences from "./pages/workspace/settings/Preferences";
 import Security from "./pages/workspace/settings/Security";
-import Aboutremindrai from "./pages/workspace/settings/AboutRemindrPost";
+import Aboutremindrai from "./pages/workspace/settings/AboutRemindrai";
 
-// Reminder flow
 import CreateReminderScreen from "./features/remindersystem/screens/CreateReminderScreen";
 
-// Global UI
 import ToastContainer from "./components/ToastSystem/ToastContainer";
 import ScrollToTop from "./components/ScrollToTop";
 
-// Timezone context — must sit inside AuthContextProvider since it reads auth state
 import { TimezoneProvider } from "./context/TimezoneProvider";
 
 function AppContent() {
   const { currentUser, isUserLoggingOut } = useAuthContext();
 
-  // Theme hook initializes synchronously from localStorage in most setups.
-  // We don't block rendering on it — the theme flicker (if any) is handled
-  // by a class on <html> set before React hydrates, not by a spinner here.
+  // useTheme reads from localStorage synchronously — no flicker, no spinner needed.
+  // The <html> class is already set before React hydrates so the theme is instant.
   useTheme();
 
   return (
     <>
-      {/* Keeps the window scrolled to top on every route change */}
       <ScrollToTop />
 
       <Routes>
-        {/* ============================================================
-            PUBLIC ROUTES
-            Render immediately — no auth check, no spinner, no waiting.
-            PublicRoute only redirects logged-in users away from auth pages.
-        ============================================================ */}
+        {/* Public pages never wait for auth to resolve.
+            A visitor hitting the landing page shouldn't see a loading state
+            just because Firebase hasn't responded yet. */}
 
         <Route
           path="/"
@@ -96,7 +71,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/features"
           element={
@@ -107,7 +81,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/about"
           element={
@@ -118,7 +91,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/docs"
           element={
@@ -129,7 +101,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/contact"
           element={
@@ -140,7 +111,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/privacy"
           element={
@@ -151,7 +121,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/terms"
           element={
@@ -162,7 +131,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/gdpr"
           element={
@@ -173,8 +141,6 @@ function AppContent() {
             </PublicRoute>
           }
         />
-
-        {/* Auth page — all auth flows live under /auth */}
         <Route
           path="/auth/*"
           element={
@@ -186,8 +152,8 @@ function AppContent() {
           }
         />
 
-        {/* Redirect legacy/alias auth paths to /auth instead of duplicating the route.
-            This avoids registering the same component 4 times and keeps URLs canonical. */}
+        {/* These used to be separate pages. Canonical URL is /auth now.
+            Keeping redirects so old links don't 404. */}
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/signup" element={<Navigate to="/auth" replace />} />
         <Route
@@ -195,13 +161,7 @@ function AppContent() {
           element={<Navigate to="/auth" replace />}
         />
 
-        {/* ============================================================
-            PROTECTED ROUTES
-            ProtectedRoute handles all auth state + loading internally.
-            Nothing here blocks public pages from rendering.
-        ============================================================ */}
-
-        {/* Email verification — user is auth'd but not yet verified */}
+        {/* Verified but hasn't finished onboarding yet */}
         <Route
           path="/verify-email"
           element={
@@ -212,8 +172,6 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-
-        {/* Onboarding — verified but hasn't completed setup yet */}
         <Route
           path="/onboarding"
           element={
@@ -223,10 +181,8 @@ function AppContent() {
           }
         />
 
-        {/* Dashboard — fully authenticated + verified + onboarded users only.
-            DashboardLayout renders <Outlet /> for nested routes.
-            AnimatePresence for page transitions belongs INSIDE DashboardLayout
-            around <Outlet /> — not here — so the sidebar/topbar never remounts. */}
+        {/* AnimatePresence for transitions lives inside DashboardLayout around <Outlet />.
+            Putting it here would remount the sidebar on every route change. */}
         <Route
           path="/workspace/*"
           element={
@@ -253,40 +209,33 @@ function AppContent() {
           </Route>
         </Route>
 
-        {/* ============================================================
-            CATCH-ALL
-            Unknown routes — send user somewhere sensible based on auth state.
-        ============================================================ */}
+        {/* mid-logout gets sent home immediately so there's no flash of the dashboard */}
         <Route
           path="*"
           element={
             isUserLoggingOut ? (
-              <Navigate to="/" replace /> // mid-logout — go home
+              <Navigate to="/" replace />
             ) : currentUser ? (
-              <Navigate to="/workspace" replace /> // logged in — go to dashboard
+              <Navigate to="/workspace" replace />
             ) : (
               <Navigate to="/" replace />
-            ) // not logged in — go to landing page
+            )
           }
         />
       </Routes>
 
-      {/* Toast notifications sit outside the route tree so they survive
-          route transitions without unmounting mid-display */}
+      {/* Outside the route tree so toasts don't unmount mid-transition */}
       <ToastContainer />
     </>
   );
 }
 
-// Memoized to prevent unnecessary re-renders when the provider tree above re-renders
 const MemoizedAppContent = React.memo(AppContent);
 
 export default function App() {
+  // TimezoneProvider needs auth state, so it has to live inside AuthContextProvider.
+  // That's the only reason for this nesting order.
   return (
-    // Provider order matters:
-    // 1. AuthContextProvider — outermost, everything else reads from it
-    // 2. TimezoneProvider — reads auth state so must be inside AuthContextProvider
-    // 3. MemoizedAppContent — reads auth state so must be inside AuthContextProvider
     <AuthContextProvider>
       <TimezoneProvider saveProfileTz={false}>
         <MemoizedAppContent />
@@ -294,4 +243,3 @@ export default function App() {
     </AuthContextProvider>
   );
 }
-
