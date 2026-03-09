@@ -1,6 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Lock, Unlock, ArrowRight } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ContentIdentityCard from "./ContentIdentityCard";
@@ -20,6 +18,14 @@ export default function Hero() {
   const mCardRightRef = useRef(null);
   const mLogoRef = useRef(null);
 
+  const [showHint, setShowHint] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setShowHint(window.scrollY < 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   useEffect(() => {
     const mm = gsap.matchMedia();
 
@@ -27,8 +33,6 @@ export default function Hero() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          // "top top" = scrollY 0. "+=700" = after 700px of scroll.
-          // This is pure scroll-distance based — not element-position based.
           start: "top top",
           end: "+=700",
           scrub: 1.8,
@@ -125,7 +129,7 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen flex flex-col justify-center items-center px-5 sm:px-8 lg:px-12 pt-28 pb-20"
+      className="relative w-full min-h-screen flex flex-col justify-center items-center px-5 sm:px-8 lg:px-12 pt-36 sm:pt-44 pb-16 sm:pb-20"
     >
       <div
         ref={headlineRef}
@@ -143,13 +147,54 @@ export default function Hero() {
       </div>
 
       <p
-        className="relative z-10 text-sm sm:text-base lg:text-lg text-textLight dark:text-white/60 font-inter max-w-lg mx-auto text-center leading-relaxed mb-14 hi"
+        className="relative z-10 text-sm sm:text-base lg:text-lg text-textLight dark:text-white/60 font-inter max-w-lg mx-auto text-center leading-relaxed mb-6 hi"
         style={{ "--d": "0.14s" }}
       >
         Set your role, tone, platform, and timing once
         <br />
         Drafts are prepared and ready at the chosen time.
       </p>
+
+      <div
+        className={`hidden sm:flex relative z-10 flex-col items-center mb-6 transition-opacity duration-500 hi ${
+          showHint ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        style={{ "--d": "0.2s" }}
+      >
+        {/* Mouse body */}
+        <div className="relative w-7 h-10 border-[3px] border-textLight/30 dark:border-white/30 border-solid rounded-[50px] box-border mb-4">
+          {/* Dot inside mouse */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-textLight/40 dark:bg-white/40"
+            style={{ animation: "mouse-scroll 2s infinite", bottom: "30px" }}
+          />
+        </div>
+        {/* Chevrons */}
+        <div className="flex flex-col items-center gap-0 -mt-1">
+          {[0, 250].map((delay, i) => (
+            <div
+              key={i}
+              className="w-[10px] h-[10px] border-r-[3px] border-b-[3px] border-textLight/40 dark:border-white/40 rotate-45 -mt-1.5"
+              style={{
+                animation: `chevron-pulse 500ms ease infinite alternate ${delay}ms`,
+              }}
+            />
+          ))}
+        </div>
+
+        <style>{`
+          @keyframes mouse-scroll {
+            0%   { opacity: 0; height: 6px; }
+            40%  { opacity: 1; height: 10px; }
+            80%  { transform: translate(-50%, 20px); height: 10px; opacity: 0; }
+            100% { height: 3px; opacity: 0; }
+          }
+          @keyframes chevron-pulse {
+            from { opacity: 0; }
+            to   { opacity: 0.5; }
+          }
+        `}</style>
+      </div>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto">
         <div className="hidden sm:flex items-stretch justify-center">
@@ -160,23 +205,19 @@ export default function Hero() {
           >
             <ContentIdentityCard />
           </div>
-
           <div className="flex-shrink-0 flex items-center justify-center px-6 z-10">
-            <div className="relative flex items-center justify-center">
-              <div
-                ref={logoRef}
-                className="relative flex items-center justify-center w-11 h-11 z-10"
-                style={{ opacity: 0 }}
-              >
-                <img
-                  src="/brand_logo.svg"
-                  alt="brand logo"
-                  className="w-auto h-8 object-contain"
-                />
-              </div>
+            <div
+              ref={logoRef}
+              className="relative flex items-center justify-center w-11 h-11 z-10"
+              style={{ opacity: 0 }}
+            >
+              <img
+                src="/brand_logo.svg"
+                alt="brand logo"
+                className="w-auto h-8 object-contain"
+              />
             </div>
           </div>
-
           <div
             ref={cardRightRef}
             className="flex-1 min-w-0"
@@ -213,7 +254,7 @@ export default function Hero() {
         className="relative z-10 mt-10 flex flex-col sm:flex-row items-center gap-3 hi"
         style={{ "--d": "0.22s" }}
       >
-        <Button to="/auth" showArrow>
+        <Button to="/auth" showArrow className="text-base sm:text-lg">
           See it in action
         </Button>
       </div>
