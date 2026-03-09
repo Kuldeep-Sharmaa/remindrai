@@ -58,7 +58,7 @@ const CallToAction = () => {
         <Button
           to="/auth"
           showArrow
-          className="relative z-10 text-base sm:text-lg"
+          className="relative z-10 text-base sm:text-lg bg-textDark dark:bg-textLight "
         >
           Start setup
         </Button>
