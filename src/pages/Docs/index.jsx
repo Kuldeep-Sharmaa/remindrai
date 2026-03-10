@@ -1,244 +1,271 @@
-import React, { useState, useMemo } from "react";
-import { Search, BookOpen, Zap, HelpCircle, ExternalLink } from "lucide-react";
-import SearchBar from "./components/SearchBar";
-import CollapsibleSection, {
-  HighlightText,
-} from "./components/CollapsibleSection";
-import { quickstart } from "./data/quickstart";
-import { features } from "./data/features";
-import { faq } from "./data/faq";
+import React, { useState, useRef, useEffect } from "react";
+import { Search, X } from "lucide-react";
 
-const DocsPage = () => {
+// Section components
+import CreateAccount from "./sections/CreateAccount";
+import VerifyEmail from "./sections/VerifyEmail";
+import Onboarding from "./sections/Onboarding";
+import Workspace from "./sections/Workspace";
+import ContentSetup from "./sections/ContentSetup";
+import CreatePrompt from "./sections/CreatePrompt";
+import ContentInbox from "./sections/ContentInbox";
+import ManagePrompts from "./sections/ManagePrompts";
+import Timezone from "./sections/Timezone";
+import Notifications from "./sections/Notifications";
+import Preferences from "./sections/Preferences";
+import Account from "./sections/Account";
+
+// ─── Nav structure ─────────────────────────────────────────────────────────────
+
+const NAV = [
+  {
+    group: "Getting started",
+    items: [
+      { id: "create-account", label: "Create account" },
+      { id: "verify-email", label: "Verify email" },
+      { id: "onboarding", label: "Onboarding" },
+      { id: "workspace", label: "Workspace" },
+    ],
+  },
+  {
+    group: "Core workflow",
+    items: [
+      { id: "content-setup", label: "Content setup" },
+      { id: "create-prompt", label: "Creating a prompt" },
+      { id: "content-inbox", label: "Content inbox" },
+      { id: "manage-prompts", label: "Managing prompts" },
+    ],
+  },
+  {
+    group: "Settings",
+    items: [
+      { id: "timezone", label: "Timezone" },
+      { id: "notifications", label: "Notifications" },
+      { id: "preferences", label: "Preferences" },
+      { id: "account", label: "Account" },
+    ],
+  },
+];
+
+const SECTION_MAP = {
+  "create-account": {
+    component: CreateAccount,
+    title: "How do I create an account?",
+    intro: "Sign up takes less than a minute.",
+  },
+  "verify-email": {
+    component: VerifyEmail,
+    title: "How do I verify my email?",
+    intro: "Required before accessing the Workspace.",
+  },
+  onboarding: {
+    component: Onboarding,
+    title: "What happens during onboarding?",
+    intro: "Sets your Content Identity.",
+  },
+  workspace: {
+    component: Workspace,
+    title: "What is inside the Workspace?",
+    intro: "Four sections: Overview, Studio, Deliveries, Settings.",
+  },
+  "content-setup": {
+    component: ContentSetup,
+    title: "How do I update my content setup?",
+    intro: "Edit role, tone, and platform from Studio.",
+  },
+  "create-prompt": {
+    component: CreatePrompt,
+    title: "How do I create a prompt?",
+    intro: "Prompts define what the system prepares and when.",
+  },
+  "content-inbox": {
+    component: ContentInbox,
+    title: "Where does generated content appear?",
+    intro: "All drafts appear in Deliveries.",
+  },
+  "manage-prompts": {
+    component: ManagePrompts,
+    title: "How do I manage my prompts?",
+    intro: "View, delete, and review prompts from Studio.",
+  },
+  timezone: {
+    component: Timezone,
+    title: "How do I change my timezone?",
+    intro: "All delivery times use your timezone.",
+  },
+  notifications: {
+    component: Notifications,
+    title: "How do I manage notifications?",
+    intro: "Control email and app notifications.",
+  },
+  preferences: {
+    component: Preferences,
+    title: "How do I change app preferences?",
+    intro: "Theme and display settings.",
+  },
+  account: {
+    component: Account,
+    title: "How do I manage my account?",
+    intro: "Password and account deletion.",
+  },
+};
+
+// Flat list for search
+const SEARCH_INDEX = Object.entries(SECTION_MAP).map(([id, s]) => ({
+  id,
+  label: NAV.flatMap((g) => g.items).find((i) => i.id === id)?.label || id,
+  title: s.title,
+  intro: s.intro,
+}));
+
+// ─── Main ──────────────────────────────────────────────────────────────────────
+
+export default function Docs() {
+  const [active, setActive] = useState("create-account");
   const [query, setQuery] = useState("");
-  const [expandedSections, setExpandedSections] = useState({
-    quickstart: false,
-    features: false,
-    faq: false,
-  });
+  const [results, setResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
 
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
+  const ActiveSection = SECTION_MAP[active]?.component;
 
-  // Advanced search functionality
-  const searchResults = useMemo(() => {
-    if (!query.trim()) {
-      return {
-        quickstart: { items: quickstart, hasMatch: false },
-        features: { items: features, hasMatch: false },
-        faq: { items: faq, hasMatch: false },
-        totalResults: 0,
-      };
+  // Search
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      setResults([]);
+      setShowResults(false);
+      return;
     }
-
-    const searchTerm = query.toLowerCase();
-
-    const quickstartMatches = quickstart.filter(
-      (item) =>
-        item.step.toLowerCase().includes(searchTerm) ||
-        item.detail.toLowerCase().includes(searchTerm)
+    setResults(
+      SEARCH_INDEX.filter(
+        (r) =>
+          r.title.toLowerCase().includes(q) ||
+          r.intro.toLowerCase().includes(q) ||
+          r.label.toLowerCase().includes(q),
+      ).slice(0, 7),
     );
-
-    const featureMatches = features.filter(
-      (item) =>
-        item.title.toLowerCase().includes(searchTerm) ||
-        item.description.toLowerCase().includes(searchTerm) ||
-        (item.category && item.category.toLowerCase().includes(searchTerm))
-    );
-
-    const faqMatches = faq.filter(
-      (item) =>
-        item.question.toLowerCase().includes(searchTerm) ||
-        item.answer.toLowerCase().includes(searchTerm) ||
-        (item.category && item.category.toLowerCase().includes(searchTerm))
-    );
-
-    const totalResults =
-      quickstartMatches.length + featureMatches.length + faqMatches.length;
-
-    // Auto-expand sections with matches
-    if (totalResults > 0) {
-      const newExpanded = {
-        quickstart: quickstartMatches.length > 0,
-        features: featureMatches.length > 0,
-        faq: faqMatches.length > 0,
-      };
-      setExpandedSections(newExpanded);
-    }
-
-    return {
-      quickstart: {
-        items: quickstartMatches,
-        hasMatch: quickstartMatches.length > 0,
-      },
-      features: { items: featureMatches, hasMatch: featureMatches.length > 0 },
-      faq: { items: faqMatches, hasMatch: faqMatches.length > 0 },
-      totalResults,
-    };
+    setShowResults(true);
   }, [query]);
 
+  // Close search dropdown on outside click
+  useEffect(() => {
+    const h = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target))
+        setShowResults(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const navigate = (id) => {
+    setActive(id);
+    setShowResults(false);
+    setQuery("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="min-h-screen mt-16 bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              RemindrAI Documentation
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need to know about using RemindrAI effectively.
-              Search through our guides, features, and frequently asked
-              questions.
-            </p>
-          </div>
+    <div className="min-h-screen w-full">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 pt-32 pb-24">
+        {/* Page header */}
+        <div className="mb-10">
+          <p className="font-grotesk text-sm tracking-widest uppercase text-brand font-medium mb-3">
+            Documentation
+          </p>
+          <h1 className="font-grotesk text-4xl sm:text-5xl font-bold text-textLight dark:text-textDark tracking-tight leading-tight mb-6">
+            How to use RemindrAI
+          </h1>
 
-          <div className="max-w-2xl mx-auto">
-            <SearchBar
-              query={query}
-              setQuery={setQuery}
-              resultsCount={searchResults.totalResults}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* No Results State */}
-        {query && searchResults.totalResults === 0 && (
-          <div className="text-center py-12">
-            <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No results found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Try searching for something else or browse our sections below.
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {/* Quick Start Guide */}
-          <CollapsibleSection
-            title="Quick Start Guide"
-            icon={BookOpen}
-            isExpanded={expandedSections.quickstart}
-            onToggle={() => toggleSection("quickstart")}
-            hasMatches={searchResults.quickstart.hasMatch}
-            query={query}
-          >
-            <div className="space-y-4">
-              {searchResults.quickstart.items.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-l-4 border-blue-500"
+          {/* Search */}
+          <div ref={searchRef} className="relative max-w-md">
+            <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-bgImpact border border-gray-200 dark:border-white/[0.08] rounded-lg">
+              <Search
+                className="w-4 h-4 text-muted flex-shrink-0"
+                strokeWidth={1.75}
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search docs…"
+                className="flex-1 bg-transparent font-inter text-sm text-textLight dark:text-textDark placeholder:text-muted outline-none"
+              />
+              {query && (
+                <button
+                  onClick={() => {
+                    setQuery("");
+                    setShowResults(false);
+                  }}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-semibold flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                        <HighlightText text={item.step} query={query} />
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        <HighlightText text={item.detail} query={query} />
+                  <X className="w-3.5 h-3.5 text-muted hover:text-textLight dark:hover:text-textDark transition-colors" />
+                </button>
+              )}
+            </div>
+
+            {showResults && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-bgImpact border border-gray-200 dark:border-white/[0.08] rounded-lg overflow-hidden z-50 shadow-lg">
+                {results.length === 0 ? (
+                  <p className="font-inter text-sm text-muted px-4 py-3">
+                    No results for "{query}"
+                  </p>
+                ) : (
+                  results.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => navigate(r.id)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/[0.04] border-b border-gray-100 dark:border-white/[0.04] last:border-0 transition-colors"
+                    >
+                      <p className="font-inter text-sm text-textLight dark:text-textDark font-medium leading-snug">
+                        {r.title}
                       </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CollapsibleSection>
-
-          {/* Features */}
-          <CollapsibleSection
-            title="Features"
-            icon={Zap}
-            isExpanded={expandedSections.features}
-            onToggle={() => toggleSection("features")}
-            hasMatches={searchResults.features.hasMatch}
-            query={query}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              {searchResults.features.items.map((feature) => (
-                <div
-                  key={feature.id}
-                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      <HighlightText text={feature.title} query={query} />
-                    </h4>
-                    {feature.category && (
-                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
-                        <HighlightText text={feature.category} query={query} />
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    <HighlightText text={feature.description} query={query} />
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CollapsibleSection>
-
-          {/* FAQ */}
-          <CollapsibleSection
-            title="Frequently Asked Questions"
-            icon={HelpCircle}
-            isExpanded={expandedSections.faq}
-            onToggle={() => toggleSection("faq")}
-            hasMatches={searchResults.faq.hasMatch}
-            query={query}
-          >
-            <div className="space-y-4">
-              {searchResults.faq.items.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white flex-1">
-                      <HighlightText text={item.question} query={query} />
-                    </h4>
-                    {item.category && (
-                      <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full ml-2">
-                        <HighlightText text={item.category} query={query} />
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    <HighlightText text={item.answer} query={query} />
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CollapsibleSection>
+                      <p className="font-inter text-xs text-muted mt-0.5">
+                        {r.intro}
+                      </p>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
-          <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Still need help? We're here to assist you.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                Contact Support
-                <ExternalLink className="h-4 w-4" />
-              </button>
-            </div>
+        <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06] mb-10" />
+
+        {/* Two-zone layout */}
+        <div className="flex gap-12 lg:gap-16">
+          {/* Sidebar */}
+          <nav className="hidden lg:flex flex-col gap-6 w-44 flex-shrink-0 self-start sticky top-28">
+            {NAV.map((group) => (
+              <div key={group.group}>
+                <p className="font-grotesk text-xs tracking-widest uppercase text-muted font-medium mb-2 px-3">
+                  {group.group}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => navigate(item.id)}
+                      className={`text-left font-inter text-sm py-1.5 px-3 rounded transition-colors duration-150 ${
+                        active === item.id
+                          ? "text-brand bg-brand/[0.06] font-medium"
+                          : "text-muted hover:text-textLight dark:hover:text-textDark"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          {/* Content — active section */}
+          <div className="flex-1 min-w-0">
+            {ActiveSection && <ActiveSection onNavigate={navigate} />}
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default DocsPage;
+}
