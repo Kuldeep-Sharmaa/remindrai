@@ -6,7 +6,7 @@ import CreateAccount from "./sections/CreateAccount";
 import VerifyEmail from "./sections/VerifyEmail";
 import Onboarding from "./sections/Onboarding";
 import Workspace from "./sections/Workspace";
-import ContentSetup from "./sections/ContentSetup";
+import ContentSetup from "./sections/Contentsetup";
 import CreatePrompt from "./sections/CreatePrompt";
 import ContentInbox from "./sections/ContentInbox";
 import ManagePrompts from "./sections/ManagePrompts";
