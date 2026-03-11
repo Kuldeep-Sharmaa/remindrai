@@ -170,7 +170,7 @@ const Footer = () => {
           <div className="flex flex-row gap-14 flex-shrink-0 lg:pb-2">
             {Object.entries(NAV).map(([section, links]) => (
               <div key={section}>
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-textLight/80 dark:text-white/80 mb-4 sm:mb-5 font-grotesk">
+                <p className="text-sm font-bold uppercase tracking-[0.28em] text-textLight/80 dark:text-white/80 mb-4 sm:mb-5 font-grotesk">
                   {section}
                 </p>
                 <ul className="space-y-2.5 sm:space-y-3">
