@@ -126,11 +126,11 @@ const AnimatedWordmark = () => {
 const CraftBadge = () => (
   <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.02]">
     <Infinity
-      className="w-3.5 h-3.5 text-muted"
+      className="w-3.5 h-3.5 text-brand"
       strokeWidth={1.75}
       aria-hidden="true"
     />
-    <span className="text-xs text-muted font-inter">
+    <span className="text-xs text-textLight/80 dark:text-white/80 font-inter">
       A system that keeps work moving
     </span>
   </div>
@@ -156,13 +156,13 @@ const Footer = () => {
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8">
         <div className="pt-14 pb-10 md:pt-20 md:pb-14 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs font-semibold tracking-[0.32em] uppercase text-muted mb-6 font-grotesk">
+            <p className="text-[10px] sm:text-xs font-semibold tracking-[0.32em] uppercase text-textLight/80 dark:text-white/80 mb-6 font-grotesk">
               Making time work for you
             </p>
             <div className="overflow-hidden">
               <AnimatedWordmark />
             </div>
-            <p className="mt-5 text-sm sm:text-[15px] text-muted max-w-xs sm:max-w-sm leading-relaxed font-inter">
+            <p className="mt-5 text-sm sm:text-[15px] text-textLight/80 dark:text-white/80 max-w-xs sm:max-w-sm leading-relaxed font-inter">
               Built for founders, creators, and focused people.
             </p>
           </div>
@@ -170,7 +170,7 @@ const Footer = () => {
           <div className="flex flex-row gap-14 flex-shrink-0 lg:pb-2">
             {Object.entries(NAV).map(([section, links]) => (
               <div key={section}>
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-muted mb-4 sm:mb-5 font-grotesk">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-textLight/80 dark:text-white/80 mb-4 sm:mb-5 font-grotesk">
                   {section}
                 </p>
                 <ul className="space-y-2.5 sm:space-y-3">
@@ -197,7 +197,7 @@ const Footer = () => {
           <div className="order-1 sm:order-2 flex justify-center sm:justify-end w-full sm:w-auto">
             <CraftBadge />
           </div>
-          <p className="text-xs text-muted font-inter order-2 sm:order-1 w-full sm:w-auto">
+          <p className="text-xs text-textLight/80 dark:text-white/80 font-inter order-2 sm:order-1 w-full sm:w-auto">
             © {CURRENT_YEAR} RemindrAI · {version} · All rights reserved
           </p>
         </div>
