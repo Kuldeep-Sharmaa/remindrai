@@ -64,7 +64,6 @@ const ForgotPasswordPage = () => {
       }, 3000);
     } catch (error) {
       console.error("Password reset error:", error);
-      // Stay on page so user can retry
       showToast({
         type: "error",
         message:
@@ -79,14 +78,13 @@ const ForgotPasswordPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-bgLight dark:bg-bgDark font-inter text-textLight dark:text-textDark">
-      {/* Top nav bar — matches AuthWrapper */}
-      <header className="w-full flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-border/50">
+      <header className="w-full flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-border/50">
         <Link to="/">
           {" "}
           <img
             src="/transparent_logo.svg"
             alt="RemindrAI"
-            className="h-10 w-auto"
+            className="h-10 lg:h-12 w-auto"
             loading="eager"
           />
         </Link>
@@ -104,12 +102,11 @@ const ForgotPasswordPage = () => {
             <h1 className="font-grotesk text-4xl font-semibold tracking-[-0.01em] leading-tight mb-2">
               Reset your password
             </h1>
-            <p className="text-base text-muted leading-relaxed">
+            <p className="text-base text-textLight/80 dark:text-white/80 leading-relaxed">
               Enter your email and we'll send you a link to reset your password.
             </p>
           </motion.div>
 
-          {/* Form */}
           <motion.form
             onSubmit={handleSubmit}
             noValidate
@@ -175,7 +172,6 @@ const ForgotPasswordPage = () => {
             </button>
           </motion.form>
 
-          {/* Back to login */}
           <p className="mt-6 text-center text-[12.5px] text-muted">
             Remember your password?{" "}
             <button

@@ -15,17 +15,17 @@ const AuthWrapper = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-bgLight dark:bg-bgDark font-inter text-textLight dark:text-textDark">
-      <header className="w-full flex items-center justify-between sm:py-6 lg:px-8 py-5 border-b border-gray-100 dark:border-border/50">
+      <header className="w-full flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-border/50">
         <Link to="/">
           <img
             src="/transparent_logo.svg"
             alt="RemindrAI"
-            className="h-10 w-auto"
+            className="h-10 lg:h-12 w-auto"
             loading="eager"
           />
         </Link>
 
-        <div className="flex items-center gap-2 text-sm lg:text-base text-muted">
+        <div className="flex items-center gap-2 text-sm lg:text-base text-textLight/80 dark:text-white/80">
           <span>{isLogin ? "No account?" : "Have an account?"}</span>
           <button
             onClick={toggleForm}
@@ -51,7 +51,7 @@ const AuthWrapper = () => {
                   {isLogin ? "Welcome back" : "Create your account"}
                 </h1>
 
-                <p className="text-base text-muted leading-relaxed">
+                <p className="text-base text-textLight/80 dark:text-white/80 leading-relaxed">
                   {isLogin
                     ? "Continue where you left off."
                     : "Set up your workspace to get started."}
