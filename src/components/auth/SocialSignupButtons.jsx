@@ -74,8 +74,8 @@ const SocialButton = ({
     disabled={disabled}
     className="
       flex-1 flex items-center justify-center gap-2.5
-      h-[42px] px-4 rounded-xl
-      font-inter text-sm font-medium
+      h-10 px-2.5 py-2.5 rounded-xl
+      font-inter text-base font-medium
       text-textLight dark:text-textDark
       bg-transparent
       border border-gray-200 dark:border-border
