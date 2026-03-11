@@ -36,20 +36,18 @@ export default function Button({
       text-textLight dark:text-textDark
       hover:border-black/30 dark:hover:border-white/30
       hover:text-textLight dark:hover:text-white
-      bg-transparent
     `,
     ghost: `
       border-none
       text-textLight/40 dark:text-white/30
       hover:text-textLight/80 dark:hover:text-white/70
-      bg-transparent px-0
+       px-0
     `,
     icon: `
       border border-black/10 dark:border-white/10
       text-textLight/40 dark:text-white/30
       hover:border-black/20 dark:hover:border-white/20
       hover:text-textLight/70 dark:hover:text-white/60
-      bg-transparent
     `,
   };
 
