@@ -310,11 +310,11 @@ const Graph = () => {
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-black/5 dark:border-white/5">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <p className="text-xs font-inter text-textLight/40 dark:text-white/30">
+              <p className="text-xs font-inter text-textLight/80 dark:text-white/80">
                 Consistent 4 drafts per week configuration.
               </p>
             </div>
-            <p className="text-xs font-inter text-textLight dark:text-white hidden sm:block">
+            <p className="text-xs font-inter text-textLight/80 dark:text-white/80 hidden sm:block">
               Hover to explore
             </p>
           </div>

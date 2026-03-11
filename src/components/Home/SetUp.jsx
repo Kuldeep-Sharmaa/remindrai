@@ -214,7 +214,7 @@ const Setup = () => {
                   <h2 className="font-grotesk text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-textLight dark:text-textDark tracking-tight leading-[1.05]">
                     {step.title}
                   </h2>
-                  <p className="font-inter text-sm sm:text-base text-muted leading-relaxed max-w-sm mx-auto lg:mx-0">
+                  <p className="font-inter text-sm sm:text-base text-textLight dark:text-textDark leading-relaxed max-w-sm mx-auto lg:mx-0">
                     {step.text}
                   </p>
                 </div>

@@ -133,14 +133,14 @@ const Problem = () => {
                   ref={(el) => (painRef.current[i] = el)}
                   className="flex gap-4 lg:px-1 px-4 items-start py-4 first:pt-0 last:pb-0"
                 >
-                  <div className="w-5 h-5 rounded-md bg-red-500/10 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400" />
+                  <div className="w-5 h-5 rounded-md  flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-600" />
                   </div>
                   <div>
                     <p className="text-xs font-grotesk font-semibold tracking-widest uppercase text-textLight dark:text-textDark mb-1.5">
                       {point.label}
                     </p>
-                    <p className="text-sm text-textLight/50 dark:text-textDark/50 font-inter leading-relaxed">
+                    <p className="text-sm text-textLight/80 dark:text-textDark/80 font-inter leading-relaxed">
                       {point.body}
                     </p>
                   </div>
