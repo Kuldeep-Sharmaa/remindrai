@@ -8,7 +8,7 @@ import EmailInput from "../signup/EmailInput";
 import PasswordInput from "./PasswordInput";
 import ForgotPasswordLink from "./ForgotPasswordLink";
 import SubmitButton from "./SubmitButton";
-import SocialAuthButtons from "../signup/SocialSignupButtons";
+import SocialAuthButtons from "../SocialSignupButtons";
 
 const LoginForm = ({ onSwitchToSignup }) => {
   const {

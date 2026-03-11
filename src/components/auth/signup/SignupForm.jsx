@@ -8,7 +8,7 @@ import EmailInput from "./EmailInput";
 import PasswordInput from "./PasswordInput";
 import ConfirmPasswordInput from "./ConfirmPasswordInput";
 import SubmitButton from "./SubmitButton";
-import SocialSignupButtons from "./SocialSignupButtons";
+import SocialSignupButtons from "../SocialSignupButtons";
 
 import { showToast } from "../../ToastSystem/toastUtils";
 
