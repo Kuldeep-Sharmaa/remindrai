@@ -108,11 +108,11 @@ export default function Navbar() {
             <img
               src="/transparent_logo.svg"
               alt="RemindrAI"
-              className="h-12 w-auto"
+              className="h-10 lg:h-12 w-auto"
             />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
+          <nav className="hidden lg:flex items-center gap-3 flex-1 justify-center">
             {isLoggedIn && (
               <Link
                 to="/workspace"
@@ -136,7 +136,7 @@ export default function Navbar() {
                   ${
                     isActive(to)
                       ? "text-brand dark:text-brand-soft font-medium"
-                      : "text-gray-500/90 dark:text-gray-400/90 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5"
+                      : "text-textLight/80 dark:text-white/80 hover:text-brand-hover dark:hover:text-brand-hover hover:bg-gray-50 dark:hover:bg-white/5"
                   }`}
               >
                 {label}
