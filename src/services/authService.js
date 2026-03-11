@@ -44,6 +44,19 @@ googleProvider.setCustomParameters({
 
 const githubProvider = new GithubAuthProvider();
 
+// never retry these — either user action or a permanent error
+const NON_RETRYABLE_ERRORS = [
+  "auth/user-not-found",
+  "auth/wrong-password",
+  "auth/invalid-email",
+  "auth/user-disabled",
+  "auth/email-already-in-use",
+  "auth/weak-password",
+  "auth/requires-recent-login",
+  "auth/popup-closed-by-user",
+  "auth/cancelled-popup-request",
+];
+
 /**
  * Retries a flaky async operation with exponential backoff.
  * Won't retry on errors that are the user's fault (wrong password, bad email etc.)
@@ -54,17 +67,10 @@ const retryOperation = async (operation, maxAttempts = MAX_RETRY_ATTEMPTS) => {
     try {
       return await operation();
     } catch (error) {
-      const nonRetryableErrors = [
-        "auth/user-not-found",
-        "auth/wrong-password",
-        "auth/invalid-email",
-        "auth/user-disabled",
-        "auth/email-already-in-use",
-        "auth/weak-password",
-        "auth/requires-recent-login",
-      ];
-
-      if (nonRetryableErrors.includes(error.code) || attempt === maxAttempts) {
+      if (
+        NON_RETRYABLE_ERRORS.includes(error.code) ||
+        attempt === maxAttempts
+      ) {
         throw error;
       }
 
@@ -89,6 +95,12 @@ const classifyError = (error) => {
   };
 
   switch (error.code) {
+    case "auth/popup-closed-by-user":
+    case "auth/cancelled-popup-request":
+      classification.type = "POPUP_CLOSED";
+      classification.userMessage =
+        "Sign-in window was closed. Try again when you're ready.";
+      break;
     case "auth/network-request-failed":
       classification.type = "NETWORK";
       classification.userMessage =
@@ -142,19 +154,17 @@ const createUserProfileDocument = async (userAuth, additionalData) => {
     const userSnapshot = await getDoc(userDocRef);
 
     if (!userSnapshot.exists()) {
-      // Brand new user — build the full profile from scratch
       const { email, uid } = userAuth;
 
       await setDoc(userDocRef, {
         uid,
         email,
         createdAt: serverTimestamp(),
-        ...additionalData, // picks up { fullName } from signup
+        ...additionalData,
 
         onboardingComplete: false,
         isPro: false,
 
-        // Set during onboarding, null until then
         role: null,
         platform: null,
         tone: null,
@@ -175,7 +185,6 @@ const createUserProfileDocument = async (userAuth, additionalData) => {
 
       console.log("New user profile created");
     } else {
-      // Returning user — just bump the login stats, leave everything else alone
       await setDoc(
         userDocRef,
         {
@@ -285,7 +294,7 @@ export const loginWithGoogle = async () => {
     const classification = classifyError(error);
     throw {
       success: false,
-      error: error.message,
+      error: classification.userMessage,
       code: error.code,
       classification,
     };
@@ -314,7 +323,7 @@ export const loginWithGithub = async () => {
     const classification = classifyError(error);
     throw {
       success: false,
-      error: error.message,
+      error: classification.userMessage,
       code: error.code,
       classification,
     };
