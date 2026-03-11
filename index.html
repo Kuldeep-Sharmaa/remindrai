@@ -43,23 +43,11 @@
 
             const root = document.documentElement;
 
-            root.classList.remove(
-              "dark",
-              "theme-light-image",
-              "theme-dark-image",
-              "theme-auto-image",
-            );
-
+            root.classList.remove("dark");
             if (effectiveTheme === "dark") {
               root.classList.add("dark");
             }
 
-            root.classList.add(`theme-${storedTheme}-image`);
-            root.setAttribute("data-theme", storedTheme);
-            root.setAttribute("data-effective-theme", effectiveTheme);
-            root.setAttribute("data-system-theme", systemTheme);
-
-            // ✅ Fix: paint body bg before React mounts so public pages never flash
             document.documentElement.style.backgroundColor =
               effectiveTheme === "dark" ? "#000000" : "#ffffff";
             document.body &&
@@ -69,12 +57,6 @@
             return { storedTheme, effectiveTheme, systemTheme };
           } catch (e) {
             document.documentElement.classList.remove("dark");
-            document.documentElement.setAttribute("data-theme", "light");
-            document.documentElement.setAttribute(
-              "data-effective-theme",
-              "light",
-            );
-            document.documentElement.setAttribute("data-system-theme", "light");
             return {
               storedTheme: "light",
               effectiveTheme: "light",
@@ -117,7 +99,6 @@
           };
         }
 
-        // Kill transitions until React is ready
         const style = document.createElement("style");
         style.textContent = `
           * {
@@ -150,6 +131,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
   </body>
 </html>
