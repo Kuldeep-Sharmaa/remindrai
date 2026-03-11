@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Step1Preview from "./steps/step1";
@@ -44,7 +44,7 @@ const Setup = () => {
   const dotRefs = useRef([]);
   const activeStepRef = useRef(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!sectionRef.current || !pinnedRef.current) return;
 
     const ctx = gsap.context(() => {
@@ -147,8 +147,9 @@ const Setup = () => {
         trigger: sectionRef.current,
         pin: pinnedRef.current,
         start: "top top",
-        end: `+=${window.innerHeight * (steps.length - 1)}`,
+        end: () => `+=${window.innerHeight * (steps.length - 1)}`,
         anticipatePin: 1,
+        invalidateOnRefresh: true,
         onUpdate: (self) => {
           const index = Math.min(
             Math.floor(self.progress * steps.length),
@@ -161,6 +162,9 @@ const Setup = () => {
           showStep(0);
         },
       });
+
+      const timer = setTimeout(() => ScrollTrigger.refresh(), 300);
+      return () => clearTimeout(timer);
     }, sectionRef.current);
 
     return () => ctx.revert();
