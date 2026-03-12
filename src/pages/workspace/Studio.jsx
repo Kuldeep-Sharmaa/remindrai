@@ -1,11 +1,3 @@
-/**
- * Studio.jsx
- *
- * Configuration workspace.
- * Defines what the assistant prepares.
- * Uses global reminder pipeline from AuthContext.
- */
-
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -15,6 +7,20 @@ import UserPreferencesCard from "../../features/remindersystem/components/UserPr
 import ReminderListContainer from "../../features/remindersystem/components/ReminderList/ReminderListContainer";
 import { useAuthContext } from "../../context/AuthContext";
 import PageTransition from "../../components/workspaceAnimations/PageTransition";
+
+const heroVariants = {
+  hidden: { opacity: 0, y: 8 },
+  enter: { opacity: 1, y: 0, transition: { duration: 0.32, ease: "easeOut" } },
+};
+
+const ctaVariants = {
+  hidden: { opacity: 0, y: 6 },
+  enter: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.36, ease: "easeOut", delay: 0.08 },
+  },
+};
 
 const Reminders = () => {
   const navigate = useNavigate();
@@ -30,8 +36,6 @@ const Reminders = () => {
     navigate("/workspace/studio/create");
   }, [navigate]);
 
-  const handleDeleteReminder = useCallback(async () => {}, []);
-
   const handleSettingsClick = useCallback(() => {
     navigate("/workspace/settings/preferences");
   }, [navigate]);
@@ -45,24 +49,6 @@ const Reminders = () => {
       </div>
     );
   }
-
-  const heroVariants = {
-    hidden: { opacity: 0, y: 8 },
-    enter: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.32, ease: "easeOut" },
-    },
-  };
-
-  const ctaVariants = {
-    hidden: { opacity: 0, y: 6 },
-    enter: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.36, ease: "easeOut", delay: 0.08 },
-    },
-  };
 
   return (
     <PageTransition>
@@ -78,9 +64,8 @@ const Reminders = () => {
             <h1 className="text-3xl sm:text-4xl font-grotesk font-semibold tracking-tight text-textLight dark:text-textDark mb-2">
               Studio
             </h1>
-
             <p className="text-base text-muted max-w-xl mx-auto">
-              Define what your assistant prepares.
+              Define what gets prepared for you.
             </p>
           </motion.header>
 
@@ -109,12 +94,11 @@ const Reminders = () => {
             </button>
           </motion.section>
 
-          {/*  List */}
+          {/* List */}
           <section className="mt-6">
             <ReminderListContainer
               reminders={reminders}
               error={null}
-              onDelete={handleDeleteReminder}
               onAddReminderClick={handleAddReminderClick}
             />
           </section>
@@ -125,4 +109,3 @@ const Reminders = () => {
 };
 
 export default Reminders;
-
