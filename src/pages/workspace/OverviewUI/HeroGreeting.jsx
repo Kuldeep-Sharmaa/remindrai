@@ -7,22 +7,21 @@ const OverviewGreeting = ({
   isFirstTime,
   hasError,
 }) => {
+  const firstName = userName?.split(" ")[0] || userName;
+
   const getStatusLine = () => {
     if (hasError) return "Sync issue detected.";
-    if (isFirstTime) return "Let’s begin.";
-    if (hasActiveDraft) return "Everything is on track.";
+    if (isFirstTime) return "Start by creating your first preparation.";
+    if (hasActiveDraft) return "Your next draft is in preparation.";
     return "Ready when you are.";
   };
 
   return (
-    <section className="space-y-3">
-      {/* Primary Identity Line */}
+    <section className="space-y-2">
       <h1 className="text-xl sm:text-2xl font-semibold font-grotesk tracking-tight text-textLight dark:text-textDark">
-        {greeting}, {userName}.
+        {greeting}, {firstName}.
       </h1>
-
-      {/* System State Line */}
-      <p className="text-sm sm:text-base font-inter text-muted leading-relaxed">
+      <p className="text-sm sm:text-base font-inter text-textLight/80 dark:text-textDark/80 leading-relaxed">
         {getStatusLine()}
       </p>
     </section>

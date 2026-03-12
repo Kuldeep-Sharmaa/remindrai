@@ -48,37 +48,31 @@ function formatLabels(isoString, timezone) {
 const NextDeliveryPanel = ({ next }) => {
   if (!next) {
     return (
-      <section className="w-full border-t border-border pt-8 mt-6">
-        <div className="space-y-6 max-w-md">
-          <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed">
-            Tell it what to prepare
-          </p>
-
-          <Link
-            to="/workspace/studio/create"
-            className="flex items-center justify-center px-5 py-2.5 
+      <section className="w-full border-t justify-center grid border-border pt-8 mt-6 space-y-5">
+        <p className="text-base font-medium text-textLight dark:text-textDark">
+          Tell it what to prepare.
+        </p>
+        <Link
+          to="/workspace/studio/create"
+          className="inline-flex items-center px-5 py-2.5
                      text-sm font-medium rounded-md
                      bg-brand text-white hover:bg-brand-hover
                      transition-colors duration-200"
-          >
-            Create First Preparation
-          </Link>
-        </div>
+        >
+          Create first preparation
+        </Link>
       </section>
     );
   }
 
-  // Get content based on reminder type
   let content = "Draft in preparation";
 
   if (next.content?.aiPrompt) {
-    // AI reminder - show prompt
     content =
       next.content.aiPrompt.length > 100
         ? next.content.aiPrompt.slice(0, 100).trimEnd() + "…"
         : next.content.aiPrompt;
   } else if (next.content?.message) {
-    // Simple reminder - show message
     content =
       next.content.message.length > 100
         ? next.content.message.slice(0, 100).trimEnd() + "…"
@@ -98,43 +92,41 @@ const NextDeliveryPanel = ({ next }) => {
     : null;
 
   return (
-    <>
-      <section className="w-full border-t border-border pt-8 mt-6">
-        <p className="text-xs uppercase tracking-wider text-textLight dark:text-textDark mb-4">
-          In Preparation
+    <section className="w-full border-t border-border pt-8 mt-6 space-y-6">
+      <div className="space-y-4">
+        <p className="text-xs uppercase tracking-wider text-textLight/80 dark:text-textDark/80">
+          Up next
         </p>
-        <p className="text-sm text-muted mb-4">Up next</p>
 
-        <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed mb-6 max-w-xl">
+        <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed max-w-xl">
           {content}
         </p>
 
-        <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-muted" />
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-muted flex-shrink-0" />
           <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
             Ready {dayLabel.toLowerCase()} at {timeStr}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-muted">
+        <div className="flex items-center gap-3 text-xs text-textLight/80 dark:text-textDark/80">
           {freqLabel && <span>{freqLabel}</span>}
           {platformLabel && (
             <>
-              <span className="text-border">·</span>
+              <span>·</span>
               <span>{platformLabel}</span>
             </>
           )}
         </div>
-      </section>
-      <div>
-        <Link
-          to="/workspace/studio"
-          className="text-xs text-muted hover:text-brand transition-colors"
-        >
-          View all preparations →
-        </Link>
       </div>
-    </>
+
+      <Link
+        to="/workspace/studio"
+        className="text-xs text-muted hover:text-brand transition-colors duration-150"
+      >
+        View all active prompts →
+      </Link>
+    </section>
   );
 };
 
