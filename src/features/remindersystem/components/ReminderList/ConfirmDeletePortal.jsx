@@ -1,36 +1,24 @@
-/**
- * ConfirmDeletePortal.jsx
- *
- * Professional delete confirmation modal.
- * Centered on desktop, bottom sheet on mobile.
- */
-
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { X } from "lucide-react";
 
 function ConfirmDeletePortal({ open, onConfirm, onCancel }) {
   const modalRef = useRef(null);
 
-  // Handle ESC key and outside clicks
   useEffect(() => {
     if (!open) return;
 
     const handleEscape = (e) => {
       if (e.key === "Escape") onCancel?.();
     };
-
     const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
+      if (modalRef.current && !modalRef.current.contains(e.target))
         onCancel?.();
-      }
     };
 
     document.addEventListener("keydown", handleEscape);
     document.addEventListener("mousedown", handleClickOutside);
-
-    // Prevent body scroll when modal is open
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -54,7 +42,7 @@ function ConfirmDeletePortal({ open, onConfirm, onCancel }) {
           onClick={onCancel}
         />
 
-        {/* Modal */}
+        {/* Panel */}
         <motion.div
           ref={modalRef}
           className="relative w-full sm:w-auto sm:min-w-[400px] sm:max-w-md
@@ -80,16 +68,16 @@ function ConfirmDeletePortal({ open, onConfirm, onCancel }) {
             </h2>
             <button
               onClick={onCancel}
-              className="w-8 h-8 flex items-center justify-center rounded-full
-                         hover:bg-border/20 transition-colors
-                         text-muted hover:text-textLight dark:hover:text-textDark"
               aria-label="Close"
+              className="w-8 h-8 flex items-center justify-center rounded-full
+                         hover:bg-border/20 transition-colors duration-150
+                         text-muted hover:text-textLight dark:hover:text-textDark"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Content */}
+          {/* Body */}
           <div className="px-6 py-5">
             <p className="text-sm text-muted leading-relaxed">
               This will prevent new drafts from being prepared. Any drafts that
@@ -101,18 +89,17 @@ function ConfirmDeletePortal({ open, onConfirm, onCancel }) {
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border/30 bg-bgLight/50 dark:bg-bgDark/50">
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium
+              className="px-4 py-2 text-sm font-medium rounded-lg
                          text-textLight dark:text-textDark
-                         hover:bg-border/20 rounded-lg transition-colors"
+                         hover:bg-border/20 transition-colors duration-150"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
-              className="px-4 py-2 text-sm font-medium
+              className="px-4 py-2 text-sm font-medium rounded-lg
                          bg-red-600 hover:bg-red-700 text-white
-                         rounded-lg transition-colors
-                         shadow-sm"
+                         transition-colors duration-150 shadow-sm"
             >
               Delete
             </button>

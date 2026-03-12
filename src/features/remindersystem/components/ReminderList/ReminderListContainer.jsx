@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import ReminderListItem from "./ReminderListItem";
 import TaskDetailModal from "./TaskDetailModal";
 import { useAuthContext } from "../../../../context/AuthContext";
@@ -33,14 +34,14 @@ const listItemMotion = {
 };
 
 const SkeletonRow = () => (
-  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 animate-pulse">
+  <div className="bg-bgImpact rounded-xl px-4 py-3 animate-pulse">
     <div className="flex items-center gap-3">
-      <div className="w-10 h-7 rounded-full bg-gray-200 dark:bg-gray-700" />
+      <div className="w-10 h-7 rounded-full bg-border" />
       <div className="flex-1 min-w-0">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2" />
-        <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+        <div className="h-3 bg-border rounded w-1/3 mb-2" />
+        <div className="h-2.5 bg-border rounded w-2/3" />
       </div>
-      <div className="w-24 h-6 bg-gray-200 dark:bg-gray-700 rounded ml-auto" />
+      <div className="w-24 h-6 bg-border rounded ml-auto" />
     </div>
   </div>
 );
@@ -76,23 +77,18 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
       return;
     }
 
-    // Deleted reminders never appear in UI
     const activeReminders = reminders.filter((r) => !r.deletedAt);
-
     const incomingById = new Map(activeReminders.map((r) => [r.id, r]));
 
     setVisibleReminders((prev) => {
-      // Keep items that still exist, but refresh with upstream data
       const kept = prev
         .filter((p) => incomingById.has(p.id))
         .map((p) => incomingById.get(p.id));
 
-      // Find new items not in kept
       const newItems = activeReminders.filter(
         (r) => !kept.some((k) => k.id === r.id),
       );
 
-      // New items appear at top
       return [...newItems, ...kept];
     });
   }, [reminders]);
@@ -115,22 +111,17 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
         return;
       }
 
-      // Capture the item being deleted for potential rollback
       const deletedItem = visibleReminders.find((r) => r.id === id);
       if (!deletedItem) return;
 
-      // Remove from UI immediately
       setVisibleReminders((prev) => prev.filter((r) => r.id !== id));
 
       try {
         await remindrClient.deleteReminder(user.uid, id);
         toast.success("Task deleted.");
       } catch (err) {
-        // Rollback: restore the deleted item at its original position
         setVisibleReminders((prev) => {
-          // Check if it was already re-added somehow
           if (prev.some((r) => r.id === id)) return prev;
-          // Add back to front (safest position)
           return [deletedItem, ...prev];
         });
         toast.error("Failed to delete item. Try again.");
@@ -143,7 +134,7 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
   // Error state
   if (error) {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 overflow-hidden">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6">
         <div className="rounded-lg p-6 text-center border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
           <h3 className="text-lg font-semibold text-red-700 dark:text-red-300">
             Something went wrong
@@ -158,14 +149,16 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
   }
 
   const showEmptyActive = reminders !== null && activePrompts.length === 0;
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto  py-8">
+      {/* Heading */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-2xl font-semibold font-grotesk tracking-tight text-textLight dark:text-textDark">
           Active Prompts
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Prompts that generate drafts for you. Each draft appears when it’s
+        <p className="text-sm font-inter text-textLight/80 dark:text-textDark/80 mt-1">
+          Prompts that generate drafts for you. Each draft appears when it's
           delivered.
         </p>
       </div>
@@ -211,20 +204,21 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
         )}
       </motion.div>
 
-      {/* --- Past Prompts (collapsed) --- */}
+      {/* Past Prompts (collapsed) */}
       {pastPrompts.length > 0 && (
         <div className="mt-10">
           <button
             onClick={() => setShowPast((v) => !v)}
-            className="flex items-center justify-between w-full text-left"
+            className="flex items-center justify-between w-full text-left group"
           >
-            <div>
-              <h3 className="text-sm font-medium text-muted">
-                Past Prompts ({pastPrompts.length})
-              </h3>
-            </div>
-
-            <span className="text-muted text-sm">{showPast ? "▾" : "▸"}</span>
+            <h3 className="text-sm font-medium text-textLight/80 dark:text-textDark/80">
+              Past Prompts ({pastPrompts.length})
+            </h3>
+            {showPast ? (
+              <ChevronDown className="w-4 h-4 text-muted" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-muted" />
+            )}
           </button>
 
           <AnimatePresence initial={false}>

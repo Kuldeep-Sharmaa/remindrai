@@ -1,21 +1,9 @@
-/**
- * ReminderListItem.jsx
- *
- * Individual reminder definition item.
- * Shows next run time, frequency, and delete confirmation.
- */
-
 import React, { memo, useMemo, useCallback, useState } from "react";
 import { motion } from "framer-motion";
-import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { Trash2, Eye } from "lucide-react";
 import { DateTime } from "luxon";
 import clsx from "clsx";
-
 import ConfirmDeletePortal from "./ConfirmDeletePortal";
-
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
 
 const toIsoString = (v) => {
   if (!v) return null;
@@ -42,14 +30,16 @@ const freqLabel = (reminder = {}) => {
   const map = {
     one_time: "One time",
     daily: "Every day",
-    weekly: "Every Week",
+    weekly: "Every week",
   };
   return map[String(raw).toLowerCase()] || String(raw).replace(/_/g, " ");
 };
 
-// ─────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────
+// truncates the full constructed string — identity + brief combined
+const truncate = (text, limit = 90) => {
+  if (!text) return "";
+  return text.length > limit ? text.slice(0, limit).trimEnd() + "…" : text;
+};
 
 const ReminderListItem = ({ reminder, onView, onDelete }) => {
   const {
@@ -64,34 +54,27 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
   const isAI = String(reminderType || "").toLowerCase() === "ai";
   const tz = schedule?.timezone || DateTime.local().zoneName;
   const nextIso = toIsoString(nextRunAtUTC);
-
   const isPendingBackend = enabled === true && !nextIso;
 
-  const aiPreviewSentence = useMemo(() => {
-    if (!isAI) return null;
+  const cardPreview = useMemo(() => {
+    if (isAI) {
+      const parts = [];
+      if (content.role) parts.push(`I'm a ${content.role}`);
+      if (content.tone) parts.push(`I prefer a ${content.tone} tone`);
+      if (content.platform) parts.push(`on ${content.platform}`);
 
-    const parts = [];
-    if (content.role) parts.push(`I'm a ${content.role}`);
-    if (content.tone) parts.push(`I prefer a ${content.tone} tone`);
-    if (content.platform) parts.push(`on ${content.platform}`);
+      const identity = parts.join(". ");
+      const brief = String(content?.aiPrompt || "").trim();
+      const full =
+        identity && brief ? `${identity} — ${brief}` : identity || brief;
 
-    const anchors = parts.join(". ");
-    const body =
-      String(content?.aiPrompt || "").trim() || "No prompt provided.";
-
-    return anchors ? `${anchors} — ${body.slice(0, 240)}…` : body.slice(0, 240);
-  }, [isAI, content]);
-
-  const simplePreview = useMemo(() => {
-    if (isAI) return null;
+      return truncate(full) || "No prompt provided.";
+    }
 
     const message = String(content?.message || "").trim();
-    return message.length > 200
-      ? message.slice(0, 200) + "…"
-      : message || "No message.";
+    return truncate(message) || "No message.";
   }, [isAI, content]);
 
-  // Delete state
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleView = useCallback(
@@ -133,31 +116,25 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 8 }}
         className={clsx(
-          "w-full border-t border-border py-8 transition-colors",
-          enabled && "hover:bg-bgImpact/20",
-          !enabled && "opacity-60",
+          "w-full rounded-xl border border-border/40 px-4 py-5",
+          "bg-bgImpact transition-colors duration-150",
+          enabled && "cursor-pointer hover:border-border/70",
+          !enabled && "opacity-50 cursor-default",
         )}
         onClick={() => enabled && onView?.(id)}
         role="listitem"
       >
-        <div
-          className="flex flex-col gap-5"
-          style={{ cursor: enabled ? "pointer" : "default" }}
-        >
-          {/* Meta Row */}
+        <div className="flex flex-col gap-3">
+          {/* Type badge + status */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] uppercase tracking-widest text-muted">
-                {isAI ? "AI Draft" : "Simple Note"}
+            <span className="text-[11px] uppercase tracking-widest font-medium text-muted">
+              {isAI ? "AI Draft" : "Simple Note"}
+            </span>
+            {isPendingBackend && (
+              <span className="text-[11px] text-brand tracking-wide">
+                Preparing…
               </span>
-
-              {isPendingBackend && (
-                <span className="text-[11px] text-brand tracking-wide">
-                  Preparing
-                </span>
-              )}
-            </div>
-
+            )}
             {!enabled && (
               <span className="text-[11px] text-muted tracking-wide">
                 Completed
@@ -165,38 +142,40 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
             )}
           </div>
 
-          {/* Intent Preview */}
-          <div className="text-base sm:text-lg font-medium text-textDark leading-relaxed line-clamp-3">
-            {isAI ? aiPreviewSentence : simplePreview}
-          </div>
+          {/* Preview — identity context + brief glimpse */}
+          <p className="text-sm sm:text-base font-medium text-textLight dark:text-textDark leading-snug">
+            {cardPreview}
+          </p>
 
           {/* Schedule */}
           {enabled && (
-            <div className="text-xs text-muted tracking-wide">
+            <p className="text-xs text-textLight/80 dark:text-textDark/80 tracking-wide">
               Next · {formatNextRun(nextIso, tz)} · {freqLabel(reminder)}
-            </div>
+            </p>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 pt-1">
+          {/* Actions — stop propagation so clicks don't open the modal */}
+          <div
+            className="flex items-center gap-0.5 pt-0.5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               onClick={handleView}
-              title="View details"
-              className="p-2 rounded-md hover:bg-bgImpact/40 transition"
+              aria-label="View prompt details"
+              className="p-2 rounded-md text-muted hover:text-textLight dark:hover:text-textDark hover:bg-white/5 transition-colors duration-150"
             >
-              <EyeIcon className="w-4 h-4 text-muted" />
+              <Eye className="w-4 h-4" />
             </button>
 
             {enabled && (
               <button
                 type="button"
                 onClick={handleDeleteClick}
-                title="Stop future deliveries"
                 aria-label="Stop future deliveries"
-                className="p-2 rounded-md transition hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400"
+                className="p-2 rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors duration-150"
               >
-                <TrashIcon className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
               </button>
             )}
           </div>
