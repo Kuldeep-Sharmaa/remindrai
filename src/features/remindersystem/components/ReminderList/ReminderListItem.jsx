@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Trash2, Eye } from "lucide-react";
 import { DateTime } from "luxon";
 import clsx from "clsx";
+import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
 import ConfirmDeletePortal from "./ConfirmDeletePortal";
 
 const toIsoString = (v) => {
@@ -117,7 +118,7 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
         exit={{ opacity: 0, y: 8 }}
         className={clsx(
           "w-full rounded-xl border border-border/40 px-4 py-5",
-          "bg-bgImpact transition-colors duration-150",
+          "bg-white dark:bg-bgImpact transition-colors duration-150",
           enabled && "cursor-pointer hover:border-border/70",
           !enabled && "opacity-50 cursor-default",
         )}
@@ -127,8 +128,19 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
         <div className="flex flex-col gap-3">
           {/* Type badge + status */}
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-widest font-medium text-muted">
-              {isAI ? "AI Draft" : "Simple Note"}
+            <span
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                isAI
+                  ? "bg-brand/10 text-brand border border-brand/20"
+                  : "bg-transparent border border-border text-textLight dark:text-textDark"
+              }`}
+            >
+              {isAI ? (
+                <HiOutlineCpuChip className="w-4 h-4" />
+              ) : (
+                <HiOutlineBookmark className="w-4 h-4" />
+              )}
+              {isAI ? "AI Draft" : "Note"}
             </span>
             {isPendingBackend && (
               <span className="text-[11px] text-brand tracking-wide">
@@ -136,7 +148,7 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
               </span>
             )}
             {!enabled && (
-              <span className="text-[11px] text-muted tracking-wide">
+              <span className="text-[11px] text-brand tracking-wide">
                 Completed
               </span>
             )}
@@ -163,7 +175,7 @@ const ReminderListItem = ({ reminder, onView, onDelete }) => {
               type="button"
               onClick={handleView}
               aria-label="View prompt details"
-              className="p-2 rounded-md text-muted hover:text-textLight dark:hover:text-textDark hover:bg-white/5 transition-colors duration-150"
+              className="p-2 rounded-md text-muted hover:text-textLight dark:hover:text-textDark hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-150"
             >
               <Eye className="w-4 h-4" />
             </button>

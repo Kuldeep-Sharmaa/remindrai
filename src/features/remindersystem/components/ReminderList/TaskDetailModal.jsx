@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DateTime } from "luxon";
 import toast from "react-hot-toast";
-import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
+
 import { Clock, Copy, X } from "lucide-react";
 import Spinner from "../../../../components/Ui/LoadingSpinner";
 import { useAuthContext } from "../../../../context/AuthContext";
@@ -250,29 +250,14 @@ export default function TaskDetailModal({
                 {/* Type + status badges */}
                 <div className="flex items-center gap-2 mb-5 flex-wrap">
                   <span
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-                      isAI
-                        ? "bg-brand/10 text-brand border border-brand/20"
-                        : "bg-transparent border border-border text-muted"
-                    }`}
-                  >
-                    {isAI ? (
-                      <HiOutlineCpuChip className="w-4 h-4" />
-                    ) : (
-                      <HiOutlineBookmark className="w-4 h-4" />
-                    )}
-                    {isAI ? "AI Draft" : "Note"}
-                  </span>
-
-                  <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                       enabled
                         ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                        : "bg-muted/10 text-muted"
+                        : "bg-muted/10 text-brand"
                     }`}
                   >
                     <span
-                      className={`h-2 w-2 rounded-full ${enabled ? "bg-emerald-400/80" : "bg-muted/70"}`}
+                      className={`h-2 w-2 rounded-full ${enabled ? "bg-emerald-400/80" : "bg-brand/70"}`}
                     />
                     {enabled ? "Active" : "Completed"}
                   </span>
