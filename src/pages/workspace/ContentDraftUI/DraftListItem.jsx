@@ -70,7 +70,7 @@ export default function DraftListItem({
                   aria-label="Unread"
                 />
               )}
-              <h3 className="font-grotesk font-semibold text-sm sm:text-base text-textLight dark:text-textDark truncate">
+              <h3 className="font-grotesk font-semibold text-base text-textLight dark:text-textDark truncate">
                 {reminderTitle}
               </h3>
             </div>
