@@ -56,7 +56,7 @@ const Reminders = () => {
         <div className="w-full max-w-screen-xl mx-auto">
           {/* Header */}
           <motion.header
-            className="text-center mt-10 mb-12"
+            className="text-center mt-4 mb-4"
             initial="hidden"
             animate="enter"
             variants={heroVariants}
@@ -64,9 +64,6 @@ const Reminders = () => {
             <h1 className="text-3xl sm:text-4xl font-grotesk font-semibold tracking-tight text-textLight dark:text-textDark mb-2">
               Studio
             </h1>
-            <p className="text-base text-muted max-w-xl mx-auto">
-              Define what gets prepared for you.
-            </p>
           </motion.header>
 
           {/* Preferences */}
