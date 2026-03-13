@@ -120,12 +120,15 @@ const NextDeliveryPanel = ({ next }) => {
         </div>
       </div>
 
-      <Link
-        to="/workspace/studio"
-        className="text-xs text-muted hover:text-brand transition-colors duration-150"
-      >
-        View all active prompts →
-      </Link>
+      <div className="mt-5">
+        {" "}
+        <Link
+          to="/workspace/studio"
+          className="text-sm text-muted hover:text-brand transition-colors duration-150"
+        >
+          View all active prompts →
+        </Link>
+      </div>
     </section>
   );
 };
