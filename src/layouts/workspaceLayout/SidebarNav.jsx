@@ -59,7 +59,7 @@ function SidebarNav({
 
   return (
     <nav
-      className="flex flex-col flex-1 px-3 text-black dark:text-white overflow-hidden"
+      className="flex flex-col flex-1 px-3 text-textLight dark:text-textDark overflow-hidden"
       aria-label="Main navigation"
     >
       <ul className="flex-1 overflow-y-auto space-y-2 scrollbar-none pt-6">
@@ -74,30 +74,37 @@ function SidebarNav({
                 to={link.href}
                 onClick={handleLinkClick}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors duration-150 group relative overflow-hidden
                   ${
                     active
-                      ? "bg-black dark:bg-white text-white dark:text-black shadow-md"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/50 hover:text-black dark:hover:text-white hover:shadow-md"
+                      ? "bg-brand text-white"
+                      : "text-bgDrak dark:text-bgLight hover:bg-brand/10 hover:text-brand"
                   }`}
               >
                 <span
-                  className={`flex-shrink-0 transition-all duration-300 z-10 ${active ? "scale-110" : "group-hover:scale-105"}`}
+                  className={`flex-shrink-0  z-10 ${
+                    active ? "scale-110" : "group-hover:scale-105"
+                  }`}
                 >
                   {link.icon}
                 </span>
 
                 <span
-                  className={`text-sm font-medium transition-all duration-300 ease-out z-10
+                  className={`text-sm font-medium  z-10
                   ${expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}
                   ${!expanded && isMobileView ? "hidden" : ""}`}
                 >
                   {link.label}
                 </span>
 
+                {/* Tooltip for collapsed state */}
                 {!expanded && (
                   <div
-                    className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-gray-900 text-black dark:text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out whitespace-nowrap z-50 hidden lg:block shadow-xl border border-gray-200 dark:border-gray-700"
+                    className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-bgImpact
+                               text-textLight dark:text-textDark text-sm rounded-lg
+                               opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                               whitespace-nowrap z-50
+                               hidden lg:block shadow-xl border border-border/20"
                     role="tooltip"
                     aria-hidden={!expanded}
                   >
@@ -110,17 +117,18 @@ function SidebarNav({
         })}
       </ul>
 
-      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700/50 pt-4 pb-6 px-0">
+      {/* Logout */}
+      <div className="flex-shrink-0 border-t border-border/20 pt-4 pb-6 px-0">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden w-full text-gray-600 dark:text-gray-400 hover:bg-red-500/10 hover:text-red-500"
+          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-colors duration-150 group relative overflow-hidden w-full text-bgDrak dark:text-bgLight hover:bg-red-500/10 hover:text-red-500"
         >
-          <span className="flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
+          <span className="flex-shrink-0 transition-transform duration-150 group-hover:scale-105">
             {logoutLink?.icon}
           </span>
 
           <span
-            className={`text-sm font-medium transition-all duration-300 ease-out
+            className={`text-sm font-medium transition-all duration-150 ease-out
             ${expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}
             ${!expanded && isMobileView ? "hidden" : ""}`}
           >
@@ -128,7 +136,13 @@ function SidebarNav({
           </span>
 
           {!expanded && (
-            <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-gray-900 text-black dark:text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out whitespace-nowrap z-50 hidden lg:block shadow-xl border border-gray-200 dark:border-gray-700">
+            <div
+              className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-bgImpact
+                           text-textLight dark:text-textDark text-sm rounded-lg
+                           opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                           transition-all duration-150 ease-out whitespace-nowrap z-50
+                           hidden lg:block shadow-xl border border-border/20"
+            >
               Logout
             </div>
           )}
