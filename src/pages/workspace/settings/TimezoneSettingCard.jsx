@@ -98,8 +98,8 @@ const TimezoneSettingCard = () => {
         <Info className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
         <p>
           RemindrAI uses your timezone to determine when drafts are prepared and
-          delivered. Make sure your device timezone is correct so reminders run
-          at the expected time.
+          delivered. Make sure your device timezone is correct so prompts run at
+          the expected time.
         </p>
       </div>
     </section>
