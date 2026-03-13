@@ -11,6 +11,7 @@ import {
   MessageSquareText,
   Monitor,
   Fingerprint,
+  Info,
 } from "lucide-react";
 
 // Keeps the fetch from firing again if user navigates away and back
@@ -150,13 +151,16 @@ const AccountInfo = () => {
         {/* Personal Information */}
         <div className="p-5 sm:p-8 space-y-5">
           <h2 className="text-xl font-bold text-textLight dark:text-textDark font-grotesk flex items-center gap-2">
-            <User size={22} className="text-muted" />
+            <User
+              size={22}
+              className="text-textLight/80 dark:text-textDark/80 "
+            />
             Personal Information
           </h2>
 
           {/* Full name */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-textLight/80 dark:text-textDark/80  font-inter">
               <User size={14} />
               Full Name
             </label>
@@ -169,7 +173,7 @@ const AccountInfo = () => {
 
           {/* Email */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-textLight/80 dark:text-textDark/80  font-inter">
               <Mail size={14} />
               Email Address
             </label>
@@ -186,13 +190,16 @@ const AccountInfo = () => {
         {/* Account History */}
         <div className="p-5 sm:p-8 space-y-5">
           <h2 className="text-xl font-bold text-textLight dark:text-textDark font-grotesk flex items-center gap-2">
-            <CalendarDays size={22} className="text-muted" />
+            <CalendarDays
+              size={22}
+              className="text-textLight/80 dark:text-textDark/80 "
+            />
             Account History
           </h2>
 
           {/* Member since */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-textLight/80 dark:text-textDark/80  font-inter">
               <CalendarDays size={14} />
               Member Since
             </label>
@@ -205,7 +212,7 @@ const AccountInfo = () => {
 
           {/* Timezone */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-textLight/80 dark:text-textDark/80  font-inter">
               <Globe size={14} />
               Current Timezone
             </label>
@@ -214,7 +221,7 @@ const AccountInfo = () => {
                 {timezone}
               </p>
             </div>
-            <p className="text-xs text-muted font-inter mt-2">
+            <p className="text-xs text-textLight/80 dark:text-textDark/80  font-inter mt-2">
               All content is aligned with your local timezone.
             </p>
           </div>
@@ -225,10 +232,13 @@ const AccountInfo = () => {
         {/* AI Preferences */}
         <div className="p-5 sm:p-8 space-y-5 mb-2">
           <h2 className="text-xl font-bold text-textLight dark:text-textDark font-grotesk flex items-center gap-2">
-            <Bot size={22} className="text-muted" />
+            <Bot
+              size={22}
+              className="text-textLight/80 dark:text-textDark/80 "
+            />
             AI Content Preferences
           </h2>
-          <p className="text-sm text-muted font-inter -mt-2">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter -mt-2">
             These preferences help our AI tailor content for you. Update them in{" "}
             <a
               href="/workspace/settings/preferences"
@@ -246,7 +256,7 @@ const AccountInfo = () => {
               { key: "platform", label: "Platform", Icon: Monitor },
             ].map(({ key, label, Icon }) => (
               <div key={key}>
-                <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
+                <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-textLight/80 dark:text-textDark/80  font-inter">
                   <Icon size={14} />
                   {label}
                 </label>
@@ -266,44 +276,44 @@ const AccountInfo = () => {
         <div className="p-5 sm:p-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-textLight dark:text-textDark font-grotesk flex items-center gap-2">
-              <Fingerprint size={22} className="text-muted" />
-              User ID
+              <Fingerprint
+                size={22}
+                className="text-textLight/80 dark:text-textDark/80"
+              />
+              Account ID
             </h2>
             <button
               onClick={() => setShowUID(!showUID)}
-              className="text-sm text-brand dark:text-brand-soft hover:underline font-inter"
+              className="text-sm text-brand hover:underline font-inter"
             >
-              {showUID ? "Hide User ID" : "Show User ID"}
+              {showUID ? "Hide" : "Show"}
             </button>
           </div>
 
           {showUID && (
             <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 text-muted font-inter">
-                <Fingerprint size={14} />
-                Your Unique User Identifier
-              </label>
-              <div className="bg-gray-50 dark:bg-white/[0.04] rounded-xl p-4 border border-gray-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <span className="font-mono text-sm text-textLight dark:text-textDark break-all">
+              <div className="bg-bgImpact rounded-xl p-4 border border-border/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <span className="font-mono text-sm text-textDark break-all">
                   {currentUser.uid}
                 </span>
                 <button
                   onClick={handleCopyUID}
                   disabled={isCopying || !currentUser?.uid}
-                  className="text-sm text-brand dark:text-brand-soft hover:underline font-inter disabled:opacity-50 flex-shrink-0"
+                  className="text-sm text-brand hover:underline font-inter disabled:opacity-50 flex-shrink-0 transition-colors duration-150"
                 >
                   {isCopying ? "Copying..." : "Copy"}
                 </button>
               </div>
+
               {copyMessage && (
-                <p
-                  className={`text-xs font-inter ${copyMessage === "Copied" ? "text-green-500" : "text-red-500"}`}
-                >
+                <p className="text-xs text-green-500 font-inter">
                   {copyMessage}
                 </p>
               )}
-              <p className="text-xs text-muted font-inter">
-                Do not share this User ID publicly.
+
+              <p className="text-xs flex gap-2 items-center text-muted font-inter">
+                <Info size={16} className="text-muted " /> Used to identify your
+                account during support requests.
               </p>
             </div>
           )}

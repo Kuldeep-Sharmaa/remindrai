@@ -272,7 +272,7 @@ export default function TaskDetailModal({
 
                 {/* Prompt */}
                 <div className="mb-6 pb-6 border-b border-border/20">
-                  <p className="text-xs text-muted uppercase tracking-wide font-medium mb-2">
+                  <p className="text-xs text-textLight/80 dark:text-textDark/80 uppercase tracking-wide font-medium mb-2">
                     Your Prompt
                   </p>
                   <p className="text-sm sm:text-base font-medium text-textLight dark:text-textDark leading-snug whitespace-pre-wrap">
@@ -294,7 +294,7 @@ export default function TaskDetailModal({
                           key={field.label}
                           className="bg-bgImpact/40 dark:bg-bgDark/40 rounded-lg px-3 py-2 border border-border/20"
                         >
-                          <p className="text-xs text-muted mb-0.5">
+                          <p className="text-xs text-textLight/80 dark:text-textDark/80 mb-0.5">
                             {field.label}
                           </p>
                           <p className="text-sm text-textLight dark:text-textDark font-medium capitalize">

@@ -50,7 +50,7 @@ export default function UserPreferencesCard({ handleSettingsClick }) {
           <h4 className="text-sm font-semibold text-textLight dark:text-textDark">
             Content Identity
           </h4>
-          <p className="text-xs text-muted mt-1">
+          <p className="text-xs text-textLight/80 dark:text-textDark/80 mt-1">
             how drafts are written for you
           </p>
         </div>
@@ -72,17 +72,17 @@ export default function UserPreferencesCard({ handleSettingsClick }) {
       {/* Identity Summary */}
       <div className="mt-4 w-full sm:max-w-xl lg:max-w-xl">
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2">
-          <span className="text-[11px] uppercase tracking-wide text-muted">
+          <span className="text-[11px] uppercase tracking-wide text-textLight/80 dark:text-textDark/80 ">
             Role
           </span>
           {role ? <Pill>{role}</Pill> : <Pill muted>Not set</Pill>}
 
-          <span className="text-[11px] uppercase tracking-wide text-muted">
+          <span className="text-[11px] uppercase tracking-wide text-textLight/80 dark:text-textDark/80 ">
             Tone
           </span>
           {tone ? <Pill>{tone}</Pill> : <Pill muted>Not set</Pill>}
 
-          <span className="text-[11px] uppercase tracking-wide text-muted">
+          <span className="text-[11px] uppercase tracking-wide text-textLight/80 dark:text-textDark/80 ">
             Platform
           </span>
           {platform ? <Pill>{platform}</Pill> : <Pill muted>Not set</Pill>}
@@ -91,7 +91,7 @@ export default function UserPreferencesCard({ handleSettingsClick }) {
 
       {/* Missing Config Hint */}
       {!(role && tone && platform) && (
-        <p className="mt-3 text-xs text-muted">
+        <p className="mt-3 text-xs text-textLight/80 dark:text-textDark/80">
           Complete identity settings for more accurate drafts.
         </p>
       )}

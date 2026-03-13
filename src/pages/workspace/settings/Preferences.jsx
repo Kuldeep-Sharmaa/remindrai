@@ -254,12 +254,15 @@ const Preferences = () => {
         {/* Professional Role */}
         <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
           <div className="flex items-center gap-2 mb-1">
-            <Target size={15} className="text-muted" />
+            <Target
+              size={15}
+              className="text-textLight/80 dark:text-textDark/80"
+            />
             <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
               Professional Role
             </h3>
           </div>
-          <p className="text-sm text-muted font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
             Choose your professional identity to tailor strategies
           </p>
           <Select
@@ -276,12 +279,15 @@ const Preferences = () => {
         {/* Content Tone */}
         <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
           <div className="flex items-center gap-2 mb-1">
-            <Mic size={15} className="text-muted" />
+            <Mic
+              size={15}
+              className="text-textLight/80 dark:text-textDark/80 "
+            />
             <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
               Content Tone
             </h3>
           </div>
-          <p className="text-sm text-muted font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
             Define your brand voice and communication style
           </p>
           <Select
@@ -298,12 +304,15 @@ const Preferences = () => {
         {/* Primary Platform */}
         <div className="px-5 py-5 border-b border-gray-100 dark:border-white/[0.06]">
           <div className="flex items-center gap-2 mb-1">
-            <Globe size={15} className="text-muted" />
+            <Globe
+              size={15}
+              className="text-textLight/80 dark:text-textDark/80"
+            />
             <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
               Primary Platform
             </h3>
           </div>
-          <p className="text-sm text-muted font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
             Choose where you'll primarily share your content
           </p>
           <Select
