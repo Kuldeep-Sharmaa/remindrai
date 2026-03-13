@@ -24,7 +24,7 @@ import GDPR from "./pages/Legal/Gdpr";
 
 import Onboarding from "./pages/OnboardingSetup";
 import DashboardHome from "./pages/workspace/Overview";
-import Deliveries from "./pages/workspace/Content";
+import Drafts from "./pages/workspace/Content";
 import Insights from "./pages/workspace/Insights";
 import Studio from "./pages/workspace/Studio";
 import SettingsIndex from "./pages/SettingsIndex";
@@ -194,7 +194,7 @@ function AppContent() {
           <Route index element={<DashboardHome />} />
           <Route path="studio" element={<Studio />} />
           <Route path="studio/create" element={<CreateReminderScreen />} />
-          <Route path="deliveries" element={<Deliveries />} />
+          <Route path="drafts" element={<Drafts />} />
           <Route path="insights" element={<Insights />} />
 
           <Route path="settings" element={<SettingsLayout />}>

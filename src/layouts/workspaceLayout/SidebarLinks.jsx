@@ -27,9 +27,9 @@ export const SidebarLinks = [
     href: "/workspace/studio",
   },
   {
-    label: "Deliveries",
+    label: "Drafts",
     icon: <FileText size={20} />,
-    href: "/workspace/deliveries",
+    href: "/workspace/drafts",
   },
 
   {
