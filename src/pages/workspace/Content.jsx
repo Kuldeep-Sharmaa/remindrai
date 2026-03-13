@@ -1,10 +1,3 @@
-/**
- * Content.jsx
- *
- * Deliveries page - Shows AI-created outputs ready to use.
- * Emphasizes clarity, time relevance, and actionability.
- */
-
 import React, { useMemo, useState } from "react";
 import { collection, query, orderBy } from "firebase/firestore";
 import { db } from "../../services/firebase";
@@ -15,6 +8,7 @@ import DraftModal from "./ContentDraftUI/DraftModal";
 import { markOpened } from "../../services/draftInteractionsService";
 import ReminderDropdown from "./ContentDraftUI/DeliveryDropdown";
 import DeliveriesEmptyState from "./ContentDraftUI/DeliveriesEmptyState";
+import Spinner from "../../components/Ui/LoadingSpinner";
 
 export default function Content() {
   const { currentUser } = useAuthContext();
@@ -24,7 +18,6 @@ export default function Content() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedReminderId, setSelectedReminderId] = useState("all");
 
-  // Drafts query
   const draftsQuery = useMemo(() => {
     if (!userId) return null;
     return query(
@@ -39,7 +32,6 @@ export default function Content() {
     error,
   } = useCollection(draftsQuery);
 
-  // Reminders query
   const remindersQuery = useMemo(() => {
     if (!userId) return null;
     return collection(db, "users", userId, "reminders");
@@ -47,7 +39,6 @@ export default function Content() {
 
   const { documents: reminders = [] } = useCollection(remindersQuery);
 
-  // Interactions query
   const interactionsQuery = useMemo(() => {
     if (!userId) return null;
     return collection(db, "users", userId, "draftInteractions");
@@ -55,7 +46,6 @@ export default function Content() {
 
   const { documents: interactions = [] } = useCollection(interactionsQuery);
 
-  // Build lookup maps for quick access
   const reminderMap = useMemo(() => {
     const map = new Map();
     reminders.forEach((r) => map.set(r.id, r));
@@ -78,7 +68,6 @@ export default function Content() {
     return "";
   };
 
-  // Build delivery items with full reminder context
   const deliveryItems = useMemo(() => {
     return drafts.map((draft) => {
       const reminder = reminderMap.get(draft.reminderId);
@@ -134,7 +123,6 @@ export default function Content() {
     });
   }, [drafts, reminderMap, interactionMap]);
 
-  // Sort: unread first, then by creation time
   const sortedItems = useMemo(() => {
     return [...deliveryItems].sort((a, b) => {
       if (a.isUnread !== b.isUnread) return a.isUnread ? -1 : 1;
@@ -142,13 +130,10 @@ export default function Content() {
     });
   }, [deliveryItems]);
 
-  // Apply filters
   const filteredItems = useMemo(() => {
     let list = sortedItems;
 
-    if (activeTab === "unread") {
-      list = list.filter((i) => i.isUnread);
-    }
+    if (activeTab === "unread") list = list.filter((i) => i.isUnread);
 
     if (activeTab === "today") {
       const now = new Date();
@@ -169,7 +154,6 @@ export default function Content() {
     return list;
   }, [sortedItems, activeTab, selectedReminderId]);
 
-  // Only show reminders that have executed at least once
   const executedReminders = useMemo(() => {
     const executedIds = new Set(deliveryItems.map((d) => d.reminderId));
     return reminders.filter((r) => executedIds.has(r.id));
@@ -180,40 +164,40 @@ export default function Content() {
     [deliveryItems],
   );
 
-  // Loading state
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted">Loading drafts...</div>
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <Spinner />
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error loading drafts</div>
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <p className="text-red-500 text-sm">
+          Something went wrong. Try refreshing.
+        </p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-5 sm:mb-6">
-          <h2 className="text-2xl sm:text-3xl font-grotesk font-semibold text-textLight dark:text-textDark">
+        <div className="text-center mb-8 mt-6 sm:mt-10">
+          <h1 className="text-3xl sm:text-4xl font-grotesk font-semibold tracking-tight text-textLight dark:text-textDark mb-1">
             Drafts
-          </h2>
-          <p className="text-sm text-muted mt-1">
+          </h1>
+          <p className="text-sm text-textLight dark:text-textDark ">
             {deliveryItems.length} total
-            {unreadCount > 0 && ` - ${unreadCount} unread`}
+            {unreadCount > 0 && ` · ${unreadCount} unread`}
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
           {[
             { key: "all", label: "All" },
             {
@@ -225,7 +209,7 @@ export default function Content() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 text-sm rounded-lg whitespace-nowrap font-medium transition-all ${
+              className={`px-4 py-2 text-sm rounded-lg whitespace-nowrap font-medium transition-colors duration-150 ${
                 activeTab === tab.key
                   ? "bg-brand/10 text-brand"
                   : "text-muted hover:text-textLight dark:hover:text-textDark hover:bg-border/10"
@@ -236,7 +220,7 @@ export default function Content() {
           ))}
         </div>
 
-        {/* Filter - Visible, below tabs */}
+        {/* Filter */}
         <div className="mb-5">
           <ReminderDropdown
             reminders={executedReminders}
@@ -245,22 +229,22 @@ export default function Content() {
           />
         </div>
 
-        {/* Draft list or empty states */}
+        {/* List */}
         {deliveryItems.length === 0 ? (
           <DeliveriesEmptyState
             title="No drafts yet"
-            description="Your AI assistant will create content here when reminders run."
+            description="Your first draft will appear here once a prompt runs."
           />
         ) : filteredItems.length === 0 ? (
           activeTab === "unread" ? (
             <DeliveriesEmptyState
               title="All caught up"
-              description="You've reviewed everything your AI created."
+              description="You've reviewed everything that's been prepared."
             />
           ) : (
             <DeliveriesEmptyState
               title="Nothing here"
-              description="Try another reminder or switch back to all deliveries."
+              description="Try a different filter or switch back to all drafts."
             />
           )
         ) : (

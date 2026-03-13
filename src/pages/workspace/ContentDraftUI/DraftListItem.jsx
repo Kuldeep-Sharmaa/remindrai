@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { HiOutlineCpuChip, HiOutlineBookmark } from "react-icons/hi2";
+import { DateTime } from "luxon";
 
 export default function DraftListItem({
   draft,
@@ -9,89 +10,78 @@ export default function DraftListItem({
   isUnread,
   onClick,
 }) {
-  const timestamp = draft.createdAt?.toDate?.();
+  // Prefer scheduledForUTC over createdAt — it's when the draft was meant to arrive,
+  // not when Firestore wrote it (those can differ by a few seconds).
+  const timestamp = draft.scheduledForUTC
+    ? DateTime.fromISO(draft.scheduledForUTC, { zone: "utc" }).setZone(
+        DateTime.local().zoneName,
+      )
+    : draft.createdAt?.toDate
+      ? DateTime.fromJSDate(draft.createdAt.toDate())
+      : null;
 
-  const formatTime = (date) => {
-    if (!date) return "";
+  // Calendar-day comparison via Luxon so DST and timezone edges don't bite us.
+  // Comparing startOf("day") is the standard correct approach here.
+  const formatTime = (dt) => {
+    if (!dt || !dt.isValid) return "";
 
-    const now = new Date();
-    const diff = now - date;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+    const diffDays = Math.round(
+      DateTime.local().startOf("day").diff(dt.startOf("day"), "days").days,
+    );
 
-    if (days === 0) {
-      return date.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-      });
-    }
+    if (diffDays === 0) return dt.toFormat("h:mm a");
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return dt.toFormat("ccc");
 
-    if (days === 1) return "Yesterday";
-
-    if (days < 7) {
-      return date.toLocaleDateString("en-US", { weekday: "short" });
-    }
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
+    return dt.toFormat("MMM d");
   };
 
-  // Emotional preview fallback (important change)
   const preview =
     draft.content?.slice(0, 100) || "Prepared and ready when you are.";
-
-  const hasMore = draft.content?.length > 100;
-
   const isAiDraft = reminderType === "ai";
   const ReminderIcon = isAiDraft ? HiOutlineCpuChip : HiOutlineBookmark;
 
   return (
     <motion.button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-xl border transition-all
+      className={`w-full text-left p-4 rounded-xl border transition-colors duration-150
                   hover:border-brand/40 hover:bg-brand/5
                   ${
                     isUnread
                       ? "border-brand/40 bg-brand/5"
-                      : "border-border/20 bg-transparent"
+                      : "border-border/20 bg-white dark:bg-transparent"
                   }`}
       whileHover={{ scale: 1.005 }}
       whileTap={{ scale: 0.995 }}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`mt-1 flex-shrink-0 ${
-            isAiDraft ? "text-brand" : "text-muted"
-          }`}
+          className={`mt-0.5 flex-shrink-0 ${isAiDraft ? "text-brand" : "text-textLight dark:text-textDark"}`}
         >
-          <ReminderIcon className="w-5 h-5" />
+          <ReminderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {isUnread && (
                 <div
-                  className="w-2 h-2 rounded-full bg-brand flex-shrink-0"
+                  className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0"
                   aria-label="Unread"
                 />
               )}
-
-              <h3 className="font-grotesk font-semibold text-base text-textLight dark:text-textDark truncate">
+              <h3 className="font-grotesk font-semibold text-sm sm:text-base text-textLight dark:text-textDark truncate">
                 {reminderTitle}
               </h3>
             </div>
-
             <time className="text-xs text-muted whitespace-nowrap flex-shrink-0 mt-0.5">
               {formatTime(timestamp)}
             </time>
           </div>
 
-          <p className="text-sm text-muted line-clamp-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-textLight/80 dark:text-textDark/80 line-clamp-2 leading-relaxed">
             {preview}
-            {hasMore && "..."}
+            {draft.content?.length > 100 && "…"}
           </p>
         </div>
       </div>

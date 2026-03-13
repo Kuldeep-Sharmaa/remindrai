@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { markDismissed } from "../../../services/draftInteractionsService";
 import DraftDetailView from "./DraftDetailView";
@@ -10,11 +11,7 @@ export default function DraftModal({ draft, onClose }) {
 
   const handleClose = useCallback(() => {
     if (uid && draft?.id) {
-      markDismissed({
-        uid,
-        draftId: draft.id,
-        hasOpened: true,
-      });
+      markDismissed({ uid, draftId: draft.id, hasOpened: true });
     }
     onClose();
   }, [uid, draft, onClose]);
@@ -38,7 +35,8 @@ export default function DraftModal({ draft, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
+        {/* Backdrop */}
         <motion.div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -47,32 +45,31 @@ export default function DraftModal({ draft, onClose }) {
           onClick={handleClose}
         />
 
+        {/* Panel */}
         <motion.div
-          className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-bgImpact
-                     border border-[#1f2933]/40 rounded-2xl shadow-2xl overflow-hidden"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="relative w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh]
+                     bg-white dark:bg-bgImpact
+                     border border-border/40
+                     rounded-t-2xl sm:rounded-2xl
+                     shadow-2xl overflow-hidden"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ type: "spring", damping: 28, stiffness: 380 }}
         >
+          {/* Close button */}
           <button
             onClick={handleClose}
             className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center
-                       rounded-full hover:bg-[#1f2933]/20 transition-colors text-[#9ca3af] 
-                       hover:text-[#0f172a] dark:hover:text-[#e5e7eb]"
+                       rounded-full text-muted transition-colors duration-150
+                       hover:bg-border/20 hover:text-textLight dark:hover:text-textDark"
             aria-label="Close"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M12 4L4 12M4 4l8 8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+            <X className="w-4 h-4" />
           </button>
 
-          <div className="overflow-y-auto max-h-[85vh]">
+          {/* Scroll container — only one max-h here */}
+          <div className="overflow-y-auto max-h-[90vh] sm:max-h-[85vh]">
             <DraftDetailView draft={draft} />
           </div>
         </motion.div>
