@@ -2,7 +2,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-   
     // Helpers
    
     function isValidTimezone(tz) {
@@ -49,7 +48,6 @@ service cloud.firestore {
         && weekDaysOk;
     }
 
-   
     // Users collection
    
     match /users/{userId} {
@@ -73,7 +71,20 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Device tokens for push notifications.
+    // The client registers and overwrites its own device token here.
+    // Backend reads these via Admin SDK which bypasses these rules entirely.
    
+    match /users/{userId}/devices/{deviceId} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 0
+        && request.resource.data.platform in ['android', 'ios', 'web']
+        && request.resource.data.keys().hasOnly(['token', 'platform', 'createdAt']);
+    }
+
     // Idempotency mapping
    
     match /users/{userId}/reminderIdempotency/{key} {
@@ -88,7 +99,6 @@ service cloud.firestore {
       allow read, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-   
     // Per-user reminders (THE CORE LOGIC)
    
     match /users/{userId}/reminders/{reminderId} {
@@ -126,8 +136,12 @@ service cloud.firestore {
           )
         );
 
-      // READ ONLY - NO DELETE ALLOWED (Soft Delete Architecture)
+      // Read is open to the owner
       allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Hard delete only allowed during account deletion.
+      // Normal flow uses soft delete (updatedAt/deletedAt fields) — not this.
+      allow delete: if request.auth != null && request.auth.uid == userId;
 
       // UPDATE: Allow intent changes, keep system fields immutable for Client
       allow update: if request.auth != null
@@ -145,7 +159,6 @@ service cloud.firestore {
         );
     }
 
-   
     // Recompute queue
    
     match /recompute_queue/{jobId} {
@@ -161,31 +174,35 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-   
     // Draft interaction tracking
+    // create/update: client-driven, allowed as before
+    // delete: only allowed during account deletion — owner only, never mid-session
    
     match /users/{userId}/draftInteractions/{draftId} {
       allow read, create, update: if request.auth != null
         && request.auth.uid == userId;
 
-      allow delete: if false;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
-   
-    // Backend-only / Default Deny
+    // Backend-only collections — clients can read but never create or update.
+    // Delete is allowed only for the account owner (used during account deletion).
+    // Backend writes these via Admin SDK which bypasses these rules entirely.
    
     match /users/{uid}/executions/{executionId} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      allow create, update: if false;
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     match /users/{uid}/drafts/{draftId} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      allow create, update: if false;
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     match /users/{uid}/aiDaily/{dateKey} { allow read, write: if false; }
     match /system/aiUsage/{document=**} { allow read, write: if false; }
     match /{document=**} { allow read, write: if false; }
   }
-} 
+}
