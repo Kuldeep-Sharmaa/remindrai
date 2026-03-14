@@ -8,6 +8,7 @@ import LogoutModal from "./workspaceLayout/LogoutModal";
 import { useAuthContext } from "../context/AuthContext";
 import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
 import TimezoneChangeModal from "../components/TimezoneChangeModal";
+import { useFCMToken } from "../hooks/useFCMToken";
 
 const DashboardLayout = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -21,6 +22,9 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scrollRef = useRef(null);
+
+  // Registers this device for push notifications.
+  useFCMToken();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
