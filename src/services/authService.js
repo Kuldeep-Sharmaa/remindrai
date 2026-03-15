@@ -170,9 +170,8 @@ const createUserProfileDocument = async (userAuth, additionalData) => {
         tone: null,
 
         notificationPreferences: {
-          reminders: true,
-          aiTips: true,
-          automatedAlerts: true,
+          draftAlerts: true,
+          accountAlerts: true,
         },
 
         usage: {

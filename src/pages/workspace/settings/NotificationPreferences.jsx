@@ -5,9 +5,10 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { showToast } from "../../../components/ToastSystem/toastUtils";
 import SettingsSkeleton from "./SettingsSkeleton";
 import { Bell, ShieldCheck } from "lucide-react";
+
 const NOTIFICATIONS = [
   {
-    id: "aiReminders",
+    id: "draftAlerts",
     label: "Draft Ready Notifications",
     description:
       "Get notified when a new AI draft is prepared and ready to review.",
@@ -25,7 +26,7 @@ const NOTIFICATIONS = [
 const NotificationPreferences = () => {
   const { currentUser } = useAuthContext();
   const [preferences, setPreferences] = useState({
-    aiReminders: true,
+    draftAlerts: true,
     accountAlerts: true,
   });
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ const NotificationPreferences = () => {
         if (docSnap.exists()) {
           const userPrefs = docSnap.data().notificationPreferences ?? {};
           setPreferences({
-            aiReminders: userPrefs.aiReminders ?? true,
+            draftAlerts: userPrefs.draftAlerts ?? true,
             accountAlerts: userPrefs.accountAlerts ?? true,
           });
         }
