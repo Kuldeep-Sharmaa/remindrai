@@ -7,10 +7,6 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
-import {
-  getMessaging,
-  isSupported as isMessagingSupported,
-} from "firebase/messaging";
 
 // Firebase config from environment variables
 const firebaseConfig = {
@@ -43,7 +39,7 @@ if (useEmulator) {
   console.log("Connected to Firebase production");
 }
 
-// Analytics only initialize if the browser supports it and we're in production mode. We
+// Analytics (production only)
 export let analytics = null;
 
 if (import.meta.env.MODE === "production") {
@@ -54,16 +50,11 @@ if (import.meta.env.MODE === "production") {
   });
 }
 
-// Messaging only initialize if the browser supports it.
-// Token registration and permission requests happen in useFCMToken,
-// not here. This just gives us the messaging instance to work with.
-export let messaging = null;
-
-isMessagingSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-});
+// Messaging is intentionally NOT initialized here.
+// Calling getMessaging(app) at module level causes FCM to auto-register
+// its own service worker which conflicts with ours and causes duplicate notifications.
+// useFCMToken.js and useFCMForeground.js both call getMessaging(app) directly
+// after confirming support — that's the right place for it.
 
 console.log(`Firebase initialized: ${firebaseConfig.projectId}`);
 
