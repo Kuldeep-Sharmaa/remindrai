@@ -147,6 +147,7 @@ export function AuthContextProvider({ children }) {
       "draftInteractions",
       "reminderIdempotency",
       "userPrefs",
+      "devices", // FCM device tokens — clean up on account deletion
     ];
 
     try {
