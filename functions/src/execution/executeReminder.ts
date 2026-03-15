@@ -1,24 +1,12 @@
 /**
  * executeReminder.ts (TEMP — INFRASTRUCTURE TEST MODE)
  *
- * Purpose:
- * Execute a reminder in the simplest, safest way possible
- * to validate backend scheduler infrastructure.
+ * This is the temporary version used to validate the scheduler infrastructure.
+ * No AI calls, no cost logic — just a dummy draft to confirm the pipeline works.
  *
- * What this file does:
- * - Enforces idempotency
- * - Creates exactly ONE dummy draft
- * - Advances reminder state
- *
- * What this file DOES NOT do:
- * - No AI calls
- * - No cost logic
- * - No retries
- * - No branching by reminder type
- *
- * IMPORTANT:
- * This file is TEMPORARY.
- * Real AI logic will be restored AFTER infra validation passes.
+ * Real AI execution will replace the dummy draft logic once infra is confirmed.
+ * The notification hooks below are already wired for the final version too,
+ * so nothing here needs to change when we swap in the real AI logic.
  */
 
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
@@ -27,17 +15,18 @@ import { checkExecutionExists } from "./idempotency";
 import { recordExecution } from "./recordExecution";
 import { advanceReminder } from "./advanceReminder";
 import { createDraft } from "../drafts/createDraft";
-
-// Minimal reminder shape needed for infra testing
+import { sendPushNotification } from "../notifications/sendPushNotification";
 
 type ReminderData = {
   enabled: boolean;
   nextRunAtUTC: string;
   frequency: "one_time" | "daily" | "weekly";
   schedule: any;
+  reminderType: "ai" | "simple";
+  content?: {
+    platform?: string;
+  };
 };
-
-// Extract only what advanceReminder needs
 
 function extractAdvanceableReminderData(reminderData: ReminderData) {
   return {
@@ -46,14 +35,13 @@ function extractAdvanceableReminderData(reminderData: ReminderData) {
   };
 }
 
-//  Execute exactly ONE reminder (TEMP MODE)
-
 export async function executeReminder(
   reminderDoc: QueryDocumentSnapshot,
 ): Promise<void> {
   console.log("[executeReminder] START", {
     path: reminderDoc.ref.path,
   });
+
   const reminderId = reminderDoc.id;
   const reminderData = reminderDoc.data() as ReminderData;
 
@@ -62,13 +50,13 @@ export async function executeReminder(
 
   const scheduledForUTC = reminderData.nextRunAtUTC;
 
-  //  Disabled reminder guard
+  // Pull reminder context for smarter notification text
+  const reminderType = reminderData.reminderType;
+  const platform = reminderData.content?.platform;
 
   if (!reminderData.enabled) {
     return;
   }
-
-  // Idempotency guard
 
   const alreadyExecuted = await checkExecutionExists(
     uid,
@@ -80,10 +68,7 @@ export async function executeReminder(
     return;
   }
 
-  // Dummy execution
-
   try {
-    // Create EXACT dummy draft (no variation)
     const draftId = await createDraft({
       uid,
       reminderId,
@@ -93,7 +78,6 @@ export async function executeReminder(
       scheduledForUTC,
     });
 
-    // Record execution
     await recordExecution({
       uid,
       reminderId,
@@ -104,16 +88,38 @@ export async function executeReminder(
       draftId: draftId ?? undefined,
     });
 
-    // Advance reminder state
     await advanceReminder({
       reminderRef: reminderDoc.ref,
       reminderData: extractAdvanceableReminderData(reminderData),
       scheduledForUTC,
     });
+
+    // Send notification based on draft creation result
+    if (draftId) {
+      await sendPushNotification({
+        uid,
+        type: "draft_success",
+        draftId,
+        reminderType,
+        platform,
+      }).catch(() => {});
+    } else {
+      await sendPushNotification({
+        uid,
+        type: "draft_failed",
+      }).catch(() => {});
+    }
   } catch (error) {
-    console.error("[executeReminder] Dummy execution failed", {
+    console.error("[executeReminder] Execution failed", {
+      uid,
       reminderId,
       error: error instanceof Error ? error.message : String(error),
     });
+
+    // Something broke hard — make sure the user still hears about it
+    await sendPushNotification({
+      uid,
+      type: "draft_failed",
+    }).catch(() => {});
   }
 }
