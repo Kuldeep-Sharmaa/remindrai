@@ -32,9 +32,11 @@ export function useFCMForeground() {
 
         // Listen for incoming messages while the app is open.
         // This fires instead of the service worker when the tab is focused.
+        // We read from payload.data — not payload.notification — because we
+        // send data-only payloads to prevent duplicate notifications.
         unsubscribe = onMessage(messaging, (payload) => {
-          const title = payload.notification?.title ?? "RemindrAI";
-          const body = payload.notification?.body ?? "You have a new notification.";
+          const title = payload.data?.title ?? "RemindrAI";
+          const body = payload.data?.body ?? "You have a new notification.";
 
           showToast({
             type: "success",
@@ -42,7 +44,6 @@ export function useFCMForeground() {
           });
         });
       } catch (error) {
-        // Non-critical — foreground toasts failing won't break anything
         console.error("[useFCMForeground] Failed to set up listener", error);
       }
     };

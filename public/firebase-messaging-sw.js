@@ -1,3 +1,5 @@
+/* eslint-env serviceworker */
+
 /**
  * firebase-messaging-sw.js
  *
@@ -32,9 +34,11 @@ const messaging = firebase.messaging();
 
 // Fires when a push arrives and the app is in the background or closed.
 // When the app is open, onMessage() in the app handles it instead.
+// We read from payload.data — not payload.notification — because we send
+// data-only payloads to prevent FCM from auto-displaying a duplicate notification.
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title ?? "RemindrAI";
-  const body = payload.notification?.body ?? "You have a new notification.";
+  const title = payload.data?.title ?? "RemindrAI";
+  const body = payload.data?.body ?? "You have a new notification.";
 
   self.registration.showNotification(title, {
     body,

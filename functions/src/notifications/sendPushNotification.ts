@@ -55,8 +55,8 @@ function buildNotificationContent(
   }
 
   return {
-    title: "Your note is ready",
-    body: "View note.",
+    title: "Your draft is ready",
+    body: "View draft.",
   };
 }
 
@@ -115,10 +115,14 @@ export async function sendPushNotification(
         if (!token) return;
 
         try {
-          // draftId is in the payload for future deep linking support —
-          // service worker can use it to open a specific draft directly
+          // We send data-only — no notification field.
+          // Sending a notification field causes FCM to display it automatically
+          // in addition to what our service worker shows — resulting in duplicates.
+          // The service worker reads title and body from data and handles display itself.
           const data: Record<string, string> = {
             type,
+            title,
+            body,
             clickUrl: "/workspace/drafts",
           };
 
@@ -126,7 +130,6 @@ export async function sendPushNotification(
 
           await messaging.send({
             token,
-            notification: { title, body },
             data,
             webpush: {
               fcmOptions: {
