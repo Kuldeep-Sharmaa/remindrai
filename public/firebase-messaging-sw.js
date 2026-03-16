@@ -21,6 +21,20 @@ importScripts(
   "https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js",
 );
 
+// Take control immediately on install so Chrome doesn't show
+// "This site has been updated in the background" on every push.
+// Without this, Chrome re-installs the service worker each time a push
+// wakes it up and triggers the update notification unnecessarily.
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+// Claim all open clients immediately after activation so the new
+// service worker takes over without waiting for a page reload.
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim());
+});
+
 firebase.initializeApp({
   apiKey: "AIzaSyAAAgDtBEUJuJueFWmM-tX90qAGjv_zhjU",
   authDomain: "remindrai-e03c6.firebaseapp.com",
