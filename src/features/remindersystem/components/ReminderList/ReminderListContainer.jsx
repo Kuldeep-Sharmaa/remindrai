@@ -103,7 +103,8 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
     setIsModalOpen(false);
   }, []);
 
-  // Optimistic delete with rollback on failure
+  // Optimistic delete — remove from UI and show toast instantly.
+  // Backend runs in the background. If it fails, we rollback and tell the user.
   const handleDelete = useCallback(
     async (id) => {
       if (!user?.uid) {
@@ -114,17 +115,19 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
       const deletedItem = visibleReminders.find((r) => r.id === id);
       if (!deletedItem) return;
 
+      // Remove from UI and confirm immediately
       setVisibleReminders((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Prompt deleted.");
 
       try {
         await remindrClient.deleteReminder(user.uid, id);
-        toast.success("Task deleted.");
       } catch (err) {
+        //if Backend failed
         setVisibleReminders((prev) => {
           if (prev.some((r) => r.id === id)) return prev;
           return [deletedItem, ...prev];
         });
-        toast.error("Failed to delete item. Try again.");
+        toast.error("Failed to delete prompt. Try again.");
         console.error("deleteReminder error:", err);
       }
     },
