@@ -207,7 +207,7 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
         )}
       </motion.div>
 
-      {/* Past Prompts (collapsed) */}
+      {/* Past Prompts */}
       {pastPrompts.length > 0 && (
         <div className="mt-10">
           <button

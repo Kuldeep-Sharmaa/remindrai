@@ -24,7 +24,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Deduplication memory (prevents double notification issue)
+// Deduplication memory 
 const handledNotifications = new Set();
 
 firebase.initializeApp({
@@ -45,7 +45,7 @@ messaging.onBackgroundMessage((payload) => {
     payload.data?.reminderId ||
     payload.data?.title;
 
-  //  Prevent duplicate notifications (PWA SW lifecycle issue)
+  //  Prevent duplicate notifications
   if (handledNotifications.has(id)) {
     return;
   }
