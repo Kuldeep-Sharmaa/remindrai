@@ -4,14 +4,7 @@
  * firebase-messaging-sw.js
  *
  * Handles push notifications when the app is in the background or closed.
- * Place this file in /public — it must be served from the root of the domain.
- *
- * IMPORTANT: Service workers can't access Vite environment variables.
- * You need to hardcode your Firebase config here. These values are public
- * and safe to commit — they're the same ones in your firebaseConfig object.
- *
- * Where to find them:
- * Firebase Console → Project Settings → General → Your apps → SDK setup
+ * Deduplication added to prevent double notifications in PWA lifecycle edge cases.
  */
 
 importScripts(
@@ -21,19 +14,18 @@ importScripts(
   "https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js",
 );
 
-// Take control immediately on install so Chrome doesn't show
-// "This site has been updated in the background" on every push.
-// Without this, Chrome re-installs the service worker each time a push
-// wakes it up and triggers the update notification unnecessarily.
+// Ensure new SW activates immediately
 self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-// Claim all open clients immediately after activation so the new
-// service worker takes over without waiting for a page reload.
+// Take control of all clients immediately
 self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(self.clients.claim());
 });
+
+// Deduplication memory (prevents double notification issue)
+const handledNotifications = new Set();
 
 firebase.initializeApp({
   apiKey: "AIzaSyAAAgDtBEUJuJueFWmM-tX90qAGjv_zhjU",
@@ -46,11 +38,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Fires when a push arrives and the app is in the background or closed.
-// When the app is open, onMessage() in the app handles it instead.
-// We read from payload.data — not payload.notification — because we send
-// data-only payloads to prevent FCM from auto-displaying a duplicate notification.
+// Background push handler
 messaging.onBackgroundMessage((payload) => {
+  const id =
+    payload.data?.draftId ||
+    payload.data?.reminderId ||
+    payload.data?.title;
+
+  //  Prevent duplicate notifications (PWA SW lifecycle issue)
+  if (handledNotifications.has(id)) {
+    return;
+  }
+  handledNotifications.add(id);
+
   const title = payload.data?.title ?? "RemindrAI";
   const body = payload.data?.body ?? "You have a new notification.";
 
@@ -58,15 +58,18 @@ messaging.onBackgroundMessage((payload) => {
     body,
     icon: "/brand_icon.png",
     data: {
-      // draftId is passed through for future deep linking support
       url: "/workspace/drafts",
       draftId: payload.data?.draftId ?? null,
     },
   });
+
+  // Cleanup to avoid memory leak
+  setTimeout(() => {
+    handledNotifications.delete(id);
+  }, 10000);
 });
 
-// When the user clicks the notification, open /workspace/drafts.
-// If the app is already open in a tab, focus that tab instead of opening a new one.
+// Handle notification click
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -84,7 +87,7 @@ self.addEventListener("notificationclick", (event) => {
           }
         }
 
-        // App not open anywhere — open a new tab
+        // If no open window, open new one
         if (clients.openWindow) {
           return clients.openWindow(targetUrl);
         }
