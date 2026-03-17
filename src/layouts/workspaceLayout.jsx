@@ -10,6 +10,7 @@ import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
 import TimezoneChangeModal from "../components/TimezoneChangeModal";
 import { useFCMToken } from "../hooks/useFCMToken";
 import { useFCMForeground } from "../hooks/useFCMForeground";
+import IOSInstallBanner from "../components/IOSInstallBanner";
 
 const DashboardLayout = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -191,6 +192,7 @@ const DashboardLayout = () => {
       </div>
 
       <TimezoneChangeModal />
+        <IOSInstallBanner />
     </motion.div>
   );
 };
