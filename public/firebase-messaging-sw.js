@@ -40,33 +40,22 @@ const messaging = firebase.messaging();
 
 // Background push handler
 messaging.onBackgroundMessage((payload) => {
-  const id =
-    payload.data?.draftId ||
-    payload.data?.reminderId ||
-    payload.data?.title;
-
-  //  Prevent duplicate notifications
-  if (handledNotifications.has(id)) {
-    return;
-  }
-  handledNotifications.add(id);
-
   const title = payload.data?.title ?? "RemindrAI";
   const body = payload.data?.body ?? "You have a new notification.";
-
+  const tag =
+    payload.data?.draftId ||
+    payload.data?.reminderId ||
+    "remindrai-notification";
   self.registration.showNotification(title, {
     body,
     icon: "/brand_icon.png",
+    tag: tag,
+    renotify: false,
     data: {
       url: "/workspace/drafts",
       draftId: payload.data?.draftId ?? null,
     },
   });
-
-  // Cleanup to avoid memory leak
-  setTimeout(() => {
-    handledNotifications.delete(id);
-  }, 10000);
 });
 
 // Handle notification click
