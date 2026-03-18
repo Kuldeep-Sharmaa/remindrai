@@ -52,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         </div>
         <div className="flex items-center justify-between gap-8">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-600  flex-shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0" />
             <span className="text-xs font-inter text-textLight dark:text-textDark">
               Manual
             </span>
@@ -65,7 +65,7 @@ const CustomTooltip = ({ active, payload, label }) => {
       {gap > 0 && (
         <div className="pt-2.5 border-t border-black/5 dark:border-white/5">
           <p className="text-xs font-inter font-medium text-brand dark:text-brand-soft">
-            +{gap} more drafts with RemindrAI
+            +{gap} drafts
           </p>
         </div>
       )}
@@ -143,9 +143,9 @@ const Graph = () => {
     >
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-center mb-10">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase dark:text-bgLight text-bgDark">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium tracking-widest uppercase dark:text-bgLight text-bgDark">
             <span className="text-brand">System</span>vs{" "}
-            <span className="text-red-600">manual</span>
+            <span className="text-red-600">Manual</span>
           </span>
         </div>
 
@@ -173,10 +173,10 @@ const Graph = () => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
             <div>
               <p className="text-sm font-grotesk font-bold text-textLight dark:text-textDark mb-1">
-                Cumulative drafts over 12 weeks
+                Drafts over time
               </p>
               <p className="text-xs font-inter text-muted">
-                Consistent system output vs manual effort
+                What happens over time
               </p>
             </div>
             <div className="flex items-center gap-5 flex-shrink-0">
@@ -205,7 +205,6 @@ const Graph = () => {
             </div>
           </div>
 
-          {/* Chart */}
           <div className="w-full h-64 sm:h-72">
             {showChart && (
               <ResponsiveContainer width="100%" height="100%">
@@ -306,12 +305,11 @@ const Graph = () => {
             )}
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-black/5 dark:border-white/5">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <p className="text-xs font-inter text-textLight/80 dark:text-white/80">
-                Consistent 4 drafts per week configuration.
+                Based on a consistent weekly setup
               </p>
             </div>
             <p className="text-xs font-inter text-textLight/80 dark:text-white/80 hidden sm:block">

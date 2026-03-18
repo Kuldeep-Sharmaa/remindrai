@@ -64,7 +64,7 @@ const CallToAction = () => {
         </Button>
 
         <p className="relative text-xs font-inter dark:text-bgLight/40 text-bgDark/40 ">
-          Takes less than a minute to set up
+          Set it once. That’s it.
         </p>
       </div>
     </section>
