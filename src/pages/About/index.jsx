@@ -25,7 +25,7 @@ const SECTIONS = [
   {
     label: "Who it is for",
     content: [
-      "Founders, developers, and independent builders who want a steadier way to keep writing online. People who have ideas to share but do not want the act of producing content to become another full-time task.",
+      "Founders, developers, and independent builders who want a steadier way to keep writing online. People who have something to say but don’t want the process of writing to depend on their time every day.",
     ],
   },
 ];

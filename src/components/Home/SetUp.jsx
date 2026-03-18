@@ -12,23 +12,23 @@ gsap.registerPlugin(ScrollTrigger);
 const steps = [
   {
     number: "01",
-    title: "Set your direction",
-    text: "Choose your role, tone, and platform. Every draft follows this setup.",
+    title: "Define how you write",
+    text: "Set your role, tone, and platform once. Everything follows this.",
   },
   {
     number: "02",
-    title: "Set the timing",
-    text: "Choose how often and when drafts should be ready.",
+    title: "Choose when it runs",
+    text: "Pick the timing. Daily, weekly, or one-time.",
   },
   {
     number: "03",
-    title: "Drafts prepare automatically",
-    text: "At the chosen time, a new draft is prepared using your setup. No tool to open. No prompt to write.",
+    title: "It keeps preparing",
+    text: "Drafts are created automatically using your setup. Nothing to open or repeat.",
   },
   {
     number: "04",
-    title: "Draft ready on time",
-    text: "At the chosen time, a draft is ready for you. Review it, edit it, or use it as it is.",
+    title: "A draft is ready",
+    text: "When the time comes, a draft is already there. Review, edit, or use it.",
   },
 ];
 
@@ -215,7 +215,7 @@ const Setup = () => {
                   <span className="font-grotesk text-xs tracking-widest text-muted">
                     {step.number} / {String(steps.length).padStart(2, "0")}
                   </span>
-                  <h2 className="font-grotesk text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-textLight dark:text-textDark tracking-tight leading-[1.05]">
+                  <h2 className="font-grotesk text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-bold text-textLight dark:text-textDark tracking-tight leading-[1.05]">
                     {step.title}
                   </h2>
                   <p className="font-inter text-sm sm:text-base text-textLight dark:text-textDark leading-relaxed max-w-sm mx-auto lg:mx-0">

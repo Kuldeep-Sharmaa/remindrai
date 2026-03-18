@@ -8,7 +8,7 @@ const Step3Preview = () => {
     {
       title: "Share a lesson from your last product decision",
       schedule: "Tue / Thu · 09:00 AM",
-      status: "scheduled",
+      status: "Next draft",
     },
   ];
 
@@ -66,7 +66,7 @@ const Step3Preview = () => {
                 <span
                   className={`text-[10px] font-inter ${status === "preparing" ? "text-brand" : "text-muted"}`}
                 >
-                  {status === "preparing" ? "Preparing draft..." : "Scheduled"}
+                  {status === "preparing" ? "Preparing draft..." : "Next draft"}
                 </span>
                 <span className="text-[10px] text-muted font-inter">
                   · {schedule}
