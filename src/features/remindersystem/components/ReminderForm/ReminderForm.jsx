@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import useReminderForm from "../../hooks/useReminderForm";
 import PromptInput from "../ReminderForm/PromptInput";
+import PromptExamples from "../ReminderForm/PromptExamples";
 import FrequencySelector from "../ReminderForm/FrequencySelector";
 import TimeSelector from "../ReminderForm/TimeSelector";
 import NextRunDisplay from "../ReminderForm/NextRunDisplay";
@@ -37,6 +38,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   const [reminderType, setReminderType] = useState("ai");
 
   const closeBtnRef = useRef(null);
+  const promptInputRef = useRef(null);
 
   const form = useReminderForm();
   const {
@@ -96,6 +98,13 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     null;
 
   const handlePromptTouch = useCallback(() => setPromptTouched(true), []);
+
+  const handleScheduleChange = useCallback(
+    (val) => {
+      if (typeof setSchedule === "function") setSchedule(val);
+    },
+    [setSchedule],
+  );
 
   const handleOpenPreferences = useCallback(() => {
     if (typeof onOpenPreferences === "function") return onOpenPreferences();
@@ -188,7 +197,11 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               setPrompt={setPrompt}
               onPromptTouched={handlePromptTouch}
               error={shouldShowValidationError ? promptFieldError : null}
+              inputRef={promptInputRef}
             />
+            {reminderType === "ai" && (
+              <PromptExamples onSelect={setPrompt} inputRef={promptInputRef} />
+            )}
           </div>
 
           <div className="mt-4 space-y-3">
@@ -196,7 +209,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
             <TimeSelector
               frequency={frequency}
               schedule={schedule}
-              onChange={setSchedule}
+              onChange={handleScheduleChange}
               error={scheduleInlineMessage}
             />
 

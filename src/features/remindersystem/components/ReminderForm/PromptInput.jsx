@@ -1,6 +1,7 @@
 // src/features/remindersystem/components/ReminderForm/PromptInput.jsx
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 /**
  * PromptInput
@@ -152,9 +153,14 @@ export default function PromptInput({
       />
 
       <div className="flex items-center justify-between text-xs">
-        <div className="text-gray-500">
-          Tip: short, focused prompts (a phrase or one-sentence brief) work
-          best.
+        <div className="text-gray-500 text-xs">
+          Use a clear direction.
+          <Link
+            to="/docs/writing-direction"
+            className="text-brand underline ml-1"
+          >
+            Learn more
+          </Link>
         </div>
         <div className="text-gray-500">
           {localValue.length}/{maxLength} characters
