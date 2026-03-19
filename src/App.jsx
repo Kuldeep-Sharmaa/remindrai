@@ -21,6 +21,7 @@ import DocsPage from "./pages/Docs/index";
 import Privacy from "./pages/Legal/Privacy";
 import Terms from "./pages/Legal/Terms";
 import GDPR from "./pages/Legal/Gdpr";
+import Sitemap from "./pages/SiteMap";
 
 import Onboarding from "./pages/OnboardingSetup";
 import DashboardHome from "./pages/workspace/Overview";
@@ -48,8 +49,6 @@ import { TimezoneProvider } from "./context/TimezoneProvider";
 function AppContent() {
   const { currentUser, isUserLoggingOut } = useAuthContext();
 
-  // useTheme reads from localStorage synchronously — no flicker, no spinner needed.
-  // The <html> class is already set before React hydrates so the theme is instant.
   useTheme();
 
   return (
@@ -57,10 +56,6 @@ function AppContent() {
       <ScrollToTop />
 
       <Routes>
-        {/* Public pages never wait for auth to resolve.
-            A visitor hitting the landing page shouldn't see a loading state
-            just because Firebase hasn't responded yet. */}
-
         <Route
           path="/"
           element={
@@ -102,11 +97,31 @@ function AppContent() {
           }
         />
         <Route
+          path="/docs/:sectionId"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <DocsPage />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+        <Route
           path="/contact"
           element={
             <PublicRoute>
               <PublicLayout>
                 <Contact />
+              </PublicLayout>
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/sitemap"
+          element={
+            <PublicRoute>
+              <PublicLayout>
+                <Sitemap />
               </PublicLayout>
             </PublicRoute>
           }
@@ -152,8 +167,6 @@ function AppContent() {
           }
         />
 
-        {/* These used to be separate pages. Canonical URL is /auth now.
-            Keeping redirects so old links don't 404. */}
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/signup" element={<Navigate to="/auth" replace />} />
         <Route
@@ -161,7 +174,6 @@ function AppContent() {
           element={<Navigate to="/auth" replace />}
         />
 
-        {/* Verified but hasn't finished onboarding yet */}
         <Route
           path="/verify-email"
           element={
@@ -181,8 +193,6 @@ function AppContent() {
           }
         />
 
-        {/* AnimatePresence for transitions lives inside DashboardLayout around <Outlet />.
-            Putting it here would remount the sidebar on every route change. */}
         <Route
           path="/workspace/*"
           element={
@@ -209,7 +219,6 @@ function AppContent() {
           </Route>
         </Route>
 
-        {/* mid-logout gets sent home immediately so there's no flash of the dashboard */}
         <Route
           path="*"
           element={
@@ -224,7 +233,6 @@ function AppContent() {
         />
       </Routes>
 
-      {/* Outside the route tree so toasts don't unmount mid-transition */}
       <ToastContainer />
     </>
   );
@@ -233,8 +241,6 @@ function AppContent() {
 const MemoizedAppContent = React.memo(AppContent);
 
 export default function App() {
-  // TimezoneProvider needs auth state, so it has to live inside AuthContextProvider.
-  // That's the only reason for this nesting order.
   return (
     <AuthContextProvider>
       <TimezoneProvider saveProfileTz={false}>

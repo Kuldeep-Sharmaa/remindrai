@@ -10,6 +10,7 @@ import Timezone from "./sections/Timezone";
 import Notifications from "./sections/Notifications";
 import Preferences from "./sections/Preferences";
 import Account from "./sections/Account";
+import WritingDirection from "./sections/WritingDirection";
 
 export const NAV = [
   {
@@ -28,6 +29,7 @@ export const NAV = [
       { id: "create-prompt", label: "Creating a prompt" },
       { id: "content-inbox", label: "Content inbox" },
       { id: "manage-prompts", label: "Managing prompts" },
+      { id: "writing-direction", label: "Writing direction" },
     ],
   },
   {
@@ -82,6 +84,13 @@ export const SECTION_MAP = {
     title: "How do I manage my prompts?",
     intro: "View, delete, and review prompts from Studio.",
   },
+
+  "writing-direction": {
+    component: WritingDirection,
+    title: "How to write good prompts for better drafts?",
+    intro: "Good prompts lead to better drafts.  ",
+  },
+
   timezone: {
     component: Timezone,
     title: "How do I change my timezone?",

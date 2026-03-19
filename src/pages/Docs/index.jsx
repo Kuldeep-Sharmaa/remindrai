@@ -1,14 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
-import { SEARCH_INDEX } from "./docsConfig";
+import { useParams, useNavigate } from "react-router-dom";
+import { SEARCH_INDEX, SECTION_MAP } from "./docsConfig";
 import DocsHome from "./components/DocsHome";
 import SectionView from "./components/SectionView";
 
 export default function Docs() {
-  const [active, setActive] = useState(null);
+  const { sectionId } = useParams();
+  const urlNav = useNavigate();
+
+  // If URL has a valid sectionId, start there — otherwise show home
+  const [active, setActive] = useState(
+    sectionId && SECTION_MAP[sectionId] ? sectionId : null,
+  );
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
+
+  // If the URL param changes (e.g. user hits back/forward), sync active
+  useEffect(() => {
+    if (sectionId && SECTION_MAP[sectionId]) {
+      setActive(sectionId);
+    } else {
+      setActive(null);
+    }
+  }, [sectionId]);
 
   useEffect(() => {
     const q = query.trim().toLowerCase();
@@ -42,6 +58,7 @@ export default function Docs() {
     setActive(id);
     setShowResults(false);
     setQuery("");
+    urlNav(`/docs/${id}`, { replace: true });
   };
 
   const goHome = () => {
@@ -49,6 +66,7 @@ export default function Docs() {
     setActive(null);
     setShowResults(false);
     setQuery("");
+    urlNav("/docs", { replace: true });
   };
 
   const searchProps = {
