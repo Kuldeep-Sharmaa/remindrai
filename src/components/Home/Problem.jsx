@@ -48,7 +48,7 @@ const Problem = () => {
       <div className="max-w-4xl text-center mx-auto px-5 sm:px-8 lg:px-10">
         <h2
           ref={headingRef}
-          className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-grotesk text-textLight dark:text-textDark leading-[1.1] tracking-tight mb-5"
+          className="text-3xl lg:text-4xl xl:text-5xl font-bold font-grotesk text-textLight dark:text-textDark leading-[1.1] tracking-tight mb-5"
         >
           <span className="word">Running</span>{" "}
           <span className="word">out</span> <span className="word">of</span>{" "}

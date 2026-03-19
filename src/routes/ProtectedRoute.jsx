@@ -53,7 +53,7 @@ const ProtectedRoute = ({ children, requiresSubscription = false }) => {
   const isAuthenticated = !!firebaseUser && !!currentUser && hasLoadedProfile;
 
   if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Null-coalescing here is intentional — if accountStatus is ever missing
