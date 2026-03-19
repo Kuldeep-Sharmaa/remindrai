@@ -1,11 +1,12 @@
 import React from "react";
 import DocPage from "../components/DocPage";
+import { Link } from "react-router-dom";
 
 export default function ManagePrompts() {
   return (
     <DocPage
       title="How do I manage my prompts?"
-      intro="Active prompts can be viewed or deleted. Prompts cannot be edited — to change one, delete it and create a new one."
+      intro="Active prompts can be viewed or deleted. They cannot be edited."
       steps={[
         {
           label: "Open Studio",
@@ -17,14 +18,23 @@ export default function ManagePrompts() {
         },
         {
           label: "Delete a prompt",
-          body: "Click the **trash icon** on the right side of the prompt card. The prompt is removed immediately.",
+          body: "Click the **trash icon** on the right side of the Active prompt card.",
         },
         {
           label: "View past prompts",
           body: "Completed prompts appear under **Past Prompts** at the bottom of Studio. These are read-only.",
         },
       ]}
-      note="If you delete a prompt that has already delivered drafts, those drafts remain available in your Deliveries inbox."
+      note={
+        <>
+          Deleting a prompt does not remove drafts that were already delivered.
+          Those drafts remain available in your{" "}
+          <Link to="/workspace/drafts" className="underline">
+            Drafts
+          </Link>{" "}
+          Inbox .
+        </>
+      }
       prev="content-inbox"
       next="timezone"
     />

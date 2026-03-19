@@ -4,20 +4,23 @@ import DocPage from "../components/DocPage";
 export default function Timezone() {
   return (
     <DocPage
-      title="How do I change my timezone?"
-      intro="All draft delivery times use your timezone setting. If drafts are arriving at unexpected times, check this first."
+      title="Timezone"
+      intro="Draft timing follows your device’s local time."
       steps={[
-        { label: "Open Settings", body: "Click **Settings** in the sidebar." },
         {
-          label: "Find your timezone",
-          body: "Your current timezone is shown in the Preferences section.",
+          label: "Automatic detection",
+          body: "Your timezone is detected from your device.",
         },
         {
-          label: "Update the timezone",
-          body: "Select the correct timezone from the dropdown. Changes apply to all future deliveries.",
+          label: "Keep your device time correct",
+          body: "Drafts are prepared and delivered based on your current local time.",
+        },
+        {
+          label: "If timing feels off",
+          body: "Check your device timezone settings. The app does not override it.",
         },
       ]}
-      note="Changing your timezone does not affect drafts that have already been delivered."
+      note="Timezone cannot be changed inside the app."
       prev="manage-prompts"
       next="notifications"
     />

@@ -4,17 +4,24 @@ import DocPage from "../components/DocPage";
 export default function Notifications() {
   return (
     <DocPage
-      title="How do I manage notifications?"
-      intro="Control how RemindrAI notifies you about draft deliveries and account activity."
+      title="Notifications"
+      intro="Drafts are delivered as notifications when they are ready."
       steps={[
-        { label: "Open Settings", body: "Click **Settings** in the sidebar." },
         {
-          label: "Go to Notifications",
-          body: "Find the **Notifications** section.",
+          label: "Allow notifications",
+          body: "A permission prompt appears when you create your account. Allow it to receive draft alerts.",
         },
         {
-          label: "Toggle preferences",
-          body: "Enable or disable email notifications for draft deliveries and account activity.",
+          label: "If notifications are off",
+          body: "Enable them from your browser settings to start receiving alerts.",
+        },
+        {
+          label: "Using iPhone or iPad",
+          body: "Install RemindrAI on your home screen to receive notifications. This is required for notifications to work on iOS.",
+        },
+        {
+          label: "Adjust preferences",
+          body: "You can update notification settings anytime from Settings.",
         },
       ]}
       prev="timezone"
