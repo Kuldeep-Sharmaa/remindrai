@@ -1,15 +1,12 @@
-// ============================================================================
-// 📁 TimeSelector.jsx (FINAL - ISO Weekday 1-7 & Max 4 Days Enforced + inline error)
-// ----------------------------------------------------------------------------
-// - Adds `error` prop to display schedule/time validation messages inline
-// - Emits canonical schedule keys via onChange: { date, timeOfDay, weekDays, timezone }
-// - Normalizes common timezone aliases to valid IANA zones (e.g. Asia/Calcutta -> Asia/Kolkata)
-// ----------------------------------------------------------------------------
-
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import PropTypes from "prop-types";
 
-// --- Constants ---
 const ISO_WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MAX_WEEKDAYS = 4;
 
@@ -18,60 +15,45 @@ export default function TimeSelector({
   schedule = {},
   onChange,
   timezone,
-  error, // new prop: string | null (inline schedule/time error message)
+  error,
 }) {
-  // Use local state for immediate input feedback
   const [date, setDate] = useState(schedule?.date || "");
   const [time, setTime] = useState(schedule?.timeOfDay || schedule?.time || "");
   const [weekdays, setWeekdays] = useState(
     Array.isArray(schedule?.weekDays) ? schedule.weekDays : [],
   );
 
-  // 1. Determine & normalize Timezone (Memoized for efficiency)
+  // Keep a ref to onChange so we never need it in effect deps —
+  // avoids the re-emission loop when the parent re-renders
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   const tz = useMemo(() => {
     const browserTZ =
       Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone || "UTC";
     const raw = (timezone || schedule?.timezone || browserTZ || "UTC").trim();
 
-    // small alias map — extend as needed if you see other non-IANA values in your user data
     const TZ_ALIAS_MAP = {
-      // common legacy / misnamed values -> canonical IANA
       "Asia/Calcutta": "Asia/Kolkata",
       "Asia/Calcutta ": "Asia/Kolkata",
       Calcutta: "Asia/Kolkata",
       Kolkata: "Asia/Kolkata",
-      IST: "Asia/Kolkata", // optional; be careful with ambiguous abbreviations
+      IST: "Asia/Kolkata",
     };
 
     const candidate = TZ_ALIAS_MAP[raw] || raw;
 
-    // final sanity: attempt to construct Intl.DateTimeFormat with the zone.
-    // If it throws, fallback to browserTZ or 'UTC'.
     try {
-      // This will throw on invalid zones in some browsers/environments
-      /* eslint-disable no-new */
       new Intl.DateTimeFormat(undefined, { timeZone: candidate });
-      /* eslint-enable no-new */
       return candidate;
     } catch (e) {
-      // fallback gracefully
       return browserTZ || "UTC";
     }
-    // note: include schedule?.timezone in deps to re-evaluate when it changes
   }, [timezone, schedule?.timezone]);
 
-  // dev-only debug: show the normalized timezone when running locally
-  if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
-    console.log(
-      "[TimeSelector] normalized tz ->",
-      tz,
-      "raw schedule.timezone:",
-      schedule?.timezone,
-    );
-  }
-
-  // Normalize incoming schedule if the parent changes it externally
+  // Sync local state when parent changes schedule externally
   useEffect(() => {
     if (schedule?.date !== undefined && schedule.date !== date)
       setDate(schedule.date || "");
@@ -80,7 +62,6 @@ export default function TimeSelector({
     const incomingWeek = Array.isArray(schedule?.weekDays)
       ? schedule.weekDays
       : [];
-    // shallow compare
     const equal =
       incomingWeek.length === weekdays.length &&
       incomingWeek.every((v, i) => v === weekdays[i]);
@@ -93,9 +74,9 @@ export default function TimeSelector({
     JSON.stringify(schedule?.weekDays),
   ]);
 
-  // 2. Schedule Change Effect: Emit the unified schedule object on change
+  // Emit schedule — onChange is intentionally accessed via ref, not in deps,
+  // so this effect only fires when the actual schedule values change
   useEffect(() => {
-    // Build canonical schedule payload
     const payload = {
       date: date || undefined,
       timeOfDay: time || undefined,
@@ -103,50 +84,34 @@ export default function TimeSelector({
       timezone: tz,
     };
 
-    // Only include defined keys (parent can merge as needed)
-    onChange &&
-      onChange(
-        Object.keys(payload).reduce((acc, k) => {
-          if (payload[k] !== undefined) acc[k] = payload[k];
-          return acc;
-        }, {}),
-      );
-    // Intentionally exclude `schedule` to avoid render loops
-    // onChange stable (parent hook should be memoized)
-  }, [date, time, weekdays, tz, onChange]);
+    const cleaned = Object.keys(payload).reduce((acc, k) => {
+      if (payload[k] !== undefined) acc[k] = payload[k];
+      return acc;
+    }, {});
 
-  // 3. Weekday Toggle Logic (Handles ISO 1-7 and MAX_WEEKDAYS limit)
+    onChangeRef.current?.(cleaned);
+  }, [date, time, weekdays, tz]); // onChange deliberately omitted — using ref
+
   const toggleWeekday = useCallback((isoDayValue) => {
     setWeekdays((prev) => {
-      const exists = prev.includes(isoDayValue);
-
-      if (exists) {
+      if (prev.includes(isoDayValue))
         return prev.filter((d) => d !== isoDayValue);
-      }
-
-      if (prev.length >= MAX_WEEKDAYS) {
-        return prev;
-      }
-
+      if (prev.length >= MAX_WEEKDAYS) return prev;
       return [...prev, isoDayValue].sort((a, b) => a - b);
     });
   }, []);
 
-  // Determine if the "weekly" selection limit has been reached
   const isMaxedOut = weekdays.length >= MAX_WEEKDAYS;
 
-  // Helper to render error message (stringify defensively)
   const errorString =
     error === null || typeof error === "undefined"
       ? null
       : typeof error === "string"
         ? error
-        : // if object, attempt to extract message or stringify
-          error?.message || JSON.stringify(error);
+        : error?.message || JSON.stringify(error);
 
   return (
     <div className="space-y-4">
-      {/* 🔹 Date Input (One-time only) 🔹 */}
       {frequency === "one_time" && (
         <div>
           <label
@@ -169,7 +134,6 @@ export default function TimeSelector({
         </div>
       )}
 
-      {/* 🔹 Time Input (All frequencies) 🔹 */}
       <div>
         <label
           htmlFor="remindr-time"
@@ -187,7 +151,6 @@ export default function TimeSelector({
         />
       </div>
 
-      {/* Inline error rendered under time/date controls */}
       {errorString && (
         <div
           id="remindr-schedule-error"
@@ -198,7 +161,6 @@ export default function TimeSelector({
         </div>
       )}
 
-      {/* 🔹 Weekday Picker (Weekly only) 🔹 */}
       {frequency === "weekly" && (
         <div className="pt-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
