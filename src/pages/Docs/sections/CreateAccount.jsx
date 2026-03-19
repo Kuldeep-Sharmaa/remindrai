@@ -4,20 +4,24 @@ import DocPage from "../components/DocPage";
 export default function CreateAccount() {
   return (
     <DocPage
-      title="How do I create an account?"
-      intro="Sign up takes less than a minute. You will need a valid email address."
+      title="Create an account"
+      intro="Set up your account to start receiving drafts."
       steps={[
         {
-          label: "Open the homepage",
-          body: "Go to remindrai.com and click **Get started**.",
+          label: "Open RemindrAI",
+          body: "Go to remindrai.com and select **Create account**.",
         },
         {
           label: "Enter your details",
-          body: "Fill in your email address and choose a password, then submit the form.",
+          body: "Add your name, email, and password. Submit the form.",
         },
         {
-          label: "Check your inbox",
-          body: "A verification email is sent immediately. Open it to continue.",
+          label: "Or continue with Google or GitHub",
+          body: "Sign up using an existing account. No email verification is needed.",
+        },
+        {
+          label: "Verify your email",
+          body: "If you signed up with email and password, a verification email is sent. Open it to continue. If it’s not visible, check the spam folder.",
         },
       ]}
       next="verify-email"

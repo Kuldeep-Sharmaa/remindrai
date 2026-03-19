@@ -4,15 +4,19 @@ import DocPage from "../components/DocPage";
 export default function Preferences() {
   return (
     <DocPage
-      title="How do I change app preferences?"
-      intro="General display and app preferences are available in Settings."
+      title="Preferences"
+      intro="These settings influence how your drafts are written and delivered."
       steps={[
-        { label: "Open Settings", body: "Click **Settings** in the sidebar." },
         {
-          label: "Open Preferences",
-          body: "Find the **Preferences** section and adjust theme and display settings.",
+          label: "Open Settings",
+          body: "Go to Settings from the sidebar.",
+        },
+        {
+          label: "Update preferences",
+          body: "Adjust how drafts should be delivered and how the system behaves.",
         },
       ]}
+      note="Drafts follow your content setup and preferences together."
       prev="notifications"
       next="account"
     />
