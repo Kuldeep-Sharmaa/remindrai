@@ -2,23 +2,44 @@ import React from "react";
 
 const EXAMPLES = [
   {
-    label: "Startup lessons",
+    label: "Startup lesson",
     value:
-      "Practical startup lessons from building and working through real challenges",
+      "Building too many features early and realizing later that users only needed one core thing",
   },
   {
-    label: "React tips",
+    label: "Founder mistake",
     value:
-      "Simple and practical React tips for developers to improve daily workflow",
+      "Hiring too quickly and realizing later it slowed down decision making and progress",
   },
   {
-    label: "Founder insights",
-    value: "Honest insights from a founder building and learning along the way",
+    label: "React workflow",
+    value:
+      "Spending too much time debugging state issues before adopting simpler patterns that saved time",
   },
   {
-    label: "Marketing experiments",
+    label: "Debugging insight",
     value:
-      "Real marketing experiments, what worked, what failed, and what changed",
+      "Getting stuck on a bug for hours and realizing the issue was a small overlooked detail",
+  },
+  {
+    label: "Marketing reality",
+    value:
+      "Trying multiple marketing ideas and seeing most fail before finding one that actually worked",
+  },
+  {
+    label: "Content struggle",
+    value:
+      "Overthinking what to post and ending up not posting consistently for weeks",
+  },
+  {
+    label: "Career insight",
+    value:
+      "Focusing only on hard work and realizing later that visibility also matters for growth",
+  },
+  {
+    label: "Build in public",
+    value:
+      "Sharing progress publicly and noticing how it improved consistency and accountability",
   },
 ];
 
