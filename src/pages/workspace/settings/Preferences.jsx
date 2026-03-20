@@ -19,24 +19,34 @@ import {
 
 const ROLES = [
   {
-    value: "busy-founder",
-    name: "Busy Founder",
-    description: "Fast-paced founders needing consistent presence",
+    value: "founder",
+    name: "Founder",
+    description: "Building and growing a startup while handling everything",
   },
   {
     value: "solopreneur",
     name: "Solopreneur",
-    description: "Solo business owners building their brand",
+    description: "Running a business solo and staying visible online",
   },
   {
-    value: "career-builder",
-    name: "Career Builder",
-    description: "Professionals growing their personal brand",
+    value: "professional",
+    name: "Professional",
+    description: "Growing your career and sharing your journey",
   },
   {
-    value: "content-creator",
-    name: "Content Creator",
-    description: "High-volume creators reducing burnout",
+    value: "creator",
+    name: "Creator",
+    description: "Sharing ideas and building an audience consistently",
+  },
+  {
+    value: "developer",
+    name: "Developer",
+    description: "Building products and sharing technical or learning insights",
+  },
+  {
+    value: "other",
+    name: "Other",
+    description: "Something that doesn't fit the options above",
   },
 ];
 
@@ -44,23 +54,22 @@ const TONES = [
   {
     value: "professional",
     name: "Professional",
-    description: "Clear, confident, and authoritative",
-  },
-  { value: "casual", name: "Casual", description: "Warm and conversational" },
-  {
-    value: "humorous",
-    name: "Humorous",
-    description: "Witty and charming content",
+    description: "Clear, structured, and straight to the point",
   },
   {
-    value: "informative",
-    name: "Informative",
-    description: "Educational and straightforward",
+    value: "friendly",
+    name: "Friendly",
+    description: "Warm, simple, and easy to connect with",
   },
   {
-    value: "inspirational",
-    name: "Inspirational",
-    description: "Uplifting and motivating",
+    value: "thoughtful",
+    name: "Thoughtful",
+    description: "Reflective and focused on meaningful insights",
+  },
+  {
+    value: "witty",
+    name: "Witty",
+    description: "Smart, sharp, and slightly playful",
   },
 ];
 
@@ -68,22 +77,17 @@ const PLATFORMS = [
   {
     value: "linkedin",
     name: "LinkedIn",
-    description: "Professional networking and B2B content",
+    description: "Professional long-form and thought leadership",
   },
   {
     value: "twitter",
-    name: "X (Twitter)",
-    description: "Real-time updates and thought leadership",
-  },
-  {
-    value: "facebook",
-    name: "Facebook",
-    description: "Community building and connections",
+    name: "Twitter / X",
+    description: "Short, sharp, and focused ideas",
   },
   {
     value: "threads",
     name: "Threads",
-    description: "Engaging conversations and updates",
+    description: "Conversational, community-driven posts",
   },
 ];
 
@@ -262,7 +266,7 @@ const Preferences = () => {
               Professional Role
             </h3>
           </div>
-          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80 font-inter mb-3">
             Choose your professional identity to tailor strategies
           </p>
           <Select
@@ -281,13 +285,13 @@ const Preferences = () => {
           <div className="flex items-center gap-2 mb-1">
             <Mic
               size={15}
-              className="text-textLight/80 dark:text-textDark/80 "
+              className="text-textLight/80 dark:text-textDark/80"
             />
             <h3 className="text-xl font-semibold text-textLight dark:text-textDark font-grotesk">
               Content Tone
             </h3>
           </div>
-          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80 font-inter mb-3">
             Define your brand voice and communication style
           </p>
           <Select
@@ -312,7 +316,7 @@ const Preferences = () => {
               Primary Platform
             </h3>
           </div>
-          <p className="text-sm text-textLight/80 dark:text-textDark/80  font-inter mb-3">
+          <p className="text-sm text-textLight/80 dark:text-textDark/80 font-inter mb-3">
             Choose where you'll primarily share your content
           </p>
           <Select
@@ -327,7 +331,7 @@ const Preferences = () => {
           />
         </div>
 
-        {/* Save / Cancel — lives inside the card */}
+        {/* Save / Cancel */}
         <div className="px-5 py-4 bg-gray-50 dark:bg-white/[0.02]">
           <div className="flex items-center justify-between gap-3">
             {hasChanges && (
