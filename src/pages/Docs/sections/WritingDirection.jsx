@@ -4,27 +4,27 @@ import DocPage from "../components/DocPage";
 export default function WritingDirection() {
   return (
     <DocPage
-      title="How to write good prompts for better drafts?"
-      intro="The quality of your drafts depends on how clearly you describe what they should be about."
+      title="Write better prompts → get better drafts"
+      intro="Your input shapes the draft. The clearer your thinking, the more useful the result will feel."
       steps={[
         {
-          label: "Start with a clear topic",
-          body: "Write what you want to talk about. Keep it focused on one area instead of combining multiple ideas.\n\nExamples:\n• startup lessons from building a product\n• react tips for beginners\n• marketing insights from real campaigns",
+          label: "Start with one clear idea",
+          body: "Don’t try to cover everything at once. Pick one thought, one experience, or one insight.\n\nExamples:\n• lessons from building my first product\n• what I learned from debugging a production issue\n• mistakes I made while growing on LinkedIn",
         },
         {
-          label: "Add context if needed",
-          body: "If your topic is broad, add a bit more detail so the system understands the angle.\n\nExamples:\n• instead of “marketing”, write “what worked and failed in recent marketing experiments”\n• instead of “content”, write “daily content ideas for developers”",
+          label: "Give direction, not just a topic",
+          body: "A simple topic is okay, but adding direction helps the system understand your angle.\n\nExamples:\n• “marketing” → too broad\n• “what worked and failed in recent marketing experiments” → better\n\nThink: what exactly do you want to say about it?",
         },
         {
           label: "Avoid vague inputs",
-          body: "Inputs like “content ideas” or “marketing” are too general. More specific direction leads to better drafts.\n\nExamples:\n• “linkedin post ideas” → too broad\n• “lessons from growing on linkedin” → clearer",
+          body: "If your input is unclear, the output will feel generic.\n\nExamples:\n• “content ideas” → unclear\n• “how I come up with content ideas consistently” → clearer\n\nMore clarity → more useful drafts.",
         },
         {
-          label: "Think in terms of what you share",
-          body: "Use the same kind of topics you usually post about. The system continues from that pattern.\n\nExamples:\n• founder updates and learnings\n• developer workflow improvements\n• building in public experiences",
+          label: "Write like you think",
+          body: "Use the same kind of ideas you naturally share.\n\nExamples:\n• something you learned recently\n• a mistake you made\n• a small insight from your work\n\nThe system works best when your input feels real, not forced.",
         },
       ]}
-      note="Clear, focused input leads to more accurate drafts."
+      note="Good input doesn’t need to be perfect. It just needs to be clear."
       prev="preferences"
       next="delivery"
     />
