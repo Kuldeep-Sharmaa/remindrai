@@ -7,7 +7,7 @@ export const Navbar = () => {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="fixed top-0 left-0 w-full z-50 bg-bgDark dark:bg-bgDark border-b border-border"
+      className="fixed top-0 left-0 w-full z-50 bg-bgLight dark:bg-bgDark border-b border-border"
     >
       <div className="flex items-center justify-center h-16 px-5">
         <div className="flex items-center gap-2.5">

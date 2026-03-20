@@ -19,7 +19,7 @@ const OnboardingLayout = ({
 
   return (
     <motion.div
-      className="relative flex-1 flex flex-col min-h-[calc(100dvh-4rem)] bg-bgDark dark:bg-bgDark mt-16 overflow-hidden"
+      className="relative flex-1 flex flex-col min-h-[calc(100dvh-4rem)] bg-bgLight dark:bg-bgDark mt-16 overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -33,10 +33,10 @@ const OnboardingLayout = ({
           {/* Progress */}
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-grotesk font-semibold tracking-[0.14em] uppercase text-muted">
+              <span className="text-[10px] font-grotesk font-semibold tracking-[0.14em] uppercase text-textLight/80 dark:text-textDark/80">
                 Setup
               </span>
-              <span className="text-[11px] font-inter text-muted tabular-nums">
+              <span className="text-[11px] font-inter text-textLight/80 dark:text-textDark/80 tabular-nums">
                 {step} / {totalSteps}
               </span>
             </div>
@@ -57,10 +57,10 @@ const OnboardingLayout = ({
               transition={{ duration: 0.35, ease: "easeOut" }}
               className="flex flex-col gap-1.5"
             >
-              <h1 className="text-[24px] font-grotesk font-bold text-textDark dark:text-textDark leading-tight tracking-tight">
+              <h1 className="text-[24px] font-grotesk font-bold text-textLight dark:text-textDark leading-tight tracking-tight">
                 Let's set up your workspace.
               </h1>
-              <p className="text-[13px] font-inter text-muted leading-relaxed max-w-[340px]">
+              <p className="text-[13px] font-inter text-textLight/80 dark:text-textDark/80 leading-relaxed max-w-[340px]">
                 Choose how your drafts should be written. You can always adjust
                 these later in settings.
               </p>

@@ -19,12 +19,12 @@ const OnboardingStepsContent = ({ step, stepData, stepVariants }) => {
           <div className="flex flex-col gap-1.5">
             {/* Numeral + title on the same row — keeps them as a unit, not competing layers */}
             <div className="flex items-baseline gap-3">
-              <h2 className="text-[28px] sm:text-[32px] font-grotesk font-bold text-textDark dark:text-textDark leading-tight tracking-tight">
+              <h2 className="text-[28px] sm:text-[32px] font-grotesk font-bold text-textLight dark:text-textDark leading-tight tracking-tight">
                 {current.title}
               </h2>
             </div>
 
-            <p className="text-[12.5px] font-inter text-muted dark:text-muted leading-relaxed pl-[2px]">
+            <p className="text-[12.5px] font-inter text-textLight/80 dark:text-textDark/80 leading-relaxed pl-[2px]">
               {current.subtitle}
             </p>
           </div>

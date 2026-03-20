@@ -74,7 +74,7 @@ const OnboardingNavigation = ({
           onClick={() => changeStep(step - 1)}
           disabled={isSaving}
           whileTap={{ scale: 0.98 }}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-inter text-muted hover:text-textDark transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-inter text-textLight/80 dark:text-textDark/80 hover:text-textLight dark:hover:text-textDark transition-colors duration-200"
         >
           <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
           Back
