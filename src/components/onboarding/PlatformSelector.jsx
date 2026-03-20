@@ -13,7 +13,7 @@ const platforms = [
   {
     id: "twitter",
     name: "Twitter / X",
-    description: "Short-form, real-time, high frequency",
+    description: "Short, sharp, and focused ideas",
     icon: <Twitter size={18} strokeWidth={1.75} />,
   },
   {
@@ -97,10 +97,10 @@ export const PlatformSelector = ({ selectedPlatform, setSelectedPlatform }) => {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="text-[11px] font-inter text-muted text-center pt-0.5"
+          className="text-[11px] font-inter text-textLight/80 dark:text-textDark/80 text-center pt-0.5"
         >
           Platform set to{" "}
-          <span className="text-textDark font-medium">
+          <span className="text-textLight/80 dark:text-textDark/80 font-medium">
             {platforms.find((p) => p.id === selectedPlatform)?.name}
           </span>
         </motion.p>

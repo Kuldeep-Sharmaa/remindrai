@@ -2,41 +2,48 @@ import React from "react";
 import { motion } from "framer-motion";
 import {
   Rocket,
+  Briefcase,
   TrendingUp,
   PenTool,
+  Code,
   HelpCircle,
-  Briefcase,
 } from "lucide-react";
 
 const roles = [
   {
-    id: "busy-founder",
-    name: "Busy Founder",
-    description: "Building a brand with no time to post consistently",
+    id: "founder",
+    name: "Founder",
+    description: "Building and growing a startup while handling everything",
     icon: <Rocket size={18} strokeWidth={1.75} />,
   },
   {
     id: "solopreneur",
     name: "Solopreneur",
-    description: "Want to stay visible but run out of ideas or forget",
+    description: "Running a business solo and staying visible online",
     icon: <Briefcase size={18} strokeWidth={1.75} />,
   },
   {
-    id: "career-builder",
-    name: "Career Builder",
-    description: "Growing on social media but struggle to post regularly",
+    id: "professional",
+    name: "Professional",
+    description: "Growing your career and sharing your journey",
     icon: <TrendingUp size={18} strokeWidth={1.75} />,
   },
   {
-    id: "content-creator",
-    name: "Content Creator",
-    description: "Post often but feeling burned out or stuck",
+    id: "creator",
+    name: "Creator",
+    description: "Sharing ideas and building an audience consistently",
     icon: <PenTool size={18} strokeWidth={1.75} />,
+  },
+  {
+    id: "developer",
+    name: "Developer",
+    description: "Building products and sharing technical or learning insights",
+    icon: <Code size={18} strokeWidth={1.75} />,
   },
   {
     id: "other",
     name: "Other",
-    description: "A situation that doesn't fit the options above",
+    description: "Something that doesn’t fit the options above",
     icon: <HelpCircle size={18} strokeWidth={1.75} />,
   },
 ];
@@ -111,10 +118,10 @@ export const RoleSelector = ({ selectedRole, onSelect }) => {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="text-[11px] font-inter text-muted text-center pt-0.5"
+          className="text-[11px] font-inter text-textLight/80 dark:text-textDark/80 text-center pt-0.5"
         >
           Role set to{" "}
-          <span className="text-textDark font-medium">
+          <span className="text-textLight/80 dark:text-textDark/80 font-medium">
             {roles.find((r) => r.id === selectedRole)?.name}
           </span>
         </motion.p>
