@@ -1,16 +1,4 @@
-/**
- * callAIOnce.ts
- *
- * Purpose:
- * Performs a single AI call to generate content.
- *
- * Guarantees:
- * - Exactly ONE AI call
- * - NO retries
- * - NO fallbacks
- * - NO Firestore access
- */
-
+// one call, one draft — no retries, no fallbacks, fail fast
 export async function callAIOnce(prompt: string): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
 
@@ -23,7 +11,7 @@ export async function callAIOnce(prompt: string): Promise<string> {
   }
 
   console.log("[callAIOnce] Starting AI call", {
-    promptLength: prompt.length, // size only, never content
+    promptLength: prompt.length, // size only — never log actual prompt content
   });
 
   const controller = new AbortController();
@@ -38,10 +26,9 @@ export async function callAIOnce(prompt: string): Promise<string> {
         "User-Agent": "remindrai-backend/1.0",
       },
       body: JSON.stringify({
-        // Locked for cost + predictability
         model: "gpt-4.1-mini",
         input: prompt,
-        max_output_tokens: 500,
+        max_output_tokens: 250, // social posts don't need more — keeps cost predictable
       }),
       signal: controller.signal,
     });
@@ -52,13 +39,11 @@ export async function callAIOnce(prompt: string): Promise<string> {
 
     const data: unknown = await response.json();
 
-    /**
-     * We intentionally validate minimally.
-     * If OpenAI changes response shape, we FAIL FAST.
-     */
+    // took me a while to figure this out — the Responses API doesn't return output_text
+    // at the top level, it's nested at output[0].content[0].text
     const outputText =
-      typeof (data as any)?.output_text === "string"
-        ? (data as any).output_text
+      typeof (data as any)?.output?.[0]?.content?.[0]?.text === "string"
+        ? (data as any).output[0].content[0].text
         : null;
 
     if (!outputText) {
