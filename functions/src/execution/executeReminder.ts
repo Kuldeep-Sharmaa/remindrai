@@ -1,14 +1,3 @@
-/**
- * executeReminder.ts (TEMP — INFRASTRUCTURE TEST MODE)
- *
- * This is the temporary version used to validate the scheduler infrastructure.
- * No AI calls, no cost logic — just a dummy draft to confirm the pipeline works.
- *
- * Real AI execution will replace the dummy draft logic once infra is confirmed.
- * The notification hooks below are already wired for the final version too,
- * so nothing here needs to change when we swap in the real AI logic.
- */
-
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 
 import { checkExecutionExists } from "./idempotency";
@@ -16,6 +5,10 @@ import { recordExecution } from "./recordExecution";
 import { advanceReminder } from "./advanceReminder";
 import { createDraft } from "../drafts/createDraft";
 import { sendPushNotification } from "../notifications/sendPushNotification";
+import { fetchPastDrafts } from "../drafts/fetchPastDrafts";
+import { buildPrompt } from "../ai/buildPrompt";
+import { callAIOnce } from "../ai/callAIOnce";
+import { mapRole, mapTone, mapPlatform } from "../ai/promptMappings";
 
 type ReminderData = {
   enabled: boolean;
@@ -24,7 +17,11 @@ type ReminderData = {
   schedule: any;
   reminderType: "ai" | "simple";
   content?: {
+    role?: string;
+    tone?: string;
     platform?: string;
+    aiPrompt?: string; // only on ai prompts
+    message?: string; // only on simple notes
   };
 };
 
@@ -45,12 +42,10 @@ export async function executeReminder(
   const reminderId = reminderDoc.id;
   const reminderData = reminderDoc.data() as ReminderData;
 
-  // Authoritative UID extraction
+  // uid is on the parent collection, not stored in the reminder doc itself
   const uid = reminderDoc.ref.parent.parent!.id;
 
   const scheduledForUTC = reminderData.nextRunAtUTC;
-
-  // Pull reminder context for smarter notification text
   const reminderType = reminderData.reminderType;
   const platform = reminderData.content?.platform;
 
@@ -69,22 +64,56 @@ export async function executeReminder(
   }
 
   try {
+    let draftContent: string;
+    let aiUsed = false;
+
+    if (reminderType === "ai") {
+      // no prompt means nothing to generate from — fail early
+      if (!reminderData.content?.aiPrompt?.trim()) {
+        throw new Error("Missing aiPrompt for AI reminder");
+      }
+
+      let drafts: string[] = [];
+
+      try {
+        drafts = await fetchPastDrafts(uid, 2);
+      } catch {
+        // memory failing shouldn't kill the whole execution
+        drafts = [];
+      }
+
+      // need at least 2 drafts to get a reliable style signal
+      const pastDrafts = drafts.length >= 2 ? drafts : undefined;
+
+      const prompt = buildPrompt({
+        aiPrompt: reminderData.content?.aiPrompt,
+        role: mapRole(reminderData.content?.role),
+        tone: mapTone(reminderData.content?.tone),
+        platform: mapPlatform(reminderData.content?.platform),
+        pastDrafts,
+      });
+
+      draftContent = await callAIOnce(prompt);
+      aiUsed = true;
+    } else {
+      draftContent = reminderData.content?.message?.trim() || "Reminder";
+    }
+
     const draftId = await createDraft({
       uid,
       reminderId,
-      reminderType: "simple",
-      content:
-        "This is a dummy draft created for infrastructure testing purposes. its not real LLM content. API is not called. If you see this, it means the backend scheduler infrastructure is working! Congrats! 🎉",
+      reminderType,
+      content: draftContent,
       scheduledForUTC,
     });
 
     await recordExecution({
       uid,
       reminderId,
-      reminderType: "simple",
+      reminderType,
       scheduledForUTC,
       status: "executed",
-      aiUsed: false,
+      aiUsed,
       draftId: draftId ?? undefined,
     });
 
@@ -94,7 +123,6 @@ export async function executeReminder(
       scheduledForUTC,
     });
 
-    // Send notification based on draft creation result
     if (draftId) {
       await sendPushNotification({
         uid,
@@ -113,10 +141,11 @@ export async function executeReminder(
     console.error("[executeReminder] Execution failed", {
       uid,
       reminderId,
+      reminderType,
       error: error instanceof Error ? error.message : String(error),
     });
 
-    // Something broke hard — make sure the user still hears about it
+    // execution failed — still notify the user so they're not left waiting
     await sendPushNotification({
       uid,
       type: "draft_failed",
