@@ -1,10 +1,5 @@
-/**
- * Firebase Functions entry point.
- * Initializes Admin SDK and registers all Cloud Function triggers.
- */
-
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions/v1";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineString } from "firebase-functions/params";
 
 import { runScheduler } from "./scheduler/runScheduler";
@@ -14,20 +9,19 @@ admin.initializeApp();
 
 const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
 
-/**
- * Scheduler kill switch. Default: disabled
- */
+// pause the scheduler without redeploying — just flip this in Firebase config
 const SCHEDULER_ENABLED = defineString("SCHEDULER_ENABLED", {
-  default: "false",
+  default: "true",
 });
 
-/**
- * Runs every 5 minutes in production, every 1 minute in emulator.
- * Wakes the scheduler engine — scheduling logic lives in runScheduler().
- */
-export const scheduledRunScheduler = functions.pubsub
-  .schedule(isEmulator ? "every 1 minutes" : "every 5 minutes")
-  .onRun(async () => {
+// had to move to v2 specifically for secrets injection — v1 doesn't support it
+export const scheduledRunScheduler = onSchedule(
+  {
+    schedule: isEmulator ? "every 1 minutes" : "every 5 minutes",
+    region: "us-central1",
+    secrets: ["OPENAI_API_KEY"],
+  },
+  async () => {
     if (SCHEDULER_ENABLED.value() !== "true") {
       console.log("[schedulerTrigger] Scheduler disabled. Skipping run.");
       return;
@@ -35,8 +29,9 @@ export const scheduledRunScheduler = functions.pubsub
 
     console.log("[schedulerTrigger] fired");
     await runScheduler();
-  });
+  },
+);
 
-// All function exports in one place for visibility
+// these don't need secrets so they stay on v1
 export { onReminderCreate };
 export { deleteReminder } from "./tools/deleteReminder";
