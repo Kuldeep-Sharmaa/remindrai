@@ -153,15 +153,6 @@ export default function PromptInput({
       />
 
       <div className="flex items-center justify-between text-xs">
-        <div className="text-gray-500 text-xs">
-          Use a clear direction.
-          <Link
-            to="/docs/writing-direction"
-            className="text-brand underline ml-1"
-          >
-            Learn more
-          </Link>
-        </div>
         <div className="text-gray-500">
           {localValue.length}/{maxLength} characters
         </div>

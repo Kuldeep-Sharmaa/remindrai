@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -56,6 +56,8 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     validation: formValidation,
     openPreferences,
     isNextRunValid,
+    userProfile,
+    platform,
   } = form || {};
 
   useEffect(() => {
@@ -165,7 +167,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
       <div className="max-w-5xl mx-auto w-full">
         <form
           onSubmit={handleSave}
-          className="space-y-8 bg-bgLight/80 dark:bg-bgDark/50 backdrop-blur-lg rounded-2xl border border-border/40 shadow-xl p-5 sm:p-8 transition-all"
+          className="space-y-8 bg-bgLight/80 dark:bg-bgDark/50 backdrop-blur-lg rounded-2xl border border-border/40 shadow-xl p-2 pt-4 sm:p-8 transition-all"
           aria-labelledby="remindr-form-title"
         >
           <div className="text-center sm:text-left">
@@ -200,8 +202,22 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
               inputRef={promptInputRef}
             />
             {reminderType === "ai" && (
-              <PromptExamples onSelect={setPrompt} inputRef={promptInputRef} />
+              <PromptExamples
+                onSelect={setPrompt}
+                inputRef={promptInputRef}
+                role={userProfile?.role}
+                platform={platform || userProfile?.platform}
+              />
             )}
+            <div className="text-gray-500 text-xs pt-2">
+              Use a clear direction.
+              <Link
+                to="/docs/writing-direction"
+                className="text-brand underline ml-1"
+              >
+                Learn more
+              </Link>
+            </div>
           </div>
 
           <div className="mt-4 space-y-3">
