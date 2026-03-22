@@ -1,12 +1,17 @@
 // FRONTEND CONTRACT — these IDs must match exactly what the frontend sends to Firestore.
+//
+// Use `name` in the prompt.
+// Keep `name` short, grounded, and non-generic.
+// `description` is kept for future use and clarity, but this is not used in the prompt currently.
 
 type PromptEntity = {
   id: string;
-  name: string; // used in prompt — keep cues short (≤8 words)
-  description: string; // not used in prompt currently — kept for future use and clarity
+  name: string;
+  description: string;
 };
 
-// Firestore stores these as raw strings — normalize before lookup so we can be resilient to whitespace and capitalization issues
+// Firestore stores these as raw strings — normalize before lookup so we are resilient
+// to whitespace and capitalization issues.
 function normalize(value?: string): string {
   return value?.toLowerCase().trim() ?? "";
 }
@@ -26,25 +31,25 @@ const ROLE_MAP: Record<string, PromptEntity> = {
   },
   professional: {
     id: "professional",
-    name: "Professional — growing, learning, sharing the journey",
+    name: "Professional — working, improving, figuring things out",
     description:
       "a working professional sharing career growth, experiences, and real insights from their journey",
   },
   creator: {
     id: "creator",
-    name: "Creator — making things, building an audience",
+    name: "Creator — making things, testing ideas, sharing",
     description:
       "a creator sharing ideas, content experiences, and lessons from building and engaging an audience",
   },
   developer: {
     id: "developer",
-    name: "Developer — solving problems, building, learning daily",
+    name: "Developer — solving problems, building, debugging daily",
     description:
       "a developer building products and sharing technical experiences, learnings, and real challenges",
   },
   other: {
     id: "other",
-    name: "Other — sharing from a unique personal perspective",
+    name: "Other — sharing personal thoughts and experiences",
     description:
       "someone sharing personal experiences, thoughts, and insights from their own unique journey",
   },
@@ -59,19 +64,19 @@ const TONE_MAP: Record<string, PromptEntity> = {
   },
   friendly: {
     id: "friendly",
-    name: "Friendly — warm, simple, easy to connect",
+    name: "Friendly — simple, relaxed, easy to read",
     description:
       "a warm, simple, and easy-to-connect tone, like talking to someone directly",
   },
   thoughtful: {
     id: "thoughtful",
-    name: "Thoughtful — reflective, calm, meaningful",
+    name: "Thoughtful — reflective, calm, grounded",
     description:
       "a reflective and calm tone focused on meaningful insights and observations",
   },
   witty: {
     id: "witty",
-    name: "Witty — sharp, clever, slightly playful",
+    name: "Witty — sharp, clever, lightly playful",
     description: "a sharp, slightly playful tone with subtle cleverness",
   },
 };
@@ -79,7 +84,7 @@ const TONE_MAP: Record<string, PromptEntity> = {
 const PLATFORM_MAP: Record<string, PromptEntity> = {
   linkedin: {
     id: "linkedin",
-    name: "LinkedIn — professional, insightful, short paragraphs",
+    name: "LinkedIn — professional, clear, short paragraphs",
     description:
       "a professional platform where people share insights, experiences, and thoughtful reflections",
   },
@@ -96,7 +101,7 @@ const PLATFORM_MAP: Record<string, PromptEntity> = {
   },
 };
 
-// returning undefined is intentional — buildPrompt handles missing values gracefully
+// Returning undefined is intentional — buildPrompt handles missing values gracefully.
 export function mapRole(input?: string): PromptEntity | undefined {
   return ROLE_MAP[normalize(input)];
 }
