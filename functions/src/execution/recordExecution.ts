@@ -1,19 +1,10 @@
-/**
- * recordExecution.ts
- *
- * Logs execution events for auditing and debugging.
- * Best-effort writes - failures don't block execution.
- * Execution identity = reminderId + scheduledForUTC
- */
-
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-/**
- * Allowed execution statuses
- */
 export type ExecutionStatus =
   | "executed"
+  | "skipped"
+  | "skipped_limit"
   | "skipped_disabled"
   | "skipped_cap"
   | "skipped_error";
@@ -26,12 +17,9 @@ export interface RecordExecutionInput {
   status: ExecutionStatus;
   aiUsed: boolean;
   draftId?: string;
+  reason?: string; // optional context for skipped executions
 }
 
-/**
- * Records execution log for auditing and debugging.
- * Never throws.
- */
 export async function recordExecution(
   input: RecordExecutionInput,
 ): Promise<void> {
@@ -43,10 +31,10 @@ export async function recordExecution(
     status,
     aiUsed,
     draftId,
+    reason,
   } = input;
 
   try {
-    // Lazy access - ensures Admin is initialized
     const db = admin.firestore();
 
     const executionId = `${reminderId}_${scheduledForUTC}`;
@@ -59,6 +47,7 @@ export async function recordExecution(
       aiUsed: boolean;
       createdAt: FieldValue;
       draftId?: string;
+      reason?: string;
     } = {
       reminderId,
       reminderType,
@@ -68,9 +57,10 @@ export async function recordExecution(
       createdAt: FieldValue.serverTimestamp(),
     };
 
-    if (draftId) {
-      executionData.draftId = draftId;
-    }
+    if (draftId) executionData.draftId = draftId;
+
+    // only write reason when it's present — keeps clean records for normal executions
+    if (reason) executionData.reason = reason;
 
     await db
       .collection("users")
@@ -93,6 +83,6 @@ export async function recordExecution(
       status,
       error: error instanceof Error ? error.message : String(error),
     });
-    // Swallow error - logging doesn't block execution
+    // swallow — logging should never block execution
   }
 }
