@@ -14,7 +14,6 @@ const SCHEDULER_ENABLED = defineString("SCHEDULER_ENABLED", {
   default: "true",
 });
 
-// had to move to v2 specifically for secrets injection — v1 doesn't support it
 export const scheduledRunScheduler = onSchedule(
   {
     schedule: isEmulator ? "every 1 minutes" : "every 5 minutes",
@@ -32,6 +31,6 @@ export const scheduledRunScheduler = onSchedule(
   },
 );
 
-// these don't need secrets so they stay on v1
 export { onReminderCreate };
 export { deleteReminder } from "./tools/deleteReminder";
+export { addPrompt } from "./tools/addPrompt"; // callable — enforces active cap before any reminder write
