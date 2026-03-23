@@ -42,7 +42,6 @@ function buildPlatformLine(platformId?: string) {
 }
 
 function buildMemoryBlock(pastDrafts?: string[]): string {
-  // draft isn't enough signal — could just be an outlier in their writing
   if (!pastDrafts || pastDrafts.length < 2) return "";
 
   const valid = pastDrafts
@@ -65,7 +64,7 @@ export function buildPrompt(input: PromptInput): string {
     const topic = normalizeTopic(input.aiPrompt);
 
     const role = input.role?.name || "Person";
-    const tone = input.tone?.name || "Professional";
+    const tone = input.tone?.name || "Natural";
     const platform = input.platform?.name || "Social media";
 
     const platformLine = buildPlatformLine(input.platform?.id);
@@ -78,15 +77,18 @@ Platform: ${platform}
 
 Topic: ${topic}
 ${memoryBlock}
-Say it like you would to yourself. If there is a specific moment or detail, start there.
+${platformLine}
+
+If there is a specific moment or detail, start there.
 
 Focus on one part of this.
 Avoid explaining everything.
 
-Write it like a real thought.
+Write like someone noting something down, not explaining it.
 Keep the language simple and direct.
 
-${platformLine}
+Avoid smooth transitions between sentences.
+Do not wrap things up cleanly at the end.
 
 No emojis. No em dashes (—).
 `.trim();
