@@ -1,3 +1,5 @@
+// AI is fully wired — just needs the API key in Secret Manager to go live
+
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 
 import { checkExecutionExists } from "./idempotency";
@@ -9,6 +11,7 @@ import { fetchPastDrafts } from "../drafts/fetchPastDrafts";
 import { buildPrompt } from "../ai/buildPrompt";
 import { callAIOnce } from "../ai/callAIOnce";
 import { mapRole, mapTone, mapPlatform } from "../ai/promptMappings";
+import { checkDraftLimit } from "../drafts/checkDraftLimit";
 
 type ReminderData = {
   enabled: boolean;
@@ -20,8 +23,8 @@ type ReminderData = {
     role?: string;
     tone?: string;
     platform?: string;
-    aiPrompt?: string; // only on ai prompts
-    message?: string; // only on simple notes
+    aiPrompt?: string; // only on ai reminders
+    message?: string; // only on simple reminders
   };
 };
 
@@ -30,6 +33,46 @@ function extractAdvanceableReminderData(reminderData: ReminderData) {
     frequency: reminderData.frequency,
     schedule: reminderData.schedule,
   };
+}
+
+// frontend catches this first — but we check again here because we can't
+// trust that every reminder was saved through the current frontend version
+function isWeakInput(text?: string): boolean {
+  if (!text) return true;
+
+  const clean = text.trim();
+
+  if (clean.length < 5) return true;
+
+  // single long word with no spaces = keyboard mash
+  if (!clean.includes(" ") && clean.length > 12) return true;
+
+  // needs at least 2 words — "asdasd bug" still passes otherwise
+  const words = clean.split(/\s+/);
+  if (words.length < 2) return true;
+
+  // repeated single character e.g. "aaaaaaaaaaaaaaa"
+  if (/^(.)\1+$/.test(clean)) return true;
+
+  // mostly non-letter characters
+  const alphaRatio = clean.replace(/[^a-zA-Z]/g, "").length / clean.length;
+  if (alphaRatio < 0.5) return true;
+
+  // at least 1 word must look real (3+ chars with a vowel)
+  // catches "kdvkd d d d d" and "idvisdjifoifa kdvkd" style garbage
+  const hasVowel = /[aeiouAEIOU]/;
+  const realWordCount = words.filter(
+    (w) => w.length >= 3 && hasVowel.test(w),
+  ).length;
+  if (realWordCount === 0) return true;
+
+  // real English has ~35%+ vowels — keyboard mash has almost none
+  // threshold at 0.12 to catch obvious garbage without blocking real short inputs
+  const vowelCount = clean.replace(/[^aeiouAEIOU]/g, "").length;
+  const vowelRatio = vowelCount / clean.replace(/\s/g, "").length;
+  if (vowelRatio < 0.12) return true;
+
+  return false;
 }
 
 export async function executeReminder(
@@ -68,9 +111,69 @@ export async function executeReminder(
     let aiUsed = false;
 
     if (reminderType === "ai") {
-      // no prompt means nothing to generate from — fail early
-      if (!reminderData.content?.aiPrompt?.trim()) {
+      const aiPrompt = reminderData.content?.aiPrompt;
+
+      // no prompt = nothing to generate from
+      if (!aiPrompt?.trim()) {
         throw new Error("Missing aiPrompt for AI reminder");
+      }
+
+      // garbage input — skip AI, advance so it doesn't re-fire every 5 mins
+      if (isWeakInput(aiPrompt)) {
+        console.warn(
+          "[executeReminder] Weak input detected — skipping AI call",
+          {
+            uid,
+            reminderId,
+          },
+        );
+
+        await recordExecution({
+          uid,
+          reminderId,
+          reminderType,
+          scheduledForUTC,
+          status: "skipped",
+          aiUsed: false,
+          reason: "weak_input",
+        });
+
+        await advanceReminder({
+          reminderRef: reminderDoc.ref,
+          reminderData: extractAdvanceableReminderData(reminderData),
+          scheduledForUTC,
+        });
+
+        return;
+      }
+
+      // check rolling 24h limit before making any AI call
+      const { limited, count } = await checkDraftLimit(uid);
+
+      if (limited) {
+        console.warn("[executeReminder] Draft limit reached — skipping", {
+          uid,
+          reminderId,
+          count,
+        });
+
+        await recordExecution({
+          uid,
+          reminderId,
+          reminderType,
+          scheduledForUTC,
+          status: "skipped_limit",
+          aiUsed: false,
+          reason: "draft_limit_reached",
+        });
+
+        await advanceReminder({
+          reminderRef: reminderDoc.ref,
+          reminderData: extractAdvanceableReminderData(reminderData),
+          scheduledForUTC,
+        });
+
+        return;
       }
 
       let drafts: string[] = [];
@@ -86,7 +189,7 @@ export async function executeReminder(
       const pastDrafts = drafts.length >= 2 ? drafts : undefined;
 
       const prompt = buildPrompt({
-        aiPrompt: reminderData.content?.aiPrompt,
+        aiPrompt,
         role: mapRole(reminderData.content?.role),
         tone: mapTone(reminderData.content?.tone),
         platform: mapPlatform(reminderData.content?.platform),
@@ -94,6 +197,12 @@ export async function executeReminder(
       });
 
       draftContent = await callAIOnce(prompt);
+
+      // AI occasionally returns very short or empty content — don't save garbage
+      if (!draftContent || draftContent.trim().length < 20) {
+        throw new Error("AI returned empty or invalid content");
+      }
+
       aiUsed = true;
     } else {
       draftContent = reminderData.content?.message?.trim() || "Reminder";
