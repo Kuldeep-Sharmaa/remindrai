@@ -1,7 +1,7 @@
 {
   "name": "remindrai",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A proactive AI content assistant that creates and delivers fresh, on-brand drafts at the right time.",
   "type": "module",
   "scripts": {
