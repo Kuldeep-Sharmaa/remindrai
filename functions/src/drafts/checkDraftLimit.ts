@@ -1,22 +1,32 @@
 import * as admin from "firebase-admin";
+import { DateTime } from "luxon";
 
 const DRAFT_LIMIT = 3;
-const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 export interface DraftLimitResult {
   limited: boolean;
   count: number;
 }
 
-// checks how many AI drafts this user has generated in the last 24 hours
-// uses executions collection — so deleting a draft doesn't restore quota
+// 3 AI drafts per calendar day — resets at midnight in the user's own timezone
+// rolling 24h felt fair to us but users think in days, not time windows
 export async function checkDraftLimit(uid: string): Promise<DraftLimitResult> {
   try {
     const db = admin.firestore();
 
-    const windowStart = admin.firestore.Timestamp.fromDate(
-      new Date(Date.now() - WINDOW_MS),
-    );
+    // read user's timezone — written by TimezoneSync when user confirms their zone
+    // falls back to UTC if not set yet (new accounts, first session)
+    const userDoc = await db.collection("users").doc(uid).get();
+    const userTimezone = userDoc.data()?.timezone || "UTC";
+
+    // start of today in the user's local timezone — this is what "today" means to them
+    const startOfToday = DateTime.now()
+      .setZone(userTimezone)
+      .startOf("day")
+      .toUTC()
+      .toJSDate();
+
+    const windowStart = admin.firestore.Timestamp.fromDate(startOfToday);
 
     const snapshot = await db
       .collection("users")
@@ -41,7 +51,7 @@ export async function checkDraftLimit(uid: string): Promise<DraftLimitResult> {
       error: error instanceof Error ? error.message : String(error),
     });
 
-    // fail open — don't block execution if the check itself fails
+    // fail open — a broken limit check should never silently kill a user's draft
     return { limited: false, count: 0 };
   }
 }
