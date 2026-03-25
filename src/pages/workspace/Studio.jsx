@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Spinner from "../../components/Ui/LoadingSpinner";
 import UserPreferencesCard from "../../features/remindersystem/components/UserPreferencesCard";
 import ReminderListContainer from "../../features/remindersystem/components/ReminderList/ReminderListContainer";
+import DraftLimit from "../../features/remindersystem/components/DraftLimit";
 import { useAuthContext } from "../../context/AuthContext";
 import PageTransition from "../../components/workspaceAnimations/PageTransition";
 
@@ -22,7 +23,7 @@ const ctaVariants = {
   },
 };
 
-const Reminders = () => {
+const Studio = () => {
   const navigate = useNavigate();
 
   const {
@@ -91,6 +92,11 @@ const Reminders = () => {
             </button>
           </motion.section>
 
+          {/* Quota status - always visible, warns early before user hits create */}
+          <section className="mb-6">
+            <DraftLimit uid={user?.uid} />
+          </section>
+
           {/* List */}
           <section className="mt-6">
             <ReminderListContainer
@@ -105,4 +111,4 @@ const Reminders = () => {
   );
 };
 
-export default Reminders;
+export default Studio;
