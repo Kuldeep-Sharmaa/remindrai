@@ -31,6 +31,9 @@ const REMINDERS_COL = "reminders";
 const functions = getFunctions();
 const deleteReminderCallable = httpsCallable(functions, "deleteReminder");
 
+// callable instead of direct write — backend enforces the active cap before saving
+const addPromptCallable = httpsCallable(functions, "addPrompt");
+
 // Get user reminders collection reference
 function getUserRemindersCol(uid) {
   if (!uid) throw new Error("uid is required");
@@ -138,10 +141,14 @@ export async function addReminder(payload) {
   const docData = buildIntentDoc(payload, schedule);
 
   try {
-    const docRef = doc(colRef);
-    await setDoc(docRef, docData);
-    return { id: docRef.id, ...docData };
+    const res = await addPromptCallable(docData);
+    return { id: res.data.id, ...docData };
   } catch (err) {
+    // backend throws resource-exhausted when active AI reminder cap is hit
+    // surface it cleanly so ReminderForm can show the right message
+    if (err?.code === "functions/resource-exhausted") {
+      throw new Error("active_cap_reached");
+    }
     console.error("addReminder failed:", err);
     throw err;
   }
