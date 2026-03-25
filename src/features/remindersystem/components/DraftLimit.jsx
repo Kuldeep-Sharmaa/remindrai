@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 const LIMIT = 3;
 
-// bars represent active prompt slots — heading gives enough context, no label needed
+// bars represent active prompt slots
 function PromptBars({ filled, limited }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -36,16 +36,12 @@ export default function DraftLimit({ uid }) {
 
   return (
     <div className="mb-4">
-      {/* heading */}
       <h2 className="text-2xl font-grotesk font-semibold text-textLight dark:text-textDark mb-3">
         Active Prompts
       </h2>
 
-      {/* bars — visual slot indicator, silent when under limit */}
-
       <PromptBars filled={activeCount} limited={draftLimited} />
 
-      {/* status block — only speaks when something needs attention */}
       <div className="mt-3 flex flex-col gap-1">
         {atActiveLimit && !draftLimited && (
           <p className="text-xs font-medium text-yellow-500 dark:text-yellow-400">
@@ -65,7 +61,7 @@ export default function DraftLimit({ uid }) {
           </p>
         )}
 
-        {/* shown only when a limit is hit — quiet footnote, not a cta */}
+        {/* shown only when a limit is hit */}
         {isAnyLimitHit && (
           <a
             href="/docs/usage-limits"
