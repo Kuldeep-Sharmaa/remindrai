@@ -9,7 +9,7 @@ export default function Timezone() {
       steps={[
         {
           label: "Automatic detection",
-          body: "Your timezone is detected from your device.",
+          body: "Remindrai detects **automatically** your timezone from your device.This ensures drafts are delivered at the right local time without manual setup.",
         },
         {
           label: "Keep your device time correct",
@@ -17,7 +17,7 @@ export default function Timezone() {
         },
         {
           label: "If timing feels off",
-          body: "Check your device timezone settings. The app does not override it.",
+          body: "Check your device timezone settings. RemindrAI relies on your device time, so if it’s incorrect, draft delivery may be affected.",
         },
       ]}
       note="Timezone cannot be changed inside the app."

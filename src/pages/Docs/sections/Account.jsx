@@ -9,11 +9,11 @@ export default function Account() {
       steps={[
         {
           label: "Change password",
-          body: "If your account was created with email and password, you can update it anytime from Settings.",
+          body: "If your account was created with email and **password**, only the account owner can update it anytime from Settings. If you signed up with **Google** or **GitHub**, password management is handled through those services.",
         },
         {
           label: "Delete account",
-          body: "You can permanently delete your account from Settings. This removes your prompts, drafts, and content setup.",
+          body: "You can permanently delete your account from Settings. This removes your prompts, drafts, and content setup. All your data will be **permanently deleted and cannot be recovered**.",
         },
       ]}
       note="Account deletion is permanent and cannot be undone."

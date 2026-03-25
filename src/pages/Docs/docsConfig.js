@@ -11,6 +11,7 @@ import Notifications from "./sections/Notifications";
 import Preferences from "./sections/Preferences";
 import Account from "./sections/Account";
 import WritingDirection from "./sections/WritingDirection";
+import UsageLimits from "./sections/UsageLimits";
 
 export const NAV = [
   {
@@ -30,6 +31,7 @@ export const NAV = [
       { id: "content-inbox", label: "Content inbox" },
       { id: "manage-prompts", label: "Managing prompts" },
       { id: "writing-direction", label: "Writing direction" },
+      { id: "usage-limits", label: "Usage limits" },
     ],
   },
   {
@@ -89,6 +91,12 @@ export const SECTION_MAP = {
     component: WritingDirection,
     title: "How to write good prompts for better drafts?",
     intro: "Good prompts lead to better drafts.  ",
+  },
+
+  "usage-limits": {
+    component: UsageLimits,
+    title: "How do usage limits work?",
+    intro: "Active prompts and daily drafts explained.",
   },
 
   timezone: {

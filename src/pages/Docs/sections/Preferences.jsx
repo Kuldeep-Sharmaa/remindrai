@@ -1,5 +1,6 @@
 import React from "react";
 import DocPage from "../components/DocPage";
+import { Link } from "react-router-dom";
 
 export default function Preferences() {
   return (
@@ -16,7 +17,15 @@ export default function Preferences() {
           body: "Adjust how drafts should be delivered and how the system behaves.",
         },
       ]}
-      note="Drafts follow your content setup and preferences together."
+      note={
+        <>
+          System follow your content setup and{" "}
+          <Link to="/workspace/settings/preferences" className="underline">
+            preferences
+          </Link>{" "}
+          settings.
+        </>
+      }
       prev="notifications"
       next="account"
     />

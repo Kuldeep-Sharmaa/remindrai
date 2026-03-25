@@ -54,13 +54,47 @@ export default function DocPage({ title, intro, steps, note }) {
             <span className="font-grotesk text-xs text-brand font-medium w-5 sm:w-6 flex-shrink-0 pt-0.5 sm:pt-1">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <div className="flex flex-col gap-1">
-              <p className="font-grotesk text-sm font-semibold text-textLight dark:text-textDark">
-                {step.label}
-              </p>
+
+            <div className="flex flex-col gap-2">
+              {/* Label */}
+              {step.label && (
+                <h3 className="font-grotesk text-sm sm:text-base font-semibold text-textLight dark:text-textDark">
+                  {step.label}
+                </h3>
+              )}
+
+              {/* Body */}
               <p className="font-inter text-sm sm:text-base text-textLight/80 dark:text-textDark/80 leading-relaxed">
                 <Bold text={step.body} />
               </p>
+
+              {/* Optional label above points */}
+              {step.pointsLabel && (
+                <p className="font-inter text-sm sm:text-base text-textLight/80 dark:text-textDark/80 leading-relaxed">
+                  {step.pointsLabel}
+                </p>
+              )}
+
+              {/* Points */}
+              {step.points && (
+                <ul className="flex flex-col gap-1 pl-4">
+                  {step.points.map((point, idx) => (
+                    <li
+                      key={idx}
+                      className="text-sm sm:text-base text-textLight/80 dark:text-textDark/80 leading-relaxed"
+                    >
+                      • <span className="font-medium">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Footer */}
+              {step.footer && (
+                <p className="text-sm sm:text-base text-textLight/70 dark:text-textDark/70 leading-relaxed">
+                  {step.footer}
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -87,7 +121,7 @@ export default function DocPage({ title, intro, steps, note }) {
           href="/contact"
           className="inline-flex items-center gap-1.5 font-inter text-xs text-muted hover:text-brand transition-colors duration-150"
         >
-          Something unclear? Contact support
+          Something missing or unclear? Contact us.
           <ArrowUpRight className="w-3 h-3" />
         </a>
       </div>

@@ -9,7 +9,7 @@ export default function CreateAccount() {
       steps={[
         {
           label: "Open RemindrAI",
-          body: "Go to remindrai.com and select **Create account**.",
+          body: "Go to **remindrai.vercel.app** and select **Create account**.",
         },
         {
           label: "Enter your details",
@@ -17,11 +17,11 @@ export default function CreateAccount() {
         },
         {
           label: "Or continue with Google or GitHub",
-          body: "Sign up using an existing account. No email verification is needed.",
+          body: "Sign up using an existing account. No email verification is needed for Google authentication.",
         },
         {
           label: "Verify your email",
-          body: "If you signed up with email and password, a verification email is sent. Open it to continue. If it’s not visible, check the spam folder.",
+          body: "If you signed up with email and password, a **verification email** is sent. Open it to continue. If it’s not visible, check the spam **folder**.",
         },
       ]}
       next="verify-email"
