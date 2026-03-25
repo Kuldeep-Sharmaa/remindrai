@@ -10,6 +10,8 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 import useReminderForm from "../../hooks/useReminderForm";
+import useDraftLimit from "../../hooks/useDraftLimit";
+import useActiveReminderLimit from "../../hooks/useActiveReminderLimit";
 import PromptInput from "../ReminderForm/PromptInput";
 import PromptExamples from "../ReminderForm/PromptExamples";
 import FrequencySelector from "../ReminderForm/FrequencySelector";
@@ -40,7 +42,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
   const closeBtnRef = useRef(null);
   const promptInputRef = useRef(null);
 
-  const form = useReminderForm();
+  const form = useReminderForm({ reminderType });
   const {
     prompt = "",
     setPrompt = () => {},
@@ -59,6 +61,12 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
     userProfile,
     platform,
   } = form || {};
+
+  const { limited: draftLimited } = useDraftLimit(userProfile?.uid);
+  const { atActiveLimit } = useActiveReminderLimit(userProfile?.uid);
+
+  // both limits must pass for AI reminders — button is the only signal in the form
+  const isAiBlocked = reminderType === "ai" && (draftLimited || atActiveLimit);
 
   useEffect(() => {
     if (form?.reminderType && form.reminderType !== reminderType) {
@@ -278,13 +286,13 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
 
             <motion.button
               type="submit"
-              disabled={!isValid || saving || isActivating}
+              disabled={!isValid || saving || isActivating || isAiBlocked}
               whileTap={
                 isValid && !saving && !isActivating ? { scale: 0.98 } : {}
               }
               className={`relative w-full sm:w-auto min-w-[140px] px-5 py-2.5 text-sm sm:text-base font-semibold rounded-md transition-all duration-200 overflow-hidden
                 ${
-                  !isValid || saving || isActivating
+                  !isValid || saving || isActivating || isAiBlocked
                     ? "bg-brand/40 cursor-not-allowed"
                     : "bg-brand hover:brightness-110"
                 }`}
@@ -300,6 +308,17 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
                     className="flex items-center justify-center"
                   >
                     <ActivatingButton reminderType={reminderType} />
+                  </motion.span>
+                ) : isAiBlocked ? (
+                  <motion.span
+                    key="blocked"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="text-white/60"
+                  >
+                    Limit Reached
                   </motion.span>
                 ) : (
                   <motion.span
