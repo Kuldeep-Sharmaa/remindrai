@@ -17,7 +17,6 @@ import useReminderValidation from "./useReminderValidation";
 
 const LS_PROMPT_KEY = "remindr_prompt_autosave_v1";
 
-// Safe localStorage helpers
 function safeLocalGet(key) {
   try {
     return localStorage.getItem(key);
@@ -28,19 +27,14 @@ function safeLocalGet(key) {
 function safeLocalSet(key, value) {
   try {
     localStorage.setItem(key, value);
-  } catch {
-    // Ignore abort errors
-  }
+  } catch {}
 }
 function safeLocalRemove(key) {
   try {
     localStorage.removeItem(key);
-  } catch {
-    // Ignore abort errors
-  }
+  } catch {}
 }
 
-// Simple UUID for client-side idempotency tracking
 function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -49,7 +43,6 @@ function uuidv4() {
   });
 }
 
-// Default schedule starts 5 mins in future
 function makeDefaultSchedule(confirmedTimezone) {
   const timezone =
     confirmedTimezone ||
@@ -75,19 +68,16 @@ export default function useReminderForm(opts = {}) {
   const initial = opts.initial ?? null;
   const onSaved = typeof opts.onSaved === "function" ? opts.onSaved : null;
 
-  // Track if user has touched the form
   const [isActive, setIsActive] = useState(false);
 
   const activate = useCallback(() => {
     if (!isActive) setIsActive(true);
   }, [isActive]);
 
-  // Validation only runs when active
   const { validate: validateReminder } = useReminderValidation({
     enabled: isActive,
   });
 
-  // Form state
   const [prompt, setPrompt] = useState(() => {
     if (initial?.prompt) return initial.prompt;
     return safeLocalGet(LS_PROMPT_KEY) || "";
@@ -117,18 +107,15 @@ export default function useReminderForm(opts = {}) {
       : makeDefaultSchedule(providerTimezone);
   });
 
-  // UI status
   const [saving, setSaving] = useState(false);
   const [generating] = useState(false);
   const [lastError, setLastError] = useState(null);
 
-  // Refs for safety
   const apiInFlightRef = useRef(false);
   const saveAbortControllerRef = useRef(null);
   const lastIdempotencyKeyRef = useRef(null);
   const unmountedRef = useRef(false);
 
-  // Setters with auto-activate
   const setPromptInternal = useCallback(
     (val) => {
       activate();
@@ -166,7 +153,6 @@ export default function useReminderForm(opts = {}) {
     [activate],
   );
 
-  // Ensure valid timezone
   const scheduleWithTZ = useMemo(() => {
     const tz =
       scheduleInternal?.timezone ||
@@ -184,8 +170,6 @@ export default function useReminderForm(opts = {}) {
     };
   }, [scheduleInternal, providerTimezone]);
 
-  // Calculate next run for UI preview only
-  // We don't send this to backend
   const { nextRunIso: nextRunIsoFromHook, nextRunHuman: nextRunHumanFromHook } =
     useNextRun({
       frequency,
@@ -193,11 +177,13 @@ export default function useReminderForm(opts = {}) {
       enabled: isActive,
     });
 
-  // Run validation
   const uiValidation = useMemo(() => {
     if (!isActive) return { ok: false, errors: {} };
 
-    const reminderType = initial?.reminderType || "ai";
+    // reminderType comes from parent component — hook doesn't own this state
+    // without this, simple notes always validate as "ai" and trigger WEAK_INPUT
+    const reminderType = opts.reminderType || initial?.reminderType || "ai";
+
     const params = {
       reminderType,
       aiPrompt: reminderType === "ai" ? prompt : undefined,
@@ -211,18 +197,24 @@ export default function useReminderForm(opts = {}) {
     } catch {
       return { ok: false, errors: { _global: "Validation failed." } };
     }
-  }, [isActive, prompt, frequency, scheduleWithTZ, validateReminder, initial]);
+  }, [
+    isActive,
+    opts.reminderType,
+    prompt,
+    frequency,
+    scheduleWithTZ,
+    validateReminder,
+    initial,
+  ]);
 
   const isNextRunValid = !!nextRunIsoFromHook;
 
-  // Autosave draft to localStorage
   useEffect(() => {
     if (!isActive) return;
     const t = setTimeout(() => safeLocalSet(LS_PROMPT_KEY, prompt || ""), 700);
     return () => clearTimeout(t);
   }, [prompt, isActive]);
 
-  // Toggle weekday in selector
   const toggleWeekday = useCallback(
     (weekday) => {
       activate();
@@ -244,12 +236,9 @@ export default function useReminderForm(opts = {}) {
         saveAbortControllerRef.current.abort();
         saveAbortControllerRef.current = null;
       }
-    } catch {
-      // Ignore abort errors
-    }
+    } catch {}
   }, []);
 
-  // Build intent-only payload for backend
   const buildCanonicalPayload = useCallback(
     ({ normalized, overrides = {} }) => {
       if (!normalized) throw new Error("Normalized payload missing.");
@@ -269,7 +258,6 @@ export default function useReminderForm(opts = {}) {
       const resolvedPlatform =
         platform && platform.length > 0 ? platform : userProfile?.platform;
 
-      // Build schedule
       const cleanSchedule = {
         timezone: normalized.schedule?.timezone,
         timeOfDay: normalized.schedule?.localTime || "09:00",
@@ -282,7 +270,6 @@ export default function useReminderForm(opts = {}) {
         cleanSchedule.weekDays = normalized.schedule.daysOfWeek;
       }
 
-      // Base payload - no nextRunAtUTC, no enabled
       const payload = {
         ownerId,
         reminderType,
@@ -290,15 +277,11 @@ export default function useReminderForm(opts = {}) {
         schedule: cleanSchedule,
       };
 
-      // Build content
       if (reminderType === "ai") {
-        const content = {
-          aiPrompt: normalized.content?.aiPrompt,
-        };
+        const content = { aiPrompt: normalized.content?.aiPrompt };
         if (resolvedTone) content.tone = resolvedTone;
         if (resolvedPlatform) content.platform = resolvedPlatform;
         if (resolvedRole) content.role = resolvedRole;
-
         payload.content = content;
       } else {
         payload.content = {
@@ -313,7 +296,6 @@ export default function useReminderForm(opts = {}) {
     [userProfile, frequency, tone, platform, initial],
   );
 
-  // Save to backend
   const save = useCallback(
     async (overrides = {}) => {
       activate();
@@ -388,7 +370,6 @@ export default function useReminderForm(opts = {}) {
     ],
   );
 
-  // Keyboard shortcut (Cmd+Enter)
   useEffect(() => {
     const handler = (e) => {
       const isSubmit = (e.ctrlKey || e.metaKey) && e.key === "Enter";
@@ -413,7 +394,6 @@ export default function useReminderForm(opts = {}) {
     return () => window.removeEventListener("keydown", handler);
   }, [save, saving, generating, isActive]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       unmountedRef.current = true;
@@ -422,7 +402,6 @@ export default function useReminderForm(opts = {}) {
   }, [cancelInFlight]);
 
   return {
-    // Form inputs
     prompt,
     setPrompt: setPromptInternal,
     platform,
@@ -433,12 +412,8 @@ export default function useReminderForm(opts = {}) {
     setFrequency: setFrequencyInternal,
     schedule: scheduleWithTZ,
     setSchedule,
-
-    // Preview only - never sent to backend
     nextRunHuman: nextRunHumanFromHook,
     isNextRunValid,
-
-    // Meta
     saving,
     generating,
     lastError,
