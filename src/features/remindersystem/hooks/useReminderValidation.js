@@ -1,26 +1,49 @@
-// ============================================================================
-// 📁 useReminderValidation.js
-// ----------------------------------------------------------------------------
-// Purpose:
-//   Centralized validation + normalization for reminder form data.
-//
-// Goals:
-//   - Separate AI vs SIMPLE content rules
-//   - Produce normalized payload on success so client can write safely
-//   - Compute canonical next-run UTC for scheduling sanity checks
-//   - Keep a pure function (unit-testable) and a React hook wrapper
-// ----------------------------------------------------------------------------
-
 import { useCallback } from "react";
 import { DateTime } from "luxon";
 
-// --- Defaults & constants ---
-const DEFAULT_MIN_PROMPT_LENGTH = 1; // baseline for simple message
-const DEFAULT_MIN_PROMPT_LENGTH_AI = 8; // recommended for ai-style reminders
+const DEFAULT_MIN_PROMPT_LENGTH = 1;
+const DEFAULT_MIN_PROMPT_LENGTH_AI = 8;
 const DEFAULT_MAX_WEEKDAYS = 4;
 const VALID_FREQUENCIES = ["one_time", "daily", "weekly"];
 
-// --- Helpers ---------------------------------------------------------------
+// catches keyboard mash and garbage input before it wastes a draft slot
+function isWeakInput(text) {
+  if (!text) return true;
+
+  const clean = text.trim();
+
+  if (clean.length < 5) return true;
+
+  // single long word with no spaces = keyboard mash e.g. "kjojogioiepefsdfsdfd"
+  if (!clean.includes(" ") && clean.length > 12) return true;
+
+  // needs at least 2 words — "asdasd bug" still passes otherwise
+  const words = clean.split(/\s+/);
+  if (words.length < 2) return true;
+
+  // repeated single character e.g. "aaaaaaaaaaaaaaa"
+  if (/^(.)\1+$/.test(clean)) return true;
+
+  // mostly non-letter characters = noise
+  const alphaRatio = clean.replace(/[^a-zA-Z]/g, "").length / clean.length;
+  if (alphaRatio < 0.5) return true;
+
+  // at least 1 word must look real (3+ chars with a vowel)
+  // catches "kdvkd d d d d" and "idvisdjifoifa kdvkd" style garbage
+  const hasVowel = /[aeiouAEIOU]/;
+  const realWordCount = words.filter(
+    (w) => w.length >= 3 && hasVowel.test(w),
+  ).length;
+  if (realWordCount === 0) return true;
+
+  // real English has ~35%+ vowels — keyboard mash has almost none
+  // threshold at 0.12 to catch obvious garbage without blocking real short inputs
+  const vowelCount = clean.replace(/[^aeiouAEIOU]/g, "").length;
+  const vowelRatio = vowelCount / clean.replace(/\s/g, "").length;
+  if (vowelRatio < 0.12) return true;
+
+  return false;
+}
 
 function normalizeWeekdays(input) {
   if (!Array.isArray(input)) return null;
@@ -63,15 +86,11 @@ function computeNextRunIso(schedule) {
     if (kind === "one_time") {
       if (!localDate) return null;
       const candidate = DateTime.fromISO(
-        `${localDate}T${String(hh).padStart(2, "0")}:${String(mm).padStart(
-          2,
-          "0"
-        )}`,
-        { zone: timezone }
+        `${localDate}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`,
+        { zone: timezone },
       );
       if (!candidate.isValid) return null;
-      // 🆕 require strictly in future
-      if (candidate <= now) return null; // this triggers TIME_IN_PAST
+      if (candidate <= now) return null;
       return candidate.toUTC().toISO();
     }
 
@@ -113,8 +132,6 @@ function computeNextRunIso(schedule) {
   return null;
 }
 
-// --- Main validator --------------------------------------------------------
-
 export function validateReminderPure(params = {}, options = {}) {
   const {
     reminderType,
@@ -143,7 +160,6 @@ export function validateReminderPure(params = {}, options = {}) {
       ? "AI"
       : "SIMPLE";
 
-  // --- Content validation ---
   const rawAi = typeof aiPrompt === "string" ? aiPrompt : undefined;
   const rawMsg = typeof message === "string" ? message : undefined;
   const fallback = typeof legacyPrompt === "string" ? legacyPrompt : "";
@@ -160,6 +176,19 @@ export function validateReminderPure(params = {}, options = {}) {
         },
       };
     }
+
+    // catches garbage like "kjojogioiepefsdfsdfd" — no point saving a draft slot for this
+    if (isWeakInput(candidate)) {
+      return {
+        ok: false,
+        errorCode: "WEAK_INPUT",
+        errors: {
+          aiPrompt:
+            "This doesn’t look like a clear idea yet. Try one of the suggestions below.",
+        },
+      };
+    }
+
     content.aiPrompt = candidate.slice(0, 2000);
   } else {
     const candidate = (rawMsg ?? fallback ?? "").trim();
@@ -175,7 +204,6 @@ export function validateReminderPure(params = {}, options = {}) {
     content.message = candidate.slice(0, 2000);
   }
 
-  // --- Frequency ---
   if (!VALID_FREQUENCIES.includes(frequency)) {
     return {
       ok: false,
@@ -184,7 +212,6 @@ export function validateReminderPure(params = {}, options = {}) {
     };
   }
 
-  // --- Timezone ---
   const tz =
     typeof scheduleWithTZ?.timezone === "string" &&
     scheduleWithTZ.timezone.length > 0
@@ -206,7 +233,6 @@ export function validateReminderPure(params = {}, options = {}) {
     };
   }
 
-  // --- Time ---
   const timeRaw =
     scheduleWithTZ?.timeOfDay ||
     scheduleWithTZ?.time ||
@@ -222,9 +248,7 @@ export function validateReminderPure(params = {}, options = {}) {
   }
   const hh = Number(timeMatch[1]);
   const mm = Number(timeMatch[2]);
-  const canonicalLocalTime = `${String(hh).padStart(2, "0")}:${String(
-    mm
-  ).padStart(2, "0")}`;
+  const canonicalLocalTime = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 
   const normalizedSchedule = {
     kind: frequency,
@@ -232,7 +256,6 @@ export function validateReminderPure(params = {}, options = {}) {
     localTime: canonicalLocalTime,
   };
 
-  // --- One-time date ---
   if (frequency === "one_time") {
     const dateRaw = scheduleWithTZ?.date;
     if (!dateRaw) {
@@ -243,7 +266,6 @@ export function validateReminderPure(params = {}, options = {}) {
       };
     }
 
-    // 🆕 Validate future time before computeNextRun
     const candidate = DateTime.fromISO(`${dateRaw}T${canonicalLocalTime}`, {
       zone: tz,
     });
@@ -256,7 +278,6 @@ export function validateReminderPure(params = {}, options = {}) {
       };
     }
     if (candidate <= now) {
-      // 🆕 New check for past time
       return {
         ok: false,
         errorCode: "TIME_IN_PAST",
@@ -270,7 +291,6 @@ export function validateReminderPure(params = {}, options = {}) {
     normalizedSchedule.localDate = dateRaw;
   }
 
-  // --- Weekly weekdays ---
   if (frequency === "weekly") {
     const rawW =
       scheduleWithTZ?.weekDays ??
@@ -296,9 +316,7 @@ export function validateReminderPure(params = {}, options = {}) {
     normalizedSchedule.daysOfWeek = normWd;
   }
 
-  // --- Compute next run ---
   const nextRunIso = computeNextRunIso(normalizedSchedule);
-
   if (!nextRunIso) {
     return {
       ok: false,
@@ -310,7 +328,6 @@ export function validateReminderPure(params = {}, options = {}) {
     };
   }
 
-  // --- All good ---
   return {
     ok: true,
     normalized: {
@@ -322,12 +339,10 @@ export function validateReminderPure(params = {}, options = {}) {
   };
 }
 
-// --- Hook wrapper ----------------------------------------------------------
-
 export default function useReminderValidation(defaultOptions = {}) {
   const validate = useCallback(
     (params = {}) => validateReminderPure(params, defaultOptions),
-    [defaultOptions]
+    [defaultOptions],
   );
   return { validate };
 }
