@@ -4,15 +4,16 @@ import { db } from "../../../services/firebase";
 import { useAuthContext } from "../../../context/AuthContext";
 import { showToast } from "../../../components/ToastSystem/toastUtils";
 import SettingsSkeleton from "./SettingsSkeleton";
-import { Bell, ShieldCheck } from "lucide-react";
+import { Bell, ShieldCheck, ArrowRight } from "lucide-react";
 
 const NOTIFICATIONS = [
   {
     id: "draftAlerts",
-    label: "Draft Ready Notifications",
+    label: "Draft Ready Alerts",
     description:
       "Get notified when a new AI draft is prepared and ready to review.",
     Icon: Bell,
+    comingSoon: false,
   },
   {
     id: "accountAlerts",
@@ -20,6 +21,7 @@ const NOTIFICATIONS = [
     description:
       "Get notified about login activity, password changes, and security updates.",
     Icon: ShieldCheck,
+    comingSoon: true,
   },
 ];
 
@@ -30,7 +32,7 @@ const NotificationPreferences = () => {
     accountAlerts: true,
   });
   const [loading, setLoading] = useState(true);
-  // Tracks which toggle is currently saving
+  // tracks which toggle is currently saving
   const [savingKey, setSavingKey] = useState(null);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const NotificationPreferences = () => {
   }, [currentUser]);
 
   const handleToggle = async (key) => {
-    if (savingKey) return; // Prevent overlapping saves
+    if (savingKey) return;
     const updated = { ...preferences, [key]: !preferences[key] };
     setPreferences(updated);
     setSavingKey(key);
@@ -67,7 +69,7 @@ const NotificationPreferences = () => {
         }),
         new Promise((resolve) => setTimeout(resolve, 2000)),
       ]);
-      showToast({ type: "success", message: "Preferences saved." });
+      showToast({ type: "success", message: "Alerts updated." });
     } catch {
       setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
       showToast({ type: "error", message: "Could not save. Try again." });
@@ -91,24 +93,35 @@ const NotificationPreferences = () => {
         </div>
 
         <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
-          {NOTIFICATIONS.map(({ id, label, description, Icon }) => {
+          {NOTIFICATIONS.map(({ id, label, description, Icon, comingSoon }) => {
             const isSaving = savingKey === id;
+            const isDisabled = comingSoon || !!savingKey;
+
             return (
-              <div key={id} className="flex items-center gap-4 px-5 py-4">
+              <div
+                key={id}
+                className={`flex items-center gap-4 px-5 py-4 ${comingSoon ? "opacity-50" : ""}`}
+              >
                 <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/[0.06] flex items-center justify-center">
                   <Icon className="w-4 h-4 text-muted" />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium font-grotesk text-textLight dark:text-textDark">
-                    {label}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium font-grotesk text-textLight dark:text-textDark">
+                      {label}
+                    </p>
+                    {comingSoon && (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-brand text-brand">
+                        Coming soon
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-muted font-inter mt-0.5">
                     {description}
                   </p>
                 </div>
 
-                {/* Toggle with saving state */}
                 <div className="flex-shrink-0 flex items-center gap-2">
                   {isSaving && (
                     <svg
@@ -132,13 +145,13 @@ const NotificationPreferences = () => {
                     </svg>
                   )}
                   <label
-                    className={`relative inline-flex items-center ${isSaving ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                    className={`relative inline-flex items-center ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <input
                       type="checkbox"
                       checked={preferences[id]}
-                      onChange={() => handleToggle(id)}
-                      disabled={!!savingKey}
+                      onChange={() => !comingSoon && handleToggle(id)}
+                      disabled={isDisabled}
                       className="sr-only peer"
                     />
                     <div
@@ -157,6 +170,17 @@ const NotificationPreferences = () => {
           })}
         </div>
       </section>
+
+      {/* quiet footnote — explains PWA notification support */}
+      <p className="mt-3 text-[11px] text-muted px-1">
+        <a
+          href="/docs/notifications"
+          className="underline underline-offset-2 hover:text-textLight dark:hover:text-textDark transition-colors duration-150"
+        >
+          Need to know
+          <ArrowRight className="w-3 h-3 inline-block" />
+        </a>
+      </p>
     </div>
   );
 };
