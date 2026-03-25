@@ -14,6 +14,8 @@ import TaskDetailModal from "./TaskDetailModal";
 import { useAuthContext } from "../../../../context/AuthContext";
 import remindrClient from "../../services/remindrClient";
 import EmptyState from "./EmptyState";
+import { DateTime } from "luxon";
+import { useAppTimezone } from "../../../../context/TimezoneProvider";
 
 const containerVariants = {
   hidden: {},
@@ -54,21 +56,40 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
+  const { timezone: userTimezone } = useAppTimezone();
+
   // --- Semantic grouping: Active vs Past ---
   const { activePrompts, pastPrompts } = useMemo(() => {
     const active = [];
     const past = [];
 
+    // start of today in user's timezone — same anchor as slot count hook
+    // one-time reminders that fired today stay in active list until midnight
+    const startOfToday = DateTime.now()
+      .setZone(userTimezone)
+      .startOf("day")
+      .toMillis();
+
     for (const r of visibleReminders || []) {
       if (r?.enabled === false) {
-        past.push(r);
+        // check if this is a one-time that fired today
+        const updatedAtMs = r?.updatedAt?.toMillis?.() ?? 0;
+        const firedToday =
+          r?.frequency === "one_time" && updatedAtMs >= startOfToday;
+
+        if (firedToday) {
+          // holds slot until midnight — stays in active list visually
+          active.push(r);
+        } else {
+          past.push(r);
+        }
       } else {
         active.push(r);
       }
     }
 
     return { activePrompts: active, pastPrompts: past };
-  }, [visibleReminders]);
+  }, [visibleReminders, userTimezone]);
 
   // Sync with upstream reminders, exclude deleted ones, prepend new items
   useEffect(() => {
@@ -155,17 +176,6 @@ const ReminderListContainer = ({ reminders, error, onAddReminderClick }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto  py-8">
-      {/* Heading */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold font-grotesk tracking-tight text-textLight dark:text-textDark">
-          Active Prompts
-        </h2>
-        <p className="text-sm font-inter text-textLight/80 dark:text-textDark/80 mt-1">
-          Prompts that generate drafts for you. Each draft appears when it's
-          delivered.
-        </p>
-      </div>
-
       <motion.div
         className="flex flex-col gap-4"
         initial="hidden"

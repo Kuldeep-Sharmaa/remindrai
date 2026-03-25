@@ -1,24 +1,12 @@
-/**
- * useUserReminders.js
- *
- * Fetches and normalizes user reminders from Firestore.
- * Handles timestamp conversion, deduplication, and categorization.
- * Filters out deleted reminders from all views.
- */
-
 import { useMemo } from "react";
 import { collection } from "firebase/firestore";
 import { useCollection } from "../../../hooks/useCollection";
 import { db } from "../../../services/firebase";
 import { DateTime } from "luxon";
 
-/**
- * Convert various timestamp formats to milliseconds (UTC) using Luxon.
- */
 function toMillis(val) {
   if (val === undefined || val === null) return null;
 
-  // Firestore Timestamp
   if (typeof val === "object" && typeof val.toMillis === "function") {
     try {
       const m = Number(val.toMillis());
@@ -28,20 +16,17 @@ function toMillis(val) {
     }
   }
 
-  // Date object
   if (val instanceof Date) {
     const t = val.getTime();
     return Number.isFinite(t) ? t : null;
   }
 
-  // Numeric timestamp
   if (typeof val === "number" && Number.isFinite(val)) {
-    if (val > 1e12) return val; // Already in milliseconds
-    if (val > 1e9) return val * 1000; // Convert seconds to ms
+    if (val > 1e12) return val;
+    if (val > 1e9) return val * 1000;
     return null;
   }
 
-  // String timestamp
   if (typeof val === "string") {
     const num = Number(val);
     if (!Number.isNaN(num)) {
@@ -49,15 +34,12 @@ function toMillis(val) {
       if (num > 1e9) return num * 1000;
     }
 
-    // ISO format
     const dt = DateTime.fromISO(val, { zone: "utc" });
     if (dt.isValid) return dt.toMillis();
 
-    // RFC2822 format
     const dt2 = DateTime.fromRFC2822(val, { zone: "utc" });
     if (dt2.isValid) return dt2.toMillis();
 
-    // Custom format
     const dt3 = DateTime.fromFormat(val, "yyyy-LL-dd'T'HH:mm:ss", {
       zone: "utc",
     });
@@ -67,9 +49,6 @@ function toMillis(val) {
   return null;
 }
 
-/**
- * Normalize raw reminder document into canonical shape.
- */
 function normalizeReminder(raw) {
   if (!raw || typeof raw !== "object") return null;
 
@@ -90,15 +69,16 @@ function normalizeReminder(raw) {
   const enabled = raw?.enabled === undefined ? true : Boolean(raw.enabled);
   const status = String(raw?.status || "").toLowerCase();
 
+  // enabled === false is scheduler state ("paused until next cycle" or "one-time that fired").
+  // it is NOT a lifecycle signal — don't use it to mark a reminder as done here.
+  // ReminderListContainer handles the active/past split for enabled:false using updatedAt + timezone.
   const completed =
     !deleted &&
     (raw?.completed === true ||
       raw?.isDone === true ||
       status === "completed" ||
-      status === "done" ||
-      enabled === false);
+      status === "done");
 
-  // Find nextRunAtUTC from various possible field names
   const nextCandidates = [
     raw?.nextRunAtUTC,
     raw?.nextRunAtUTC_iso,
@@ -161,7 +141,6 @@ export default function useUserReminders(userId) {
     let total = 0;
 
     for (const raw of list) {
-      // Exclude deleted reminders from all views
       const n = normalizeReminder(raw);
       if (!n || n.deleted) continue;
 
@@ -176,20 +155,19 @@ export default function useUserReminders(userId) {
       seenIds.add(id);
       total++;
 
-      // Categorize by type
       if (n.reminderType === "ai") aiReminders.push(n);
       else if (n.reminderType === "simple") simpleReminders.push(n);
       else otherReminders.push(n);
 
-      // Categorize by status
-      if (n.enabled && !n.completed) {
+      // only explicit completion signals move a reminder out of active.
+      // enabled:false is handled downstream in ReminderListContainer.
+      if (!n.completed) {
         activeReminders.push(n);
       } else {
         completedReminders.push(n);
       }
     }
 
-    // Find next scheduled reminder
     let nextRun = null;
     if (activeReminders.length > 0) {
       const withNext = activeReminders.filter(
