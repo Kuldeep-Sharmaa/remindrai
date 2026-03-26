@@ -20,22 +20,6 @@ const NAV = {
   ],
 };
 
-const DrawLine = ({ className = "" }) => (
-  <div className={`relative h-px w-full overflow-hidden ${className}`}>
-    <div className="absolute inset-0 bg-gray-100 dark:bg-white/[0.06]" />
-    <div
-      className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/30 to-transparent"
-      style={{ animation: "shimmer 3.5s ease infinite" }}
-    />
-    <style>{`
-      @keyframes shimmer {
-        0%   { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-      }
-    `}</style>
-  </div>
-);
-
 const AnimatedWordmark = () => {
   const [hovered, setHovered] = useState(false);
   const [hoverX, setHoverX] = useState(50);
@@ -149,9 +133,6 @@ const Footer = () => {
           backgroundSize: "28px 28px",
         }}
       />
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-gray-50/60 dark:from-white/[0.015] to-transparent" />
-
-      <DrawLine />
 
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8">
         <div className="pt-14 pb-10 md:pt-20 md:pb-14 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
@@ -190,8 +171,6 @@ const Footer = () => {
             ))}
           </div>
         </div>
-
-        <DrawLine />
 
         <div className="py-5 sm:py-6 flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-3 sm:gap-4 text-center sm:text-left">
           <div className="order-1 sm:order-2 flex justify-center sm:justify-end w-full sm:w-auto">

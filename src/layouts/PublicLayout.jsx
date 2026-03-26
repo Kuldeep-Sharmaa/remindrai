@@ -21,23 +21,20 @@ const PublicLayout = ({ children }) => {
   );
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden bg-transparent">
-      {/* Background — direct import, no lazy, no flash */}
-      <div className="fixed inset-0 z-10">
+    <div className="relative min-h-screen flex flex-col bg-transparent">
+      {/* overflow-x-hidden moved here so it never creates a new scroll container on the root */}
+      <div className="fixed inset-0 z-10 overflow-x-hidden">
         <Background />
       </div>
 
-      {/* Navbar */}
       {!shouldHideNavbar && (
         <div className="relative z-30">
           <Navbar />
         </div>
       )}
 
-      {/* Main Content */}
       <main className="relative z-20 flex-grow">{children}</main>
 
-      {/* Footer */}
       {!shouldHideNavbar && (
         <footer className="relative z-20">
           <Footer />
