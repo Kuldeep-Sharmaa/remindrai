@@ -112,7 +112,7 @@ const NotificationPreferences = () => {
                       {label}
                     </p>
                     {comingSoon && (
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-brand text-brand">
+                      <span className="text-xs text-center font-medium px-1.5 py-0.5 rounded-full border border-brand text-brand">
                         Coming soon
                       </span>
                     )}
