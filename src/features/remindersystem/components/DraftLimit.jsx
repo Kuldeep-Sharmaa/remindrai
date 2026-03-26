@@ -45,19 +45,19 @@ export default function DraftLimit({ uid }) {
       <div className="mt-3 flex flex-col gap-1">
         {atActiveLimit && !draftLimited && (
           <p className="text-xs font-medium text-yellow-500 dark:text-yellow-400">
-            Active prompts limit reached.
+            All AI prompt slots are in use.
           </p>
         )}
 
         {draftLimited && !atActiveLimit && (
           <p className="text-xs font-medium text-yellow-500 dark:text-yellow-400">
-            Daily draft limit is used. Resumes {resetTime}.
+            AI drafts used for today. Resets at {resetTime}.
           </p>
         )}
 
         {draftLimited && atActiveLimit && (
           <p className="text-xs font-medium text-yellow-500 dark:text-yellow-400">
-            Active prompts limit reached. Resume {resetTime}.
+            No free AI drafts left today. Resets at {resetTime}.
           </p>
         )}
 

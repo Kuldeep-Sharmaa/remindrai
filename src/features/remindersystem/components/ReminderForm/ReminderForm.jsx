@@ -318,7 +318,7 @@ export default function ReminderForm({ onSuccess, onOpenPreferences } = {}) {
                     transition={{ duration: 0.15 }}
                     className="text-white/60"
                   >
-                    Limit Reached
+                    Daily Limit Reached
                   </motion.span>
                 ) : (
                   <motion.span
