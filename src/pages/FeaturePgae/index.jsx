@@ -7,6 +7,7 @@ import {
   Layers,
   Inbox,
   ArrowUpRight,
+  UserCheck2,
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -40,6 +41,13 @@ const FEATURES = [
     label: "Content readiness",
     description:
       "At the selected time the system prepares the content in the background. No manual action is required. When you open the app, the piece is already available to review, edit, or publish.",
+  },
+
+  {
+    icon: UserCheck2,
+    label: "Learns your voice",
+    description:
+      "The system observes your past drafts to identify how you write - sentence structure, phrasing, and tone. Over time, new drafts follow these patterns, so the output stays consistent with your writing style.",
   },
 
   {
@@ -77,7 +85,7 @@ export default function Features() {
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 pt-32 pb-24 flex flex-col gap-0">
         {/* Title */}
         <div className="fade-up flex flex-col gap-4 pb-16 ">
-          <p className="font-grotesk text-xs tracking-widest uppercase text-muted">
+          <p className="font-grotesk text-xs tracking-widest uppercase text-brand">
             Features
           </p>
           <h1 className="font-grotesk text-4xl sm:text-6xl lg:text-7xl max-w-2xl font-bold text-textLight dark:text-textDark tracking-tight leading-tight">
