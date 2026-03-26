@@ -37,7 +37,6 @@ export default function DocPage({ title, intro, steps, note }) {
 
   return (
     <div ref={ref} className="flex flex-col gap-8 sm:gap-10">
-      {/* Header */}
       <div>
         <h2 className="font-grotesk text-xl sm:text-2xl lg:text-3xl font-bold text-textLight dark:text-textDark tracking-tight leading-snug mb-2 sm:mb-3">
           {title}
@@ -47,7 +46,6 @@ export default function DocPage({ title, intro, steps, note }) {
         </p>
       </div>
 
-      {/* Steps */}
       <div className="flex flex-col gap-6 sm:gap-7">
         {steps.map((step, i) => (
           <div key={i} className="flex gap-4 sm:gap-5">
@@ -56,26 +54,22 @@ export default function DocPage({ title, intro, steps, note }) {
             </span>
 
             <div className="flex flex-col gap-2">
-              {/* Label */}
               {step.label && (
-                <h3 className="font-grotesk text-sm sm:text-base font-semibold text-textLight dark:text-textDark">
+                <h3 className="font-grotesk text-base font-semibold text-textLight dark:text-textDark">
                   {step.label}
                 </h3>
               )}
 
-              {/* Body */}
               <p className="font-inter text-sm sm:text-base text-textLight/80 dark:text-textDark/80 leading-relaxed">
                 <Bold text={step.body} />
               </p>
 
-              {/* Optional label above points */}
               {step.pointsLabel && (
                 <p className="font-inter text-sm sm:text-base text-textLight/80 dark:text-textDark/80 leading-relaxed">
                   {step.pointsLabel}
                 </p>
               )}
 
-              {/* Points */}
               {step.points && (
                 <ul className="flex flex-col gap-1 pl-4">
                   {step.points.map((point, idx) => (
@@ -89,7 +83,6 @@ export default function DocPage({ title, intro, steps, note }) {
                 </ul>
               )}
 
-              {/* Footer */}
               {step.footer && (
                 <p className="text-sm sm:text-base text-textLight/70 dark:text-textDark/70 leading-relaxed">
                   {step.footer}
@@ -100,7 +93,6 @@ export default function DocPage({ title, intro, steps, note }) {
         ))}
       </div>
 
-      {/* Note */}
       {note && (
         <div className="bg-bgImpact/10 dark:bg-bgImpact border border-border dark:border-white/[0.06] rounded-lg p-4">
           <div className="flex items-start gap-3">
@@ -115,7 +107,6 @@ export default function DocPage({ title, intro, steps, note }) {
         </div>
       )}
 
-      {/* Bottom */}
       <div className="border-t border-gray-100 dark:border-white/[0.06] pt-6">
         <a
           href="/contact"
