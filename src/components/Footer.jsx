@@ -108,13 +108,38 @@ const AnimatedWordmark = () => {
 };
 
 const CraftBadge = () => (
-  <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.02]">
+  <div className="relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white dark:bg-black">
+    {/* spinning conic border layer — sits behind content */}
+    <div
+      className="pointer-events-none absolute inset-0 rounded-full"
+      style={{
+        padding: "1px",
+        WebkitMask:
+          "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+        WebkitMaskComposite: "xor",
+        maskComposite: "exclude",
+        background:
+          "conic-gradient(from var(--angle), transparent 75%, #2563eb 88%, #93c5fd 93%, #2563eb 98%, transparent 100%)",
+        animation: "borderSpin 3s linear infinite",
+      }}
+    />
+    <style>{`
+      @property --angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+      }
+      @keyframes borderSpin {
+        from { --angle: 0deg; }
+        to   { --angle: 360deg; }
+      }
+    `}</style>
     <Infinity
-      className="w-3.5 h-3.5 text-brand"
+      className="w-3.5 h-3.5 text-brand relative z-10"
       strokeWidth={1.75}
       aria-hidden="true"
     />
-    <span className="text-xs text-textLight/80 dark:text-white/80 font-inter">
+    <span className="text-xs text-textLight/80 dark:text-white/80 font-inter relative z-10">
       A system that keeps work moving
     </span>
   </div>
@@ -129,10 +154,13 @@ const Footer = () => {
         className="pointer-events-none absolute inset-0 opacity-[0.018] dark:opacity-[0.035]"
         style={{
           backgroundImage:
-            "radial-gradient(circle, #2563eb 1px, transparent 1px)",
+            "radical-gradient(circle, #2563eb 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-gray-50/60 dark:from-white/[0.015] to-transparent" />
+
+      <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06]" />
 
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8">
         <div className="pt-14 pb-10 md:pt-20 md:pb-14 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
@@ -171,6 +199,8 @@ const Footer = () => {
             ))}
           </div>
         </div>
+
+        <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06]" />
 
         <div className="py-5 sm:py-6 flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-3 sm:gap-4 text-center sm:text-left">
           <div className="order-1 sm:order-2 flex justify-center sm:justify-end w-full sm:w-auto">
