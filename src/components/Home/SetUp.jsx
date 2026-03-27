@@ -171,7 +171,7 @@ const Setup = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative">
+    <section ref={sectionRef} className="relative overflow-hidden">
       <div ref={pinnedRef} className="relative w-full h-screen overflow-hidden">
         <div className="absolute top-20 left-0 right-0 flex justify-center z-10">
           <span className="nline-flex items-center gap-2 px-3 pt-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase text-brand">

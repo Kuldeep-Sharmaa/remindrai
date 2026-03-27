@@ -44,12 +44,12 @@ export default function DraftListItem({
   return (
     <motion.button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-xl border transition-colors duration-150
+      className={`w-full text-left p-4 rounded-xl border transition-colors duration-150 
                   hover:border-brand/40 hover:bg-brand/5
                   ${
                     isUnread
                       ? "border-brand/40 bg-brand/5"
-                      : "border-border/20 bg-white dark:bg-transparent"
+                      : "border-border/20 bg-white dark:bg-bgImpact"
                   }`}
       whileHover={{ scale: 1.005 }}
       whileTap={{ scale: 0.995 }}
