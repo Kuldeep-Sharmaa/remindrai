@@ -76,6 +76,9 @@ Tone: ${tone}
 Platform: ${platform}
 
 Topic: ${topic}
+Be specific. No vague statements.
+
+If about a product, include one clear line of what it does.
 ${memoryBlock}
 ${platformLine}
 
