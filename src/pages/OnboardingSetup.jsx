@@ -124,7 +124,7 @@ const OnboardingSetup = () => {
     () => [
       {
         title: "Your role",
-        subtitle: "Select the role closest to your work.",
+        subtitle: "Select the role closest to your work",
         component: (
           <RoleSelector
             selectedRole={selectedRole}
@@ -134,14 +134,14 @@ const OnboardingSetup = () => {
       },
       {
         title: "Content tone",
-        subtitle: "Sets the default voice for generated drafts.",
+        subtitle: "Used when preparing drafts",
         component: (
           <ToneSelector selectedTone={tone} setSelectedTone={setTone} />
         ),
       },
       {
         title: "Primary platform",
-        subtitle: "Choose where your drafts are prepared for.",
+        subtitle: "Drafts are written based on this platform",
         component: (
           <PlatformSelector
             selectedPlatform={platform}

@@ -75,12 +75,12 @@ export const ToneSelector = ({ selectedTone, setSelectedTone }) => {
 
             <div className="flex-1 min-w-0">
               <p
-                className={`text-[13px] font-grotesk font-semibold leading-none mb-1 transition-colors duration-200
+                className={`text-base font-grotesk font-semibold leading-none mb-1 transition-colors duration-200
                   ${isSelected ? "text-textDark" : "text-textDark/70 group-hover:text-textDark"}`}
               >
                 {tone.name}
               </p>
-              <p className="text-[11.5px] font-inter text-muted leading-relaxed">
+              <p className="text-xs font-inter text-muted leading-relaxed">
                 {tone.description}
               </p>
             </div>
@@ -102,10 +102,10 @@ export const ToneSelector = ({ selectedTone, setSelectedTone }) => {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="text-[11px] font-inter text-textLight/80 dark:text-textDark/80 text-center pt-0.5"
+          className="text-sm font-inter text-textLight/80 dark:text-textDark/80 text-center py-1"
         >
           Tone set to{" "}
-          <span className="text-textLight/80 dark:text-textDark/80 font-medium">
+          <span className="text-brand font-medium">
             {tones.find((t) => t.id === selectedTone)?.name}
           </span>
         </motion.p>
