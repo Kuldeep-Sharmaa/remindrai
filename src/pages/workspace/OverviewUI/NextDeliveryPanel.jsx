@@ -1,5 +1,5 @@
-import React from "react";
-import { Clock } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Clock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const FREQUENCY_LABELS = {
@@ -45,12 +45,32 @@ function formatLabels(isoString, timezone) {
   }
 }
 
+function getDelayState(nextRunAtUTC) {
+  if (!nextRunAtUTC) return "normal";
+
+  const now = Date.now();
+  const scheduled = new Date(nextRunAtUTC).getTime();
+  const diffMinutes = (now - scheduled) / (1000 * 60);
+
+  if (diffMinutes > 0 && diffMinutes < 15) return "delayed";
+  if (diffMinutes >= 15) return "long_delay";
+
+  return "normal";
+}
+
 const NextDeliveryPanel = ({ next }) => {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (!next) {
     return (
       <section className="w-full border-t justify-center grid border-border pt-8 mt-6 space-y-5">
         <p className="text-base font-medium text-textLight dark:text-textDark">
-          Tell it what to prepare.
+          Set what should be prepared
         </p>
         <Link
           to="/workspace/studio/create"
@@ -91,11 +111,13 @@ const NextDeliveryPanel = ({ next }) => {
       next.content.platform.slice(1)
     : null;
 
+  const delayState = getDelayState(next.nextRunAtUTC);
+
   return (
     <section className="w-full border-t border-border pt-8 mt-6 space-y-6">
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-wider text-textLight/80 dark:text-textDark/80">
-          Up next
+        <p className="text-xs uppercase tracking-wider text-brand">
+          Next draft
         </p>
 
         <p className="text-base sm:text-lg font-medium text-textLight dark:text-textDark leading-relaxed max-w-xl">
@@ -104,10 +126,49 @@ const NextDeliveryPanel = ({ next }) => {
 
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted flex-shrink-0" />
-          <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
-            Ready {dayLabel.toLowerCase()} at {timeStr}
-          </p>
+
+          {delayState === "normal" && (
+            <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
+              Ready {dayLabel.toLowerCase()} at {timeStr}
+            </p>
+          )}
+
+          {delayState === "delayed" && (
+            <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
+              Preparation in progress
+            </p>
+          )}
+
+          {delayState === "long_delay" && (
+            <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
+              Still preparing
+            </p>
+          )}
         </div>
+
+        {delayState === "delayed" && (
+          <p className="text-sm text-textLight/70 dark:text-textDark/70">
+            Slight delay. Draft will be ready shortly.{" "}
+            <Link
+              to="/docs/delivery-timing"
+              className="underline text-muted hover:text-brand"
+            >
+              {" "}
+              Why timing may vary{" "}
+              <ArrowRight className="w-3 h-3 inline-block" />
+            </Link>
+          </p>
+        )}
+
+        {delayState === "long_delay" && (
+          <p className="text-sm text-textLight/70 dark:text-textDark/70">
+            Taking longer than usual{" "}
+            <Link to="/docs/delivery-timing" className="underline text-brand">
+              Why timing may vary{" "}
+              <ArrowRight className="w-3 h-3 inline-block" />
+            </Link>
+          </p>
+        )}
 
         <div className="flex items-center gap-3 text-xs text-textLight/80 dark:text-textDark/80">
           {freqLabel && <span>{freqLabel}</span>}
@@ -121,12 +182,11 @@ const NextDeliveryPanel = ({ next }) => {
       </div>
 
       <div className="mt-5">
-        {" "}
         <Link
           to="/workspace/studio"
           className="text-sm text-muted hover:text-brand transition-colors duration-150"
         >
-          View all active prompts →
+          View all preparations →
         </Link>
       </div>
     </section>
