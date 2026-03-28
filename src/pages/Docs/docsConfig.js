@@ -12,6 +12,7 @@ import Preferences from "./sections/Preferences";
 import Account from "./sections/Account";
 import WritingDirection from "./sections/WritingDirection";
 import UsageLimits from "./sections/UsageLimits";
+import DeliveryTiming from "./sections/DeliveryTiming";
 
 export const NAV = [
   {
@@ -32,6 +33,7 @@ export const NAV = [
       { id: "manage-prompts", label: "Managing prompts" },
       { id: "writing-direction", label: "Writing direction" },
       { id: "usage-limits", label: "Usage limits" },
+      { id: "delivery-timing", label: "Delivery timing" },
     ],
   },
   {
@@ -97,6 +99,13 @@ export const SECTION_MAP = {
     component: UsageLimits,
     title: "How do usage limits work?",
     intro: "Active prompts and daily drafts explained.",
+  },
+
+  "delivery-timing": {
+    component: DeliveryTiming,
+    title: "Why my draft is not delivered exactly on time?",
+    intro:
+      "Drafts are prepared around the selected time. Exact timing is not second-level precise.",
   },
 
   timezone: {
