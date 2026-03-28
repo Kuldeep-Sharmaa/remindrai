@@ -32,7 +32,6 @@ export default function DraftDetailView({ draft: deliveryItem }) {
   const { draft, prompt, role, tone, platform, reminderType, frequency } =
     deliveryItem;
 
-  // Prefer scheduledForUTC — same reasoning as DraftListItem
   const timestamp = draft?.scheduledForUTC
     ? DateTime.fromISO(draft.scheduledForUTC, { zone: "utc" }).setZone(
         DateTime.local().zoneName,
@@ -44,6 +43,12 @@ export default function DraftDetailView({ draft: deliveryItem }) {
   const formattedTime = timestamp?.isValid
     ? timestamp.toFormat("MMM d · h:mm a")
     : null;
+
+  const platformLabel = platform
+    ? platform.charAt(0).toUpperCase() + platform.slice(1)
+    : null;
+
+  const ctaLabel = platformLabel ? `Use on ${platformLabel}` : "Got it";
 
   const handleCopy = async () => {
     try {
@@ -64,8 +69,8 @@ export default function DraftDetailView({ draft: deliveryItem }) {
           <h2 className="text-lg sm:text-xl font-semibold text-textLight dark:text-textDark">
             You're all set.
           </h2>
-          <p className="text-sm text-textLight dark:text-textDark ">
-            {platform || "Content"} ready
+          <p className="text-sm text-textLight dark:text-textDark">
+            {platformLabel || "Content"} ready
             {tone && ` · ${tone} tone`}
             {formattedTime && ` · ${formattedTime}`}
           </p>
@@ -88,24 +93,20 @@ export default function DraftDetailView({ draft: deliveryItem }) {
 
       {/* Draft output */}
       <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5">
-        {/* Content label */}
         <div className="flex items-center gap-1.5 mb-3">
           <FileText className="w-3 h-3 text-muted" />
           <p className="text-xs text-muted uppercase tracking-wide">Content</p>
         </div>
 
-        {/* Generated content block */}
         <div className="bg-black/5 dark:bg-white/5 rounded-xl px-4 py-4">
           <p className="text-base sm:text-lg leading-relaxed whitespace-pre-wrap text-textLight dark:text-textDark font-inter">
             {draft.content}
           </p>
-          {/* Character count — inside block, always visible on all screen sizes */}
           <p className="text-xs text-muted text-right mt-3">
             {draft.content?.length || 0} characters
           </p>
         </div>
 
-        {/* Collapsible metadata */}
         {(platform || tone || role || frequency) && (
           <div className="mt-4 pt-4 border-t border-border/10">
             <button
@@ -183,7 +184,7 @@ export default function DraftDetailView({ draft: deliveryItem }) {
                 className="inline-flex items-center justify-center gap-2"
               >
                 <Copy className="w-4 h-4" />
-                Copy draft
+                {ctaLabel}
               </motion.span>
             )}
           </AnimatePresence>
