@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import Spinner from "../../components/Loaders/Spinner";
 import PageTransition from "../../components/workspaceAnimations/PageTransition";
@@ -12,12 +12,17 @@ function getNextActiveReminder(reminders) {
 
   return (
     reminders
-      .filter(
-        (r) =>
-          r.enabled === true &&
-          r.nextRunAtUTC &&
-          new Date(r.nextRunAtUTC).getTime() > now,
-      )
+      .filter((r) => {
+        if (!r.enabled || !r.nextRunAtUTC) return false;
+
+        const scheduled = new Date(r.nextRunAtUTC).getTime();
+        const diffMinutes = (now - scheduled) / (1000 * 60);
+
+        if (scheduled > now) return true;
+        if (diffMinutes >= 0 && diffMinutes < 60) return true;
+
+        return false;
+      })
       .sort((a, b) => new Date(a.nextRunAtUTC) - new Date(b.nextRunAtUTC))[0] ??
     null
   );
@@ -48,7 +53,19 @@ const Overview = () => {
     remindersError,
   } = useAuthContext();
 
-  const next = useMemo(() => getNextActiveReminder(reminders), [reminders]);
+  const [timeTick, setTimeTick] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeTick(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const next = useMemo(
+    () => getNextActiveReminder(reminders),
+    [reminders, timeTick],
+  );
 
   const greeting = getTimeGreeting();
 
