@@ -157,7 +157,7 @@ export default function Hero() {
         className="relative z-10 w-full max-w-4xl mx-auto mb-5 hi"
         style={{ "--d": "0.07s" }}
       >
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold font-grotesk text-textLight dark:text-white leading-[1.06] tracking-tight text-center">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold font-grotesk text-textLight dark:text-white leading-[1.06] tracking-tight text-center">
           Set it once
           <br />
           <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4rem] text-brand dark:text-brand-soft">

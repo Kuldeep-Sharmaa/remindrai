@@ -29,18 +29,18 @@ export default function ContentIdentityCard() {
 
       <div className="mx-4 h-px bg-white/[0.05]" />
 
-      <div className="px-4 py-2 flex-1 flex flex-col">
-        <div className="rounded-xl bg-white/[0.04] border border-white/[0.05] px-3 py-3 flex-1 flex flex-col">
+      <div className="px-4 py-2  flex flex-col">
+        <div className="rounded-xl bg-white/[0.04] border border-white/[0.05] px-3 py-3  flex flex-col">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[9px] font-grotesk font-semibold tracking-[0.14em] uppercase text-emerald-400">
               Active prompt
             </span>
           </div>
-          <p className="text-xs lg:text-sm text-white/80 font-inter leading-snug flex-1">
+          <p className="text-xs lg:text-sm text-white/80 font-inter leading-snug ">
             Write about what consistency looks like in practice.
           </p>
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex items-center gap-1.5 mt-1">
             <span className="text-[10px] font-inter text-white/80 font-medium">
               Every week
             </span>
