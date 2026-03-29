@@ -21,9 +21,9 @@ export default function ContentIdentityCard() {
 
       <div className="mx-4 h-px bg-white/[0.05]" />
 
-      <div className="px-4 pt-3 pb-3 flex flex-row flex-wrap gap-x-4 gap-y-2">
+      <div className="px-4 pt-3 pb-3 grid grid-cols-2 gap-x-4 gap-y-2">
         <Field label="Role" value="Founder" highlight />
-        <Field label="Tone" value="Direct" highlight />
+        <Field label="Tone" value="Professional" highlight />
         <Field label="Platform" value="LinkedIn" highlight />
       </div>
 
