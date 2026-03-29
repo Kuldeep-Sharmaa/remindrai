@@ -94,7 +94,7 @@ function MobileConnector() {
         y1="0"
         x2="12"
         y2="42"
-        stroke="rgba(255,255,255,0.12)"
+        stroke="rgba(128,128,128,0.2)"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
@@ -124,7 +124,7 @@ function MobileConnector() {
         y1="58"
         x2="12"
         y2="88"
-        stroke="rgba(255,255,255,0.12)"
+        stroke="rgba(128,128,128,0.2)"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
