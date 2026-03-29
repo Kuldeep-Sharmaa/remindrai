@@ -21,7 +21,7 @@ export default function ContentIdentityCard() {
 
       <div className="mx-4 h-px bg-white/[0.05]" />
 
-      <div className="px-4 pt-3 pb-3 grid grid-cols-2 gap-x-4 gap-y-2">
+      <div className="px-4 pt-3 pb-3 flex flex-row flex-wrap items-center gap-x-3 gap-y-2 justify-center">
         <Field label="Role" value="Founder" highlight />
         <Field label="Tone" value="Professional" highlight />
         <Field label="Platform" value="LinkedIn" highlight />
@@ -58,7 +58,7 @@ export default function ContentIdentityCard() {
 function Field({ label, value, highlight }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[10px] font-inter font-medium text-white/80 w-9 shrink-0">
+      <span className="text-[10px] font-inter font-medium text-white/80 shrink-0">
         {label}
       </span>
       <span
