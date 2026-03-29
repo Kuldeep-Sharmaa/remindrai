@@ -1,74 +1,234 @@
-import React, { useRef, useLayoutEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useEffect, useRef, useState } from "react";
+import { RepeatIcon } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+const WEEK = [
+  { day: "Mon", label: "Started strong", state: "active" },
+  { day: "Tue", label: "Busy", state: "active" },
+  { day: "Wed", label: "Planned", state: "planned" },
+  { day: "Thu", label: "Missed", state: "missed" },
+  { day: "Fri", label: "Missed", state: "missed" },
+  { day: "Sat", label: null, state: "empty" },
+  { day: "Sun", label: null, state: "empty" },
+];
 
-const Problem = () => {
-  const headingRef = useRef(null);
-  const bodyRef = useRef(null);
+// Fri comes in quickly after Thu — part of the same collapse
+const DELAYS = [0, 300, 580, 1080, 1320, 1680, 1820];
+const ROW_OPACITY = [1, 0.8, 0.52, 1, 0.9, 0.7, 0.7];
 
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      if (headingRef.current) {
-        gsap.fromTo(
-          headingRef.current.querySelectorAll(".word"),
-          { opacity: 0, y: 14 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.75,
-            ease: "power3.out",
-            stagger: 0.07,
-            scrollTrigger: { trigger: headingRef.current, start: "top 80%" },
-          },
-        );
-      }
-
-      if (bodyRef.current) {
-        gsap.fromTo(
-          bodyRef.current,
-          { opacity: 0, y: 10 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: { trigger: bodyRef.current, start: "top 82%" },
-          },
-        );
-      }
+function useDark() {
+  const [dark, setDark] = useState(() =>
+    document.documentElement.classList.contains("dark"),
+  );
+  useEffect(() => {
+    const mo = new MutationObserver(() =>
+      setDark(document.documentElement.classList.contains("dark")),
+    );
+    mo.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
     });
+    return () => mo.disconnect();
+  }, []);
+  return dark;
+}
 
-    return () => ctx.revert();
+function labelColor(i, isMissed, dark) {
+  if (isMissed) return dark ? "rgba(239,68,68,0.88)" : "rgba(185,28,28,0.82)";
+  const palette = dark
+    ? [
+        "rgba(255,255,255,0.92)",
+        "rgba(255,255,255,0.75)",
+        "rgba(255,255,255,0.45)",
+      ]
+    : ["rgba(15,23,42,0.92)", "rgba(15,23,42,0.72)", "rgba(15,23,42,0.42)"];
+  return palette[Math.min(i, 2)];
+}
+
+function dayColor(item, dark) {
+  if (item.state === "missed")
+    return dark ? "rgba(239,68,68,0.55)" : "rgba(185,28,28,0.50)";
+  if (item.state === "empty")
+    return dark ? "rgba(255,255,255,0.16)" : "rgba(15,23,42,0.18)";
+  return dark ? "#2563eb" : "#2563eb";
+}
+
+export default function Problem() {
+  const [step, setStep] = useState(-1);
+  const [done, setDone] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [breakAnim, setBreakAnim] = useState(false);
+  const sectionRef = useRef(null);
+  const started = useRef(false);
+  const dark = useDark();
+
+  const run = () => {
+    if (started.current) return;
+    started.current = true;
+    setEntered(true);
+
+    DELAYS.forEach((d, i) => {
+      setTimeout(() => {
+        setStep(i);
+        if (i === 3) setTimeout(() => setBreakAnim(true), 200);
+        if (i === WEEK.length - 1) setTimeout(() => setDone(true), 600);
+      }, 250 + d);
+    });
+  };
+
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          run();
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    if (sectionRef.current) io.observe(sectionRef.current);
+    return () => io.disconnect();
   }, []);
 
+  const footerColor = dark ? "white" : "black";
+
+  const missedLineColor = dark
+    ? "linear-gradient(to right, rgba(239,68,68,0.22), rgba(239,68,68,0.04) 55%, transparent)"
+    : "linear-gradient(to right, rgba(185,28,28,0.18), rgba(185,28,28,0.02) 55%, transparent)";
+
   return (
-    <section className="relative w-full py-14 lg:py-24">
-      <div className="max-w-4xl text-center mx-auto px-5 sm:px-8 lg:px-10">
-        <h2
-          ref={headingRef}
-          className="text-3xl lg:text-4xl xl:text-5xl font-bold font-grotesk text-textLight dark:text-textDark leading-[1.1] tracking-tight mb-5"
+    <section
+      ref={sectionRef}
+      className="relative w-full py-8 lg:py-12 px-5 sm:px-8 lg:px-12"
+    >
+      <div className="max-w-6xl mx-auto flex flex-col items-center lg:grid lg:grid-cols-2 lg:gap-24 lg:items-start">
+        {/* LEFT — Heading */}
+        <div
+          className="section-enter mb-14 sm:mb-16 lg:mb-0 lg:sticky lg:top-32 text-center lg:text-left"
+          style={{
+            opacity: entered ? 1 : 0,
+            transform: entered ? "translateY(0)" : "translateY(20px)",
+          }}
         >
-          <span className="word">Running</span>{" "}
-          <span className="word">out</span> <span className="word">of</span>{" "}
-          <span className="word">ideas</span>{" "}
-          <span className="word">isn't</span> <span className="word">the</span>{" "}
-          <span className="word">problem.</span>
-          <br />
-          <span className="word text-red-600">Consistency</span>{" "}
-          <span className="word">is.</span>
-        </h2>
-        <p
-          ref={bodyRef}
-          className="text-sm sm:text-base lg:text-base font-inter text-textLight/60 dark:text-textDark/50 leading-relaxed max-w-md mx-auto"
+          <p className="font-inter text-sm uppercase tracking-widest text-brand mb-4 sm:mb-5">
+            This week
+          </p>
+
+          <h2
+            className="font-grotesk font-bold tracking-tight text-textLight dark:text-textDark"
+            style={{ fontSize: "clamp(1.85rem, 4vw, 3rem)", lineHeight: 1.06 }}
+          >
+            You forget <br /> Consistency {""}
+            <span className={`breaks-shell${breakAnim ? " is-breaking" : ""}`}>
+              <span className="breaks-measure" aria-hidden="true">
+                breaks
+              </span>
+              <span className="breaks-top" aria-hidden="true">
+                breaks
+              </span>
+              <span className="breaks-bot">breaks</span>
+            </span>
+          </h2>
+
+          <p className="mt-5 font-inter text-sm lg:text-base text-bgDark/80 dark:text-bgLight/80 max-w-xs leading-relaxed mx-auto lg:mx-0">
+            It breaks when you stop.
+          </p>
+        </div>
+
+        {/* RIGHT — Log */}
+        <div
+          className="section-enter momentum-log max-w-sm mx-auto w-full lg:max-w-none lg:mx-0 px-12 lg:px-2"
+          style={{
+            opacity: entered ? 1 : 0,
+            transform: entered ? "translateY(0)" : "translateY(16px)",
+          }}
         >
-          When it depends on your time and energy, it breaks. Not all at once —
-          just enough to lose momentum.
-        </p>
+          {WEEK.map((item, i) => {
+            const visible = step >= i;
+            const isMissed = item.state === "missed";
+            const isEmpty = item.state === "empty";
+            const isFirst = i === 0;
+
+            // Gap only before the first missed day — marks where the streak ended
+            const showPreGap = isMissed && i === 3;
+
+            return (
+              <div key={item.day}>
+                {showPreGap && <div className="h-4 sm:h-6" />}
+
+                <div
+                  className="row-slip flex items-baseline gap-5 sm:gap-7"
+                  style={{
+                    opacity: visible ? ROW_OPACITY[i] : 0,
+                    transform: visible ? "translateY(0)" : "translateY(10px)",
+                    paddingBottom: isEmpty ? "6px" : "14px",
+                  }}
+                >
+                  <span
+                    className="font-grotesk text-base uppercase tracking-widest flex-shrink-0 w-8"
+                    style={{ color: dayColor(item, dark), fontWeight: 600 }}
+                  >
+                    {item.day}
+                  </span>
+
+                  {item.label ? (
+                    <span
+                      className="font-inter leading-snug"
+                      style={{
+                        fontSize: isMissed
+                          ? "clamp(1rem, 2vw, 1.0625rem)"
+                          : isFirst
+                            ? "clamp(1rem, 2.2vw, 1.1875rem)"
+                            : "clamp(1rem, 2vw, 1.0625rem)",
+                        fontWeight: isFirst || isMissed ? 500 : 400,
+                        color: labelColor(i, isMissed, dark),
+                        fontStyle:
+                          item.state === "planned" ? "italic" : "normal",
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  ) : (
+                    <span
+                      className="font-inter text-xs tracking-widest"
+                      style={{
+                        color: dark
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(15,23,42,0.12)",
+                      }}
+                    >
+                      —
+                    </span>
+                  )}
+                </div>
+
+                {isMissed && (
+                  <div
+                    style={{
+                      height: "1px",
+                      background: missedLineColor,
+                      opacity: visible ? 1 : 0,
+                      transition: "opacity 0.9s ease 0.4s",
+                      marginBottom: "4px",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+
+          <p
+            className="font-inter text-sm lg:text-base mt-8 text-center lg:text-left"
+            style={{
+              color: footerColor,
+              opacity: done ? 1 : 0,
+              transform: done ? "translateY(0)" : "translateY(4px)",
+              transition: "opacity 1.2s ease 0.3s, transform 1.2s ease 0.3s",
+            }}
+          >
+            The cycle repeats <RepeatIcon className="inline-block w-3 h-3" />
+          </p>
+        </div>
       </div>
     </section>
   );
-};
-
-export default Problem;
+}
