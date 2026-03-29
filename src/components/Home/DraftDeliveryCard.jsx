@@ -18,7 +18,7 @@ export default function DraftDeliveryCard() {
   return (
     <div
       className="w-full rounded-2xl border border-brand/25 bg-bgImpact flex flex-col shadow-none"
-      style={{ minHeight: "var(--card-min-h, 220px)" }} // ← sync with ContentIdentityCard
+      style={{ minHeight: "var(--card-min-h, 220px)" }} // Set a custom min-height for this card
     >
       {/* Header */}
       <div className="flex items-start justify-between px-4 pt-4 pb-3">
@@ -63,7 +63,7 @@ export default function DraftDeliveryCard() {
       {/* Meta + action */}
       <div className="px-4 pt-2.5 pb-4 flex items-center justify-between mt-auto">
         <div className="flex items-center gap-2">
-          <MetaTag label="direct" />
+          <MetaTag label="professional" />
           <MetaTag label="founder" />
           <span className="text-[9px] font-inter text-white/60">214 chars</span>
         </div>

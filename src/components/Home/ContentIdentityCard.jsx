@@ -7,7 +7,7 @@ export default function ContentIdentityCard() {
       className="w-full rounded-2xl border border-brand/25 bg-bgImpact flex flex-col shadow-none"
       style={{ minHeight: "var(--card-min-h, 240px)" }}
     >
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <p className="text-xs font-grotesk font-semibold tracking-[0.14em] uppercase text-white/80">
             Identity
@@ -29,7 +29,7 @@ export default function ContentIdentityCard() {
 
       <div className="mx-4 h-px bg-white/[0.05]" />
 
-      <div className="px-4 pt-3 pb-4 flex-1 flex flex-col">
+      <div className="px-4 py-2 flex-1 flex flex-col">
         <div className="rounded-xl bg-white/[0.04] border border-white/[0.05] px-3 py-3 flex-1 flex flex-col">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
