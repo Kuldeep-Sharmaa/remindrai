@@ -12,10 +12,11 @@ import {
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggleButton";
 import { useAuthContext } from "../context/AuthContext";
+import { HashLink } from "react-router-hash-link";
 
 const VISITOR_NAV = [
   { to: "/features", label: "Features" },
-  { to: "/#how-it-works", label: "How it works" },
+  { to: "/#how-it-works", label: "How it works", hash: true },
   { to: "/docs", label: "Docs" },
   { to: "/about", label: "About" },
 ];
@@ -128,23 +129,30 @@ export default function Navbar() {
               </Link>
             )}
 
-            {navItems.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
-                  ${
-                    isActive(to)
-                      ? "text-brand dark:text-brand-soft font-medium"
-                      : "text-textLight/80 dark:text-white/80 hover:text-brand-hover dark:hover:text-brand-hover hover:bg-gray-50 dark:hover:bg-white/5"
-                  }`}
-              >
-                {label}
-                {isActive(to) && (
-                  <span className="absolute bottom-0.5 left-3.5 right-3.5 h-0.5 rounded-full bg-brand" />
-                )}
-              </Link>
-            ))}
+            {navItems.map(({ to, label, hash }) =>
+              hash ? (
+                <HashLink
+                  key={to}
+                  to={to}
+                  className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
+        text-textLight/80 dark:text-white/80 hover:text-brand-hover dark:hover:text-brand-hover hover:bg-gray-50 dark:hover:bg-white/5`}
+                >
+                  {label}
+                </HashLink>
+              ) : (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`relative px-3.5 py-2 text-base rounded-lg transition-colors duration-150 font-inter
+        ${isActive(to) ? "text-brand dark:text-brand-soft font-medium" : "text-textLight/80 dark:text-white/80 hover:text-brand-hover dark:hover:text-brand-hover hover:bg-gray-50 dark:hover:bg-white/5"}`}
+                >
+                  {label}
+                  {isActive(to) && (
+                    <span className="absolute bottom-0.5 left-3.5 right-3.5 h-0.5 rounded-full bg-brand" />
+                  )}
+                </Link>
+              ),
+            )}
           </nav>
 
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
@@ -299,30 +307,43 @@ export default function Navbar() {
             </Link>
           )}
 
-          {navItems.map(({ to, label }, i) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors duration-150 font-inter
-                ${
-                  isActive(to)
-                    ? "bg-brand/8 text-brand dark:text-brand-soft"
-                    : "text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              style={{
-                animation: mobileOpen
-                  ? `slideIn 0.22s ease forwards ${(i + (isLoggedIn ? 1 : 0)) * 45 + 60}ms`
-                  : "none",
-                opacity: 0,
-              }}
-            >
-              {label}
-              {isActive(to) && (
-                <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0" />
-              )}
-            </Link>
-          ))}
+          {navItems.map(({ to, label, hash }, i) =>
+            hash ? (
+              <HashLink
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors duration-150 font-inter text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
+                style={{
+                  animation: mobileOpen
+                    ? `slideIn 0.22s ease forwards ${(i + (isLoggedIn ? 1 : 0)) * 45 + 60}ms`
+                    : "none",
+                  opacity: 0,
+                }}
+              >
+                {label}
+              </HashLink>
+            ) : (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors duration-150 font-inter
+        ${isActive(to) ? "bg-brand/8 text-brand dark:text-brand-soft" : "text-gray-500/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"}`}
+                style={{
+                  animation: mobileOpen
+                    ? `slideIn 0.22s ease forwards ${(i + (isLoggedIn ? 1 : 0)) * 45 + 60}ms`
+                    : "none",
+                  opacity: 0,
+                }}
+              >
+                {label}
+                {isActive(to) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0" />
+                )}
+              </Link>
+            ),
+          )}
 
           {isLoggedIn && (
             <>

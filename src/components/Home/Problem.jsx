@@ -11,8 +11,6 @@ const WEEK = [
   { day: "Sun", label: null, state: "empty" },
 ];
 
-// Fri comes in quickly after Thu — part of the same collapse
-const DELAYS = [0, 300, 580, 1080, 1320, 1680, 1820];
 const ROW_OPACITY = [1, 0.8, 0.52, 1, 0.9, 0.7, 0.7];
 
 function useDark() {
@@ -53,33 +51,23 @@ function dayColor(item, dark) {
 }
 
 export default function Problem() {
-  const [step, setStep] = useState(-1);
-  const [done, setDone] = useState(false);
   const [entered, setEntered] = useState(false);
+  const [visibleRows, setVisibleRows] = useState(() =>
+    Array(WEEK.length).fill(false),
+  );
+  const [done, setDone] = useState(false);
   const [breakAnim, setBreakAnim] = useState(false);
+
   const sectionRef = useRef(null);
-  const started = useRef(false);
+  const rowRefs = useRef([]);
   const dark = useDark();
 
-  const run = () => {
-    if (started.current) return;
-    started.current = true;
-    setEntered(true);
-
-    DELAYS.forEach((d, i) => {
-      setTimeout(() => {
-        setStep(i);
-        if (i === 3) setTimeout(() => setBreakAnim(true), 200);
-        if (i === WEEK.length - 1) setTimeout(() => setDone(true), 600);
-      }, 250 + d);
-    });
-  };
-
+  // Section-level IO — only drives heading entrance
   useEffect(() => {
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
-          run();
+          setEntered(true);
           io.disconnect();
         }
       },
@@ -89,7 +77,31 @@ export default function Problem() {
     return () => io.disconnect();
   }, []);
 
-  const footerColor = dark ? "white" : "black";
+  useEffect(() => {
+    const observers = rowRefs.current.map((el, i) => {
+      if (!el) return null;
+      const io = new IntersectionObserver(
+        ([e]) => {
+          if (e.isIntersecting) {
+            setVisibleRows((prev) => {
+              if (prev[i]) return prev;
+              const next = [...prev];
+              next[i] = true;
+              return next;
+            });
+            if (i === 3) setBreakAnim(true);
+            if (i === WEEK.length - 1) setDone(true);
+            io.disconnect();
+          }
+        },
+        { threshold: 0.5 },
+      );
+      io.observe(el);
+      return io;
+    });
+
+    return () => observers.forEach((io) => io?.disconnect());
+  }, []);
 
   const missedLineColor = dark
     ? "linear-gradient(to right, rgba(239,68,68,0.22), rgba(239,68,68,0.04) 55%, transparent)"
@@ -101,7 +113,6 @@ export default function Problem() {
       className="relative w-full py-8 lg:py-12 px-5 sm:px-8 lg:px-12"
     >
       <div className="max-w-6xl mx-auto flex flex-col items-center lg:grid lg:grid-cols-2 lg:gap-24 lg:items-start">
-        {/* LEFT — Heading */}
         <div
           className="section-enter mb-14 sm:mb-16 lg:mb-0 lg:sticky lg:top-32 text-center lg:text-left"
           style={{
@@ -109,15 +120,15 @@ export default function Problem() {
             transform: entered ? "translateY(0)" : "translateY(20px)",
           }}
         >
-          <p className="font-inter text-sm uppercase tracking-widest text-brand mb-4 sm:mb-5">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase text-brand">
             This week
-          </p>
+          </span>
 
           <h2
             className="font-grotesk font-bold tracking-tight text-textLight dark:text-textDark"
             style={{ fontSize: "clamp(1.85rem, 4vw, 3rem)", lineHeight: 1.06 }}
           >
-            You forget <br /> Consistency {""}
+            You forget <br /> Consistency{" "}
             <span className={`breaks-shell${breakAnim ? " is-breaking" : ""}`}>
               <span className="breaks-measure" aria-hidden="true">
                 breaks
@@ -134,7 +145,6 @@ export default function Problem() {
           </p>
         </div>
 
-        {/* RIGHT — Log */}
         <div
           className="section-enter momentum-log max-w-sm mx-auto w-full lg:max-w-none lg:mx-0 px-12 lg:px-2"
           style={{
@@ -143,16 +153,14 @@ export default function Problem() {
           }}
         >
           {WEEK.map((item, i) => {
-            const visible = step >= i;
+            const visible = visibleRows[i];
             const isMissed = item.state === "missed";
             const isEmpty = item.state === "empty";
             const isFirst = i === 0;
-
-            // Gap only before the first missed day — marks where the streak ended
             const showPreGap = isMissed && i === 3;
 
             return (
-              <div key={item.day}>
+              <div key={item.day} ref={(el) => (rowRefs.current[i] = el)}>
                 {showPreGap && <div className="h-4 sm:h-6" />}
 
                 <div
@@ -217,15 +225,14 @@ export default function Problem() {
           })}
 
           <p
-            className="font-inter text-sm lg:text-base mt-8 text-center lg:text-left"
+            className="font-inter text-sm text-muted lg:text-base mt-8 text-center lg:text-left"
             style={{
-              color: footerColor,
               opacity: done ? 1 : 0,
               transform: done ? "translateY(0)" : "translateY(4px)",
               transition: "opacity 1.2s ease 0.3s, transform 1.2s ease 0.3s",
             }}
           >
-            The cycle repeats <RepeatIcon className="inline-block w-3 h-3" />
+            This cycle repeats <RepeatIcon className="inline-block w-3 h-3" />
           </p>
         </div>
       </div>

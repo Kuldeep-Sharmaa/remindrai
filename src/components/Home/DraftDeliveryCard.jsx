@@ -21,7 +21,7 @@ export default function DraftDeliveryCard() {
       style={{ minHeight: "var(--card-min-h, 220px)" }} // Set a custom min-height for this card
     >
       {/* Header */}
-      <div className="flex items-start justify-between px-4 pt-4 pb-3">
+      <div className="flex items-start justify-between px-4 pt-3 pb-2 lg:pt-4 lg:pb-3">
         <div>
           <p className="text-[10px] font-grotesk font-semibold tracking-[0.14em] uppercase text-white/80 mb-1">
             Draft Ready
@@ -46,7 +46,7 @@ export default function DraftDeliveryCard() {
       <div className="mx-4 h-px bg-white/[0.05]" />
 
       {/* Draft body — flex-1 so both cards stretch to the same height */}
-      <div className="px-4 pt-3 pb-3 flex-1 flex flex-col gap-2">
+      <div className="px-4 pt-2 pb-2 flex-1 flex flex-col gap-1.5 lg:gap-2">
         <p className="text-xs lg:text-sm text-white/80 font-inter leading-relaxed">
           Consistency isn't about doing more. It's about not stopping when it
           gets uncomfortable.

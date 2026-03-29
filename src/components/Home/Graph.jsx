@@ -142,7 +142,7 @@ const Graph = () => {
       className="relative w-full py-6 lg:py-12 px-5 sm:px-8 lg:px-12"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-center mb-10">
+        <div className="flex justify-center mb-2">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium tracking-widest uppercase dark:text-bgLight text-bgDark">
             <span className="text-brand">System</span>vs{" "}
             <span className="text-red-600">Manual</span>

@@ -28,7 +28,7 @@ const steps = [
   {
     number: "04",
     title: "A draft is ready",
-    text: "When the time comes, a draft is already there. Review, edit, or use it.",
+    text: "When it’s time, the draft is ready. Review, edit, or use it.",
   },
 ];
 
@@ -171,10 +171,14 @@ const Setup = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden"
+      id="how-it-works"
+    >
       <div ref={pinnedRef} className="relative w-full h-screen overflow-hidden">
         <div className="absolute top-20 left-0 right-0 flex justify-center z-10">
-          <span className="nline-flex items-center gap-2 px-3 pt-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase text-brand">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-black text-xs font-grotesk font-medium  tracking-widest uppercase text-brand">
             How it works
           </span>
         </div>

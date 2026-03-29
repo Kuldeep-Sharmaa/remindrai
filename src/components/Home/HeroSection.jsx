@@ -6,7 +6,7 @@ import Button from "../Ui/GradientBtn";
 function FlowConnector() {
   return (
     <svg
-      width="800"
+      width="95%"
       height="50"
       viewBox="0 0 200 26"
       fill="none"
@@ -18,7 +18,7 @@ function FlowConnector() {
         y1="12"
         x2="84"
         y2="12"
-        stroke="rgba(255,255,255,0.12)"
+        stroke="rgba(128,128,128,0.2)"
         strokeWidth="4.5"
         strokeLinecap="round"
       />
@@ -48,7 +48,7 @@ function FlowConnector() {
         y1="12"
         x2="188"
         y2="12"
-        stroke="rgba(255,255,255,0.12)"
+        stroke="rgba(128,128,128,0.2)"
         strokeWidth="4.5"
         strokeLinecap="round"
       />
@@ -154,7 +154,7 @@ export default function Hero() {
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center items-center px-5 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-16 sm:pb-20">
       <div
-        className="relative z-10 w-full max-w-4xl mx-auto mb-5 hi"
+        className="relative z-10 w-full max-w-4xl mx-auto mb-5"
         style={{ "--d": "0.07s" }}
       >
         <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold font-grotesk text-textLight dark:text-white leading-[1.06] tracking-tight text-center">
@@ -186,7 +186,7 @@ export default function Hero() {
 
           <div
             className="flex-shrink-0 flex items-center justify-center"
-            style={{ width: "400px" }}
+            style={{ width: "clamp(160px, 30vw, 400px)" }}
           >
             <FlowConnector />
           </div>
