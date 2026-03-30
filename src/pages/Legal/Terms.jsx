@@ -4,7 +4,7 @@ const Terms = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 mt-20 text-gray-800 dark:text-white">
       <h1 className="text-3xl font-bold mb-6">Terms and Conditions</h1>
-      <p className="mb-4">Effective Date: August 2, 2025</p>
+      <p className="mb-4">Effective Date:</p>
 
       <p className="mb-6">
         Welcome to RemindrAI! These Terms and Conditions ("Terms") govern your
