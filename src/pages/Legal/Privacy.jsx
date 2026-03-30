@@ -4,7 +4,7 @@ const Privacy = () => {
   return (
     <div className="max-w-4xl mt-20 mx-auto px-4 py-10 dark:text-white text-gray-800">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-      <p className="mb-4 text-lg">Effective Date: August 2, 2025</p>
+      <p className="mb-4 text-lg">Effective Date: </p>
 
       <p className="mb-6 leading-relaxed">
         At RemindrAI, your privacy is a priority. This policy explains what data
@@ -17,7 +17,7 @@ const Privacy = () => {
       </h2>
       <p className="mb-4 leading-relaxed">
         RemindrAI is an independent SaaS project developed and operated by{" "}
-        <strong>Kuldeep Sharma</strong>
+        <strong>Kuldeep Sharma </strong>
         and made available globally. For any privacy concerns or data requests,
         contact us at
         <a
