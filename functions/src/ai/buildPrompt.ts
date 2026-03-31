@@ -16,9 +16,7 @@ function normalizeTopic(input?: string) {
 
   let text = input.trim();
 
-  text = text.replace(/^write about\s+/i, "");
-  text = text.replace(/^talk about\s+/i, "");
-  text = text.replace(/^post about\s+/i, "");
+  text = text.replace(/^(write|talk|post)\s+(about\s+)?/i, "");
   text = text.replace(/\s+/g, " ");
 
   return text.length > MAX_PROMPT_LENGTH
@@ -26,54 +24,79 @@ function normalizeTopic(input?: string) {
     : text;
 }
 
+function buildPlatformLine(platformId?: string) {
+  switch (platformId) {
+    case "linkedin":
+      return "LinkedIn: professional, clear, short paragraphs.";
+    case "twitter":
+      return "Twitter: short, direct, one idea.";
+    case "threads":
+      return "Threads: conversational, relaxed, personal.";
+    default:
+      return "Write in a way that fits the platform.";
+  }
+}
+
 function buildMemoryBlock(pastDrafts?: string[]): string {
-  if (!pastDrafts || pastDrafts.length < 2) return "";
+  if (!pastDrafts || pastDrafts.length < 1) return "";
 
   const valid = pastDrafts
     .filter((d) => typeof d === "string" && d.trim().length >= MIN_DRAFT_CHARS)
     .slice(0, MAX_MEMORY_DRAFTS);
 
-  if (valid.length < 2) return "";
+  if (valid.length < 1) return "";
 
   const drafts = valid
     .map((d) => d.trim().slice(0, MAX_DRAFT_CHARS))
     .map((d) => `---\n${d}`)
     .join("\n");
 
-  return `Your writing style:\n${drafts}\n`;
+  return `\nYour writing style:\n${drafts}\n`;
 }
 
 export function buildPrompt(input: PromptInput): string {
   try {
     const topic = normalizeTopic(input.aiPrompt);
 
-    const role = input.role?.id || "person";
-    const tone = input.tone?.id || "natural";
-    const platform = input.platform?.id || "general";
+    const role = input.role?.name || "Person";
+    const tone = input.tone?.name || "Natural";
+    const platform = input.platform?.name || "Social media";
 
+    const platformLine = buildPlatformLine(input.platform?.id);
     const memoryBlock = buildMemoryBlock(input.pastDrafts);
 
     return `
-Role: ${role}
+Perspective: ${role}
 Tone: ${tone}
 Platform: ${platform}
+
 Topic: ${topic}
+Be specific. No vague statements.
 
-Pick one clear idea. Do not cover everything.
-If about a product, describe it exactly as given. Do not assume extra features.
+Write in first person, as someone describing what they actually did, built, or decided.
 
-${memoryBlock ? memoryBlock + "Match this style. Do not copy.\n" : ""}
+If about a product, include one clear line of what it does.
+${memoryBlock}
+${platformLine}
 
-Write a short post with natural flow.
-Avoid fixed patterns (like "I used to", "What I learned").
-Avoid generic openings. Start directly or with something specific.
-Do not repeat the same idea.
-Include one clear standout line.
-dont assume anything not given. 
-Keep it simple and readable.
-No emojis.
+If the topic is vague or lacks detail, focus on the process or decision behind it — not the outcome.
+If there is a specific moment or detail, start there.
+
+Focus on one part of this.
+Avoid explaining everything.
+
+Write like someone noting something down, not explaining it.
+Keep the language simple and direct.
+
+Avoid smooth transitions between sentences.
+Avoid general advice statements.
+
+If the topic is a personal experience, end on the moment — not a lesson drawn from it.
+Do not wrap things up cleanly at the end.
+
+No emojis. No em dashes.
 `.trim();
   } catch {
-    return `Write a short, clear post.`.trim();
+    return `Write a short, clear thought. Keep it simple.`.trim();
   }
 }
