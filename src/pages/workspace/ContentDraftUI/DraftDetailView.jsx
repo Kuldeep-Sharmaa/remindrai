@@ -11,6 +11,7 @@ import {
 import { DateTime } from "luxon";
 import { useAuthContext } from "../../../context/AuthContext";
 import { markCopied } from "../../../services/draftInteractionsService";
+import { showToast } from "../../../components/ToastSystem/toastUtils";
 
 const freqLabel = (raw) => {
   const map = {
@@ -21,6 +22,15 @@ const freqLabel = (raw) => {
   return map[raw] || "One time";
 };
 
+const PLATFORM_URLS = {
+  twitter: (text) =>
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+  x: (text) => `https://x.com/intent/post?text=${encodeURIComponent(text)}`,
+  threads: (text) =>
+    `https://www.threads.net/intent/post?text=${encodeURIComponent(text)}`,
+  linkedin: "https://www.linkedin.com/feed/",
+};
+
 export default function DraftDetailView({ draft: deliveryItem }) {
   const [copied, setCopied] = useState(false);
   const [showMoreDetails, setShowMoreDetails] = useState(false);
@@ -29,8 +39,7 @@ export default function DraftDetailView({ draft: deliveryItem }) {
 
   if (!deliveryItem) return null;
 
-  const { draft, prompt, role, tone, platform, reminderType, frequency } =
-    deliveryItem;
+  const { draft, prompt, role, tone, platform, frequency } = deliveryItem;
 
   const timestamp = draft?.scheduledForUTC
     ? DateTime.fromISO(draft.scheduledForUTC, { zone: "utc" }).setZone(
@@ -54,10 +63,28 @@ export default function DraftDetailView({ draft: deliveryItem }) {
     try {
       await navigator.clipboard.writeText(draft.content);
       markCopied({ uid, draftId: draft.id });
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+
+      const platformKey = platform?.toLowerCase();
+      const platformEntry = PLATFORM_URLS[platformKey];
+
+      if (platformEntry) {
+        const url =
+          typeof platformEntry === "function"
+            ? platformEntry(draft.content)
+            : platformEntry;
+
+        showToast({
+          type: "success",
+          message: `Copied. Ready to use on ${platformLabel}`,
+        });
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
     } catch (err) {
       console.error("Failed to copy:", err);
+      showToast({ type: "error", message: "Failed to copy. Try again." });
     }
   };
 
