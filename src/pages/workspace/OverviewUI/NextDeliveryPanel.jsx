@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Clock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import LoadingDots from "../../../components/Ui/LoadingDots";
 
 const FREQUENCY_LABELS = {
   daily: "Every day",
@@ -134,8 +135,9 @@ const NextDeliveryPanel = ({ next }) => {
           )}
 
           {delayState === "delayed" && (
-            <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight">
+            <p className="text-xl font-semibold text-textLight dark:text-textDark tracking-tight inline-flex items-center">
               Preparation in progress
+              <LoadingDots />
             </p>
           )}
 
