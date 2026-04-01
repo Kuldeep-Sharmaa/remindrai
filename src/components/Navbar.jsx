@@ -24,7 +24,7 @@ const VISITOR_NAV = [
 const USER_NAV = [
   { to: "/docs", label: "Docs" },
   { to: "/about", label: "About" },
-  { to: "/contact", label: "Support" },
+  { to: "/contact", label: "Contact" },
 ];
 
 const getInitial = (u) =>
