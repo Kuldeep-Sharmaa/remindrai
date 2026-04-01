@@ -4,196 +4,174 @@ const Privacy = () => {
   return (
     <div className="max-w-4xl mt-20 mx-auto px-4 py-10 dark:text-white text-gray-800">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-      <p className="mb-4 text-lg">Effective Date: </p>
+      <p className="mb-4 text-lg">Effective Date: 16-02-2026</p>
 
       <p className="mb-6 leading-relaxed">
-        At RemindrAI, your privacy is a priority. This policy explains what data
-        we collect, how we use it, and the measures we take to protect it. By
-        using our service, you agree to the practices described here.
+        RemindrAI is designed to keep data minimal and focused - only what's
+        required to run the system is collected and used. Your content and
+        inputs belong to you, and we do not sell your data. This policy explains
+        what we collect, how it's used, and your control over it.
+      </p>
+
+      <h2 className="text-xl font-semibold mt-6 mb-2">1. What We Collect</h2>
+      <p className="mb-3 leading-relaxed">
+        We only collect what is needed to run the system.
+      </p>
+
+      <p className="font-medium mb-1">Account Information</p>
+      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
+        <li>Email address</li>
+        <li>Unique user ID</li>
+        <li>Basic profile details (if you provide them)</li>
+      </ul>
+
+      <p className="font-medium mb-1">Your Inputs</p>
+      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
+        <li>What you write inside the system</li>
+        <li>Your writing direction (role, tone, platform, etc.)</li>
+        <li>Your saved drafts and history</li>
+      </ul>
+
+      <p className="font-medium mb-1">Preferences</p>
+      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
+        <li>Time settings</li>
+        <li>Notification choices</li>
+        <li>App settings (theme, timezone, etc.)</li>
+      </ul>
+
+      <p className="font-medium mb-1">Basic Usage Data</p>
+      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
+        <li>Login activity</li>
+        <li>Timestamps (created, updated, last active)</li>
+      </ul>
+
+      <p className="mb-4 leading-relaxed">
+        We do not collect sensitive personal data or payment information.
       </p>
 
       <h2 className="text-xl font-semibold mt-6 mb-2">
-        1. Who We Are (Data Controller)
+        2. How Your Data Is Used
       </h2>
+      <p className="mb-3 leading-relaxed">
+        Your data is used only to make the system work:
+      </p>
+      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
+        <li>To create and deliver drafts</li>
+        <li>To keep your history available</li>
+        <li>To improve how future drafts match your writing style</li>
+        <li>To send system-related notifications</li>
+      </ul>
+      <p className="mb-4 leading-relaxed">We do not sell your data.</p>
+
+      <h2 className="text-xl font-semibold mt-6 mb-2">
+        3. How Drafts Are Generated
+      </h2>
+      <p className="mb-2 leading-relaxed">
+        When a draft is created, your input (and sometimes your past drafts) may
+        be processed by external AI services to generate the result.
+      </p>
+      <p className="mb-2 leading-relaxed">
+        This processing is limited to what is required to create the draft.
+      </p>
       <p className="mb-4 leading-relaxed">
-        RemindrAI is an independent SaaS project developed and operated by{" "}
-        <strong>Kuldeep Sharma </strong>
-        and made available globally. For any privacy concerns or data requests,
-        contact us at
-        <a
-          href="mailto:remindraiapp@gmail.com"
-          className="text-blue-600 underline ml-1"
-        >
-          remindraiapp@gmail.com
-        </a>
-        .
+        We do not use your data for unrelated purposes.
       </p>
 
       <h2 className="text-xl font-semibold mt-6 mb-2">
-        2. Information We Collect
+        4. Third-Party Services
       </h2>
-      <p className="mb-4 leading-relaxed">
-        We collect only the data essential to operate and improve RemindrAI:
+      <p className="mb-3 leading-relaxed">
+        We use trusted services to run the system:
       </p>
       <ul className="list-disc list-inside ml-4 mb-4 space-y-2">
         <li>
-          <strong>Account Details:</strong> Unique user ID (`uid`), email, full
-          name (if provided), and secure authentication credentials managed by
-          Firebase.
+          <strong>Firebase (Google)</strong> — authentication and database.{" "}
+          <a
+            href="https://policies.google.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            Privacy Policy
+          </a>
         </li>
         <li>
-          <strong>Preferences:</strong> Your selected `role`, `tone`,
-          `language`, `timezone`, `theme`, and preferred platform (e.g.,
-          LinkedIn).
+          <strong>Vercel</strong> — hosting and deployment.{" "}
+          <a
+            href="https://vercel.com/legal/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            Privacy Policy
+          </a>
         </li>
         <li>
-          <strong>Notification Settings:</strong> Reminder configurations such
-          as `emailNotifications`, `activityAlerts`, `aiTips`, and `reminders`.
-        </li>
-        <li>
-          <strong>Usage Metadata:</strong> Basic metrics like login count,
-          session activity, and timestamps for last login and updates.
+          <strong>External AI provider</strong> — draft generation.{" "}
+          <a
+            href="https://openai.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            Privacy Policy
+          </a>
         </li>
       </ul>
-      <p className="mt-4 leading-relaxed">
-        We do <strong>not</strong> collect sensitive personal data, payment
-        information, or use third-party cookies to track you across other
-        websites.
+      <p className="mb-4 leading-relaxed">
+        These services may process your data as part of providing their
+        functionality. We do not control how they use or store your data beyond
+        what is necessary for our system to work. Please review their respective
+        privacy policies for more details.
       </p>
 
       <h2 className="text-xl font-semibold mt-6 mb-2">
-        3. How We Use Your Data
+        5. Data Storage & Security
       </h2>
       <p className="mb-4 leading-relaxed">
-        Data is processed only for purposes directly related to our service:
+        Your data is stored securely using Firebase. We take reasonable steps to
+        protect it, but no system is completely risk-free.
       </p>
+
+      <h2 className="text-xl font-semibold mt-6 mb-2">6. Data Retention</h2>
+      <p className="mb-2 leading-relaxed">
+        Your data stays as long as your account exists.
+      </p>
+      <p className="mb-4 leading-relaxed">
+        If you delete your account, your data is permanently removed.
+      </p>
+
+      <h2 className="text-xl font-semibold mt-6 mb-2">7. Your Control</h2>
+      <p className="mb-3 leading-relaxed">You can:</p>
       <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
-        <li>
-          <strong>Service Delivery:</strong> To create, manage, and authenticate
-          your account.
-        </li>
-        <li>
-          <strong>Reminders & Notifications:</strong> To send timely reminders
-          and account updates based on your settings.
-        </li>
-        <li>
-          <strong>Personalization:</strong> To tailor the app experience and
-          content suggestions to your preferences.
-        </li>
-        <li>
-          <strong>Improvement:</strong> To analyze anonymized usage patterns and
-          enhance performance.
-        </li>
+        <li>Access your data</li>
+        <li>Update your information</li>
+        <li>Delete your account</li>
       </ul>
-      <p className="leading-relaxed">
-        We never sell or trade your personal data.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        4. Legal Basis for Processing
-      </h2>
       <p className="mb-4 leading-relaxed">
-        Under GDPR, we process personal data based on:
-      </p>
-      <ul className="list-disc list-inside ml-4 mb-4 space-y-1">
-        <li>
-          <strong>Consent:</strong> You grant consent by creating an account and
-          using our service.
-        </li>
-        <li>
-          <strong>Legitimate Interest:</strong> We process data to maintain
-          security, prevent abuse, and ensure service quality.
-        </li>
-      </ul>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        5. AI Content Processing
-      </h2>
-      <p className="mb-4 text-yellow-700 font-medium leading-relaxed">
-        Currently, no personal data or user content is sent to any external AI
-        services. When AI-powered content generation is introduced, we will
-        update this policy with complete details on how data is processed.
-        <strong> [Update Coming Soon]</strong>
+        For anything else, you can contact us.
       </p>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        6. Third-Party Services
-      </h2>
+      <h2 className="text-xl font-semibold mt-6 mb-2">8. Notifications</h2>
       <p className="mb-4 leading-relaxed">
-        We use secure, GDPR-compliant third-party providers:
-      </p>
-      <ul className="list-disc list-inside ml-4 mb-4">
-        <li>
-          <strong>Firebase (Google LLC):</strong> For authentication and
-          database storage.
-        </li>
-        <li>
-          <strong>EmailJS:</strong> For sending user-requested notifications and
-          emails.
-        </li>
-      </ul>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        7. Data Storage, Security & Retention
-      </h2>
-      <p className="mb-4 leading-relaxed">
-        Your data is encrypted and stored securely in Firebase. We retain data
-        only for as long as your account remains active. When you delete your
-        account, all associated data is permanently removed without delay.
+        RemindrAI may send notifications related to your activity. You can
+        control these in your settings.
       </p>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">8. Your Rights</h2>
+      <h2 className="text-xl font-semibold mt-6 mb-2">9. Changes</h2>
       <p className="mb-4 leading-relaxed">
-        You may request access, correction, deletion, or export of your data at
-        any time. To exercise your rights, contact us at
+        This policy may be updated as the system evolves. If changes are
+        important, you will be informed.
+      </p>
+
+      <h2 className="text-xl font-semibold mt-6 mb-2">10. Contact</h2>
+      <p className="mb-4 leading-relaxed">
         <a
           href="mailto:remindraiapp@gmail.com"
-          className="text-blue-600 underline ml-1"
+          className="text-blue-600 underline"
         >
           remindraiapp@gmail.com
         </a>
-        .
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">9. Children’s Privacy</h2>
-      <p className="mb-4 leading-relaxed">
-        RemindrAI is not directed at individuals under 18. We do not knowingly
-        collect or store data from minors.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        10. International Data Transfers
-      </h2>
-      <p className="mb-4 leading-relaxed">
-        Data may be processed on servers outside your country. All transfers
-        meet applicable data protection standards.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">
-        11. Emails & Notifications
-      </h2>
-      <p className="mb-4 leading-relaxed">
-        We only send communications you have enabled (e.g., reminders, account
-        updates). Marketing emails, if any, are sent only with your explicit
-        consent.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">12. Policy Updates</h2>
-      <p className="mb-4 leading-relaxed">
-        This Privacy Policy may be updated as our service evolves. Major changes
-        will be communicated via email or in-app notifications.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-2">13. Contact</h2>
-      <p className="mb-4 leading-relaxed">
-        For privacy-related questions or data requests, email us at
-        <a
-          href="mailto:remindraiapp@gmail.com"
-          className="text-blue-600 underline ml-1"
-        >
-          remindraiapp@gmail.com
-        </a>
-        .
       </p>
     </div>
   );
