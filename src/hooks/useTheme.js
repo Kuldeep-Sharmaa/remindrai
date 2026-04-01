@@ -13,9 +13,9 @@ const getSystemTheme = () => {
 const getStoredTheme = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return VALID_THEMES.includes(stored) ? stored : "auto";
+    return VALID_THEMES.includes(stored) ? stored : "dark";
   } catch {
-    return "auto";
+    return "dark";
   }
 };
 
