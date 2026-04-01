@@ -15,7 +15,6 @@ const NAV = {
   Legal: [
     { label: "Privacy", to: "/privacy" },
     { label: "Terms", to: "/terms" },
-    { label: "GDPR", to: "/gdpr" },
     { label: "Contact", to: "/contact" },
   ],
 };

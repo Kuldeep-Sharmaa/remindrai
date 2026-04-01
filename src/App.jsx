@@ -20,7 +20,6 @@ import DocsPage from "./pages/Docs/index";
 
 import Privacy from "./pages/Legal/Privacy";
 import Terms from "./pages/Legal/Terms";
-import GDPR from "./pages/Legal/Gdpr";
 import Sitemap from "./pages/SiteMap";
 
 import Onboarding from "./pages/OnboardingSetup";
@@ -146,16 +145,7 @@ function AppContent() {
             </PublicRoute>
           }
         />
-        <Route
-          path="/gdpr"
-          element={
-            <PublicRoute>
-              <PublicLayout>
-                <GDPR />
-              </PublicLayout>
-            </PublicRoute>
-          }
-        />
+
         <Route
           path="/auth/*"
           element={
