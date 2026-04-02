@@ -103,9 +103,6 @@ export function TimezoneProvider({ children, saveProfileTz = false }) {
     if (profileTz && isValidTimezone(profileTz)) {
       // Only update the Luxon global when the value actually changes to reduce churn.
       if (Settings.defaultZoneName !== profileTz) {
-        console.log(
-          `[TimezoneProvider] Setting profile timezone: ${profileTz}`,
-        );
         Settings.defaultZoneName = profileTz;
       }
 

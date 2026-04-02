@@ -35,8 +35,6 @@ if (useEmulator) {
     disableWarnings: true,
   });
   connectFirestoreEmulator(db, "localhost", 8081);
-} else {
-  console.log("Connected to Firebase production");
 }
 
 // Analytics (production only)
@@ -55,7 +53,5 @@ if (import.meta.env.MODE === "production") {
 // its own service worker which conflicts with ours and causes duplicate notifications.
 // useFCMToken.js and useFCMForeground.js both call getMessaging(app) directly
 // after confirming support — that's the right place for it.
-
-console.log(`Firebase initialized: ${firebaseConfig.projectId}`);
 
 export default app;

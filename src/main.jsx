@@ -19,9 +19,6 @@ if (theme === "dark") {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("/firebase-messaging-sw.js")
-    .then((registration) => {
-      console.log(" Service worker registered", registration.scope);
-    })
     .catch((error) => {
       console.error(" Service worker registration failed", error);
     });

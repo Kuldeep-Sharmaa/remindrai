@@ -98,11 +98,6 @@ export function useFCMToken() {
           platform: getPlatform(),
           createdAt: serverTimestamp(),
         });
-
-        console.log("[useFCMToken] Device registered successfully", {
-          deviceId,
-          platform: getPlatform(),
-        });
       } catch (error) {
         // Registration failing is not critical — the app works fine without it
         console.error("[useFCMToken] Failed to register device", error);
