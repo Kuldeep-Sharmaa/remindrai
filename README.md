@@ -49,8 +49,8 @@ That’s the loop. You set it once. The system continues.
 
 ## Current Status
 
-![Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
-![Target](https://img.shields.io/badge/v1%20target-mar%2011,%202026-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-live-brightgreen?style=for-the-badge)
+![URL](https://img.shields.io/badge/remindrai.vercel.app-black?style=for-the-badge&logo=vercel)
 
 ### What’s working
 
