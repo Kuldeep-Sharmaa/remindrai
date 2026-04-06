@@ -124,7 +124,6 @@ This is an **in-progress SaaS build** being developed in public. It's a real-wor
 
 - A polished demo
 - A tutorial project
-- Production-ready (yet)
 
 The code reflects actual development practices—including the messy middle stages where things work but aren't pretty yet.
 
