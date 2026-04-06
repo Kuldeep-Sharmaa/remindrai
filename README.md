@@ -4,7 +4,7 @@
 
 RemindrAI keeps your content moving.
 
-It’s built for creators, founders, and professionals who don’t struggle with ideas — they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
+It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
 
 Instead of asking you to remember what to write or when to begin, RemindrAI prepares drafts in advance and delivers them at the right time. You define your voice and topics once. The system continues from there.
 
@@ -38,7 +38,7 @@ Consistency becomes less about discipline and more about having a system that ke
 Define your role, tone, and platform. This determines how drafts are written in your voice.
 
 **2. Create a delivery**  
-Choose what should be prepared and the rhythm you prefer — one time, daily, or weekly.
+Choose what should be prepared and the rhythm you prefer - one time, daily, or weekly.
 
 **3. Receive your draft**  
 At the chosen time, a ready draft appears in your Deliveries inbox.
