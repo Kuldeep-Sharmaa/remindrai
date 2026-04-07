@@ -4,7 +4,7 @@
 
 RemindrAI keeps your content moving.
 
-It’s built for creators, founders, and professionals who don’t struggle with ideas — they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
+It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
 
 Instead of asking you to remember what to write or when to begin, RemindrAI prepares drafts in advance and delivers them at the right time. You define your voice and topics once. The system continues from there.
 
@@ -38,7 +38,7 @@ Consistency becomes less about discipline and more about having a system that ke
 Define your role, tone, and platform. This determines how drafts are written in your voice.
 
 **2. Create a delivery**  
-Choose what should be prepared and the rhythm you prefer — one time, daily, or weekly.
+Choose what should be prepared and the rhythm you prefer - one time, daily, or weekly.
 
 **3. Receive your draft**  
 At the chosen time, a ready draft appears in your Deliveries inbox.
@@ -47,26 +47,6 @@ That’s the loop. You set it once. The system continues.
 
 ---
 
-## Current Status
-
-![Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
-![Target](https://img.shields.io/badge/v1%20target-mar%2011,%202026-blue?style=for-the-badge)
-
-### What’s working
-
-- Core dashboard and Studio flow
-- Firebase authentication
-- Firestore data model
-- Backend execution system
-- Delivery inbox and draft history
-
-### In progress
-
-- Final UI refinements
-
-The execution system is active. Drafts currently use placeholder content while AI integration is completed.
-
----
 
 ## Tech Stack
 
@@ -144,7 +124,6 @@ This is an **in-progress SaaS build** being developed in public. It's a real-wor
 
 - A polished demo
 - A tutorial project
-- Production-ready (yet)
 
 The code reflects actual development practices—including the messy middle stages where things work but aren't pretty yet.
 
