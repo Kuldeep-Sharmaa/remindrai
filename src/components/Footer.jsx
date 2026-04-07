@@ -202,7 +202,27 @@ const Footer = () => {
         <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06]" />
 
         <div className="py-5 sm:py-6 flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-3 sm:gap-4 text-center sm:text-left">
-          <div className="order-1 sm:order-2 flex justify-center sm:justify-end w-full sm:w-auto">
+          <div className="order-1 sm:order-2 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
+            <a
+              href="https://www.producthunt.com/products/remindrai?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-remindrai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                alt="RemindrAI on Product Hunt"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1117827&theme=light&t=1775580571344"
+                width={160}
+                height={35}
+                className="block dark:hidden"
+              />
+              <img
+                alt="RemindrAI on Product Hunt"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1117827&theme=dark&t=1775580571344"
+                width={160}
+                height={35}
+                className="hidden dark:block"
+              />
+            </a>
             <CraftBadge />
           </div>
           <p className="text-xs text-textLight/80 dark:text-white/80 font-inter order-2 sm:order-1 w-full sm:w-auto">
