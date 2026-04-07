@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   reauthenticateWithCredential,
   reauthenticateWithPopup,
@@ -27,16 +27,6 @@ const DeleteAccountButton = () => {
   const [reauthLoading, setReauthLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log("DeleteAccountButton Mounted/Updated:");
-    console.log("  currentUser:", currentUser);
-    console.log("  isAccountDeleting:", isAccountDeleting);
-    if (!currentUser)
-      console.warn("currentUser is NULL. Delete button will be disabled.");
-    if (!currentUser?.uid)
-      console.warn("currentUser.uid is NULL. Delete button will be disabled.");
-  }, [currentUser, isAccountDeleting]);
 
   const handleInitiateDelete = () => {
     setError("");
