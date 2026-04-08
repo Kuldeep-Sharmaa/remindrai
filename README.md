@@ -1,7 +1,5 @@
 # RemindrAI
 
-> Your content assistant. Set the direction once. It prepares and delivers drafts at the right time..
-
 RemindrAI keeps your content moving.
 
 It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
