@@ -1,7 +1,5 @@
 # RemindrAI
 
-> Your content assistant. Set the direction once. It prepares and delivers drafts at the right time..
-
 RemindrAI keeps your content moving.
 
 It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
@@ -112,13 +110,13 @@ cp .env.example .env
 npm run dev
 ```
 
-You'll need your own Firebase project—production credentials aren't included.
+You'll need your own Firebase project - production credentials aren't included.
 
 <br>
 
 ## What This Is
 
-This is an **in-progress SaaS build** being developed in public. It's a real-world example of how applications evolve from concept to production.
+This is an **open source SaaS** being developed in public. It's a real-world example of how applications evolve from concept to production.
 
 **This is not:**
 
