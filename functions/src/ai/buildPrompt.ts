@@ -54,6 +54,79 @@ function buildMemoryBlock(pastDrafts?: string[]): string {
   return `\nYour writing style:\n${drafts}\n`;
 }
 
+function detectIntent(prompt?: string): "growth" | "default" {
+  if (!prompt) return "default";
+
+  const text = prompt.toLowerCase();
+
+  if (
+    text.includes("grow") ||
+    text.includes("audience") ||
+    text.includes("network") ||
+    text.includes("connect") ||
+    text.includes("followers") ||
+    text.includes("twitter growth")
+  ) {
+    return "growth";
+  }
+
+  return "default";
+}
+
+function buildCTAInstruction(
+  intent: "growth" | "default",
+  platformId?: string,
+  roleName?: string,
+): string {
+  if (intent !== "growth") return "";
+
+  const role = roleName?.toLowerCase() || "";
+
+  let examples = `
+- Curious how others approach this.
+- Would like to hear how others handle this.
+- Still figuring this out — open to ideas.
+`;
+
+  if (role.includes("founder")) {
+    examples = `
+- Curious how other founders are handling this.
+- Would love to know how others are thinking about this.
+- Still figuring this out — interested in different approaches.
+`;
+  }
+
+  if (role.includes("developer") || role.includes("engineer")) {
+    examples = `
+- Curious how other devs are solving this.
+- Would like to see how others approach this problem.
+- Still figuring this out — open to better ways.
+`;
+  }
+
+  if (role.includes("creator") || role.includes("marketer")) {
+    examples = `
+- Curious how others are growing in this space.
+- Would love to hear what’s working for others.
+- Still experimenting — open to ideas.
+`;
+  }
+
+  if (platformId === "twitter") {
+    return `
+End with a natural, human line that invites others to connect or share their experience.
+Do not force it. Keep it subtle and conversational.
+
+Match the tone to the role.
+
+Example styles:
+${examples}
+`;
+  }
+
+  return "";
+}
+
 export function buildPrompt(input: PromptInput): string {
   try {
     const topic = normalizeTopic(input.aiPrompt);
@@ -64,6 +137,13 @@ export function buildPrompt(input: PromptInput): string {
 
     const platformLine = buildPlatformLine(input.platform?.id);
     const memoryBlock = buildMemoryBlock(input.pastDrafts);
+
+    const intent = detectIntent(input.aiPrompt);
+    const ctaInstruction = buildCTAInstruction(
+      intent,
+      input.platform?.id,
+      input.role?.name,
+    );
 
     return `
 Perspective: ${role}
@@ -78,6 +158,7 @@ Write in first person, as someone describing what they actually did, built, or d
 If about a product, include one clear line of what it does.
 ${memoryBlock}
 ${platformLine}
+${ctaInstruction}
 
 If the topic is vague or lacks detail, focus on the process or decision behind it — not the outcome.
 If there is a specific moment or detail, start there.
