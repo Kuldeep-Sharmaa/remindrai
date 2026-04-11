@@ -99,29 +99,6 @@ export default function About() {
             <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06]" />
           </React.Fragment>
         ))}
-
-        {/* Built by */}
-        <div className="fade-up flex flex-col lg:flex-row gap-6 lg:gap-16 py-14">
-          <div className="lg:w-48 flex-shrink-0">
-            <p className="font-grotesk text-sm tracking-widest uppercase text-brand font-medium pt-1">
-              Built by
-            </p>
-          </div>
-          <div className="flex-1 flex flex-col gap-4 max-w-2xl">
-            <p className="font-inter text-lg sm:text-xl text-textLight dark:text-textDark leading-relaxed">
-              Built and maintained by Kuldeep Sharma.
-            </p>
-            <a
-              href="https://github.com/Kuldeep-Sharmaa/remindrai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-inter text-sm text-muted hover:text-brand dark:hover:text-brand transition-colors duration-150 w-fit"
-            >
-              github.com/Kuldeep-Sharmaa/remindrai
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );
