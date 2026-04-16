@@ -10,11 +10,11 @@ export default function ContentSetup() {
         { label: "Open Studio", body: "Click **Studio** in the sidebar." },
         {
           label: "Find your Content Identity card",
-          body: "It appears at the top of the Studio page, showing your current role, tone, and platform.",
+          body: "It appears at the top of the Studio page, showing your current role, tone, and platform. If you haven’t set it up yet, it will show default values.",
         },
         {
           label: "Click Edit",
-          body: "Click the **Edit** button on the right side of the card to update any of the three values.",
+          body: "Click the **Edit** button on the right side of the card to update any of the three values: role, tone, or platform.",
         },
         {
           label: "Save",
