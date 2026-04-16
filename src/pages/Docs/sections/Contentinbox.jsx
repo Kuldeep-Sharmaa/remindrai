@@ -9,15 +9,15 @@ export default function ContentInbox() {
       steps={[
         {
           label: "Open Deliveries",
-          body: "Click **Deliveries** in the sidebar. The total number of drafts is shown at the top.",
+          body: "Click **Deliveries** in the sidebar. The total number of drafts is shown at the top. ",
         },
         {
           label: "Read a draft",
-          body: "Each item shows the brief title, a content preview, and the delivery time. Click a draft to open the full content.",
+          body: "Each item shows the brief title, a content preview, and the delivery time. Click a draft to open the full content. The content is generated based on the setup you created in Prompts. You can read it, adjust it if needed, and post it to your platform.",
         },
         {
           label: "Filter your drafts",
-          body: "Use the tabs to switch between **All**, **Unread**, and **Today**. The dropdown lets you filter by delivery type.",
+          body: "Use the tabs to switch between **All**, **Unread**, and **Today**. The dropdown lets you filter by delivery type. ",
         },
       ]}
       prev="create-prompt"
