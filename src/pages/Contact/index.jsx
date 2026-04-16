@@ -121,9 +121,7 @@ export default function ContactUs() {
           transition={{ duration: 0.5, delay: 0.55 }}
           className="mt-12 text-xs font-inter text-center text-textLight/60 dark:text-textDark/60"
         >
-          We value your feedback and are here to help. Don’t hesitate to reach
-          out with any questions, concerns, or suggestions. Your input helps us
-          improve and create a better experience.
+          Your input helps us improve and create a better experience.
         </motion.p>
       </div>
     </div>
