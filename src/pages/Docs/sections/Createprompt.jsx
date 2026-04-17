@@ -14,11 +14,11 @@ export default function CreatePrompt() {
         },
         {
           label: "Check your Content Identity",
-          body: "Your role, tone, and platform are shown at the top of the form. Click **Edit** if they need updating before continuing.",
+          body: "Your role, tone, and platform are shown at the top of the form. Click **Edit** if they need updating before continuing. Your Content Identity is used to generate the content, so it’s important to keep it up to date.",
         },
         {
           label: "Choose a draft type",
-          body: "Select **AI Draft** to generate a full piece of content. Select **Simple Note** to keep a short idea ready to write yourself.",
+          body: "Select **AI Draft** to generate a full piece of content. Select **Simple Note** to keep a short idea ready to write yourself. ",
         },
         {
           label: "Write a brief",
