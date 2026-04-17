@@ -9,11 +9,11 @@ export default function CreateAccount() {
       steps={[
         {
           label: "Open RemindrAI",
-          body: "Go to **remindrai.vercel.app** and select **Create account**.",
+          body: "Go to **remindrai.vercel.app** and select **Create account**. You can also sign up using Google or GitHub.",
         },
         {
           label: "Enter your details",
-          body: "Add your name, email, and password. Submit the form.",
+          body: "Add your name, email, and password. Submit the form. ",
         },
         {
           label: "Or continue with Google or GitHub",
