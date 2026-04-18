@@ -9,9 +9,9 @@ export default function DeliveryTiming() {
       steps={[
         {
           label: "The system runs in short intervals",
-          body: "Drafts are prepared in **regular intervals** instead of continuously.",
+          body: "Drafts are prepared in **regular intervals** instead of continuously. This means preparation starts around the selected time, not exactly at it.",
           footer:
-            "Because of this, preparation may start shortly after the selected time.",
+            "Because of this, preparation may start shortly around the selected time.",
         },
         {
           label: "Timing is approximate",
