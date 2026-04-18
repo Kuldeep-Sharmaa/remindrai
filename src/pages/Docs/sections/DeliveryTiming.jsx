@@ -26,7 +26,7 @@ export default function DeliveryTiming() {
         },
         {
           label: "Why this approach is used",
-          body: "Running in intervals keeps the system stable and consistent across all users.",
+          body: "Running in intervals keeps the system stable and consistent across all users. It allows for efficient resource management and ensures that all drafts are prepared reliably.",
           footer:
             "It avoids missed executions and ensures drafts are always delivered.",
         },
