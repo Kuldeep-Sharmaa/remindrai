@@ -14,11 +14,11 @@ export default function ManagePrompts() {
         },
         {
           label: "View a prompt",
-          body: "Click the eye icon on a prompt card to see its full details.",
+          body: "Click the eye icon on a prompt card to see its full details. ",
         },
         {
           label: "Delete a prompt",
-          body: "Click the **trash icon** on the right side of the Active prompt card.",
+          body: "Click the **trash icon** on the right side of the Active prompt card. This will permanently delete the prompt and stop any future drafts from being delivered.",
         },
         {
           label: "View past prompts",
