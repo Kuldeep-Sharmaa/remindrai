@@ -22,7 +22,7 @@ export default function ManagePrompts() {
         },
         {
           label: "View past prompts",
-          body: "Completed prompts appear under **Past Prompts** at the bottom of Studio. These are read-only.",
+          body: "Completed prompts appear under **Past Prompts** at the bottom of Studio. These are read-only. You can view their details but cannot edit or delete them.",
         },
       ]}
       note={
