@@ -20,7 +20,7 @@ export default function Timezone() {
           body: "Check your device timezone settings. RemindrAI relies on your device time, so if it’s incorrect, draft delivery may be affected.",
         },
       ]}
-      note="Timezone cannot be changed inside the app."
+      note="Timezone cannot be changed inside the app. It follows your device's local time. To adjust it, update your device's timezone settings. This ensures drafts are delivered at the right local time for you."
       prev="manage-prompts"
       next="notifications"
     />
