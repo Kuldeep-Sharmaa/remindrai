@@ -24,7 +24,7 @@ export default function Onboarding() {
           body: "This becomes your content identity and is used for future drafts.",
         },
       ]}
-      note="This can be changed later from preferences."
+      note="This can be changed later from preferences. Your selections help tailor drafts to your style and audience, but you can update them anytime to shift your content's direction."
       prev="verify-email"
       next="workspace"
     />
