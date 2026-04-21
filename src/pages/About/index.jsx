@@ -99,6 +99,20 @@ export default function About() {
             <div className="h-px w-full bg-gray-100 dark:bg-white/[0.06]" />
           </React.Fragment>
         ))}
+        <div className="pt-8 border-t border-border text-center">
+          <p className="text-sm font-inter text-muted">
+            Built and maintained by{" "}
+            <a
+              href="https://github.com/kuldeep-sharmaa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-soft hover:text-brand transition-colors duration-200"
+            >
+              Kuldeep Sharma
+              <ArrowUpRight className="inline-block ml-1" size={16} />
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
