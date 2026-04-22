@@ -17,7 +17,7 @@ export default function VerifyEmail() {
         },
         {
           label: "Did not receive it",
-          body: "Check the spam folder or request a new email.",
+          body: "Check the spam folder or request a new email. If issues persist, contact support.",
         },
       ]}
       next="onboarding"
