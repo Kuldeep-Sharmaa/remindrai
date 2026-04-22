@@ -21,7 +21,7 @@ export default function Workspace() {
         },
         {
           label: "Settings",
-          body: "Manage your timezone, notifications, preferences, and account.",
+          body: "Manage your timezone, notifications, preferences, and account details.",
         },
       ]}
       prev="onboarding"
