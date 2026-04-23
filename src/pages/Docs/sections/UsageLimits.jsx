@@ -33,7 +33,7 @@ export default function UsageLimits() {
             "Stable operation of the product",
           ],
           footer:
-            "RemindrAI is an independent product. These limits help keep the system reliable and consistently available.",
+            "RemindrAI is an independent product. These limits help keep the system reliable and consistently available for all users. ",
         },
       ]}
       note="Active prompts and daily drafts are independent limits. Reaching one does not affect the other."
