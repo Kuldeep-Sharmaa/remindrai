@@ -9,7 +9,7 @@ export default function VerifyEmail() {
       steps={[
         {
           label: "Open the email",
-          body: "A verification link is sent to your inbox.",
+          body: "A verification link is sent to your inbox. Open the email to proceed.",
         },
         {
           label: "Click the link",
