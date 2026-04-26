@@ -5,11 +5,10 @@ export default function Workspace() {
   return (
     <DocPage
       title="What is inside the Workspace?"
-      intro="The Workspace is the main area of the product. The sidebar gives access to four sections."
+      intro="The Workspace is the main area of the product. The sidebar gives access to four sections. It's where you create and manage your prompts, view generated drafts, and adjust settings."
       steps={[
         {
-          label: "Overview",
-          body: "Shows the next draft currently in preparation — brief, delivery time, platform, and frequency.",
+          body: "Shows the next draft currently in preparation — brief, delivery time, platform, and frequency. ",
         },
         {
           label: "Studio",
