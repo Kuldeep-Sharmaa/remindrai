@@ -8,7 +8,6 @@ export default function Docs() {
   const { sectionId } = useParams();
   const urlNav = useNavigate();
 
-  // If URL has a valid sectionId, start there — otherwise show home
   const [active, setActive] = useState(
     sectionId && SECTION_MAP[sectionId] ? sectionId : null,
   );
@@ -17,7 +16,6 @@ export default function Docs() {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
 
-  // If the URL param changes (e.g. user hits back/forward), sync active
   useEffect(() => {
     if (sectionId && SECTION_MAP[sectionId]) {
       setActive(sectionId);
