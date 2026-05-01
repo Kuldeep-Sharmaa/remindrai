@@ -20,7 +20,7 @@ export default function Workspace() {
         },
         {
           label: "Settings",
-          body: "Manage your timezone, notifications, preferences, and account details.",
+          body: "Manage your timezone, notifications, preferences, and account details. You can also delete your account here.",
         },
       ]}
       prev="onboarding"
