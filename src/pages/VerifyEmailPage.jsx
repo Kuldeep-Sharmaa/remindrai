@@ -6,7 +6,7 @@ import { auth } from "../services/firebase";
 import { showToast } from "../components/ToastSystem/toastUtils";
 import { MailCheck, RefreshCw, AlertCircle } from "lucide-react";
 
-// How often we ask Firebase "has the user clicked the link yet?"
+// How often we ask Firebase "has the user clicked the link yet? 5ms"
 const VERIFICATION_CHECK_INTERVAL_MS = 5000;
 
 const VerifyEmailPage = () => {
