@@ -6,8 +6,8 @@ import { auth } from "../services/firebase";
 import { showToast } from "../components/ToastSystem/toastUtils";
 import { MailCheck, RefreshCw, AlertCircle } from "lucide-react";
 
-// How often we ask Firebase "has the user clicked the link yet?"
-const VERIFICATION_CHECK_INTERVAL_MS = 3000;
+// How often we ask Firebase "has the user clicked the link yet? 5ms"
+const VERIFICATION_CHECK_INTERVAL_MS = 5000;
 
 const VerifyEmailPage = () => {
   const {
@@ -16,8 +16,10 @@ const VerifyEmailPage = () => {
     loading,
     emailVerified,
     updateUserProfile,
+    logout,
   } = useAuthContext();
 
+  const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -45,7 +47,7 @@ const VerifyEmailPage = () => {
     }
   }, [loading, emailVerified, currentUser, navigate]);
 
-  // Poll Firebase every 3 seconds to detect when the user clicks the email link.
+  // Poll Firebase every 5 seconds to detect when the user clicks the email link.
   // Firebase doesn't push this update — we have to ask.
   useEffect(() => {
     if (!firebaseUser || emailVerified || loading) {
@@ -96,6 +98,23 @@ const VerifyEmailPage = () => {
     return () => clearTimeout(timer);
   }, [resendCooldown]);
 
+  // For users who typed the wrong email at signup. Signs them out so they can
+  // start over from the auth page instead of being stuck on this screen.
+  const handleWrongEmail = async () => {
+    if (signingOut) return;
+
+    setSigningOut(true);
+    const result = await logout();
+
+    if (!result?.success) {
+      showToast({
+        type: "error",
+        message: "Could not sign out. Please try again.",
+      });
+      setSigningOut(false);
+    }
+    // On success the auth state clears and the existing redirect to /auth runs.
+  };
   const handleResendVerificationEmail = async () => {
     if (resendLoading || resendCooldown > 0) return;
 
@@ -186,6 +205,17 @@ const VerifyEmailPage = () => {
             Please wait before requesting another email.
           </p>
         )}
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-6">
+          Entered the wrong email address?{" "}
+          <button
+            type="button"
+            onClick={handleWrongEmail}
+            disabled={signingOut}
+            className="underline font-medium text-black dark:text-white hover:opacity-80 disabled:opacity-40"
+          >
+            {signingOut ? "Signing out..." : "Sign up again"}
+          </button>
+        </p>
       </div>
     </div>
   );
