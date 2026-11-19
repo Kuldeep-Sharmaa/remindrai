@@ -1,6 +1,22 @@
-# RemindrAI
+<p align="center">
+  <img src="public/brand_icon.png" alt="RemindrAI logo" width="80" />
+</p>
 
-RemindrAI keeps your content moving.
+<h1 align="center">RemindrAI</h1>
+
+<p align="center">
+  <b>Set it once. The system keeps it going.</b>
+</p>
+
+<p align="center">
+  <a href="https://remindrai.vercel.app">Live app</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="https://github.com/Kuldeep-Sharmaa/remindrai/issues">Feedback</a>
+</p>
+
+<p align="center">
+  <img src="assets/demo.gif" alt="RemindrAI demo" width="720" />
+</p>
 
 It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
 
@@ -47,12 +63,14 @@ That’s the loop. You set it once. The system continues.
 
 
 ## Tech Stack
+<p>
+  <img src="https://skillicons.dev/icons?i=react,vite,tailwind,firebase,gcp" alt="Tech stack" />
+</p>
 
-```
 Frontend          React + Vite, Tailwind CSS
 Auth & Database   Firebase Auth, Firestore
 Backend           Firebase Functions
-```
+
 
 **Why these choices:**  
 Each tool was selected for stability, clarity, and long-term maintainability. There’s no experimentation for novelty’s sake—only what’s needed to support a real product.
