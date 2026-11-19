@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="RemindrAI demo" width="720" />
+  <img src="public/remindrai_GIF.gif" alt="RemindrAI demo" width="auto" />
 </p>
 
 It’s built for creators, founders, and professionals who don’t struggle with ideas - they struggle with consistency. Not because they lack intent, but because daily work pulls attention elsewhere.
