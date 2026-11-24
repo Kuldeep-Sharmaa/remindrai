@@ -8,7 +8,8 @@ import { MailCheck, RefreshCw, AlertCircle } from "lucide-react";
 
 // How often we ask Firebase "has the user clicked the link yet? 5ms"
 const VERIFICATION_CHECK_INTERVAL_MS = 5000;
-
+// This is an application UX choice, not a Firebase requirement.
+const RESEND_COOLDOWN_SECONDS = 60;
 const VerifyEmailPage = () => {
   const {
     firebaseUser,
@@ -22,7 +23,7 @@ const VerifyEmailPage = () => {
   const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
   const [resendLoading, setResendLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+const [resendCooldown, setResendCooldown] = useState(0);
   const [lastResendTime, setLastResendTime] = useState(null);
   const reloadIntervalRef = useRef(null);
 
@@ -133,13 +134,24 @@ const VerifyEmailPage = () => {
         type: "success",
         message: "Verification email sent! Check your inbox.",
       });
-      setResendCooldown(60);
+     setResendCooldown(RESEND_COOLDOWN_SECONDS);
       setLastResendTime(new Date().toISOString());
     } catch (error) {
-      showToast({
-        type: "error",
-        message: `Failed to send email: ${error.message}`,
-      });
+      if (error?.code === "auth/too-many-requests") {
+        // Firebase is rate-limiting us, usually because an email was sent
+        // moments ago. Show a clear message and pause the button this is our system UX choice, not a Firebase requirement.
+        showToast({
+          type: "error",
+          message:
+            "A verification email was sent recently. Please wait a minute and try again.",
+        });
+        setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      } else {
+        showToast({
+          type: "error",
+          message: `Failed to send email: ${error.message}`,
+        });
+      }
     } finally {
       setResendLoading(false);
     }
@@ -206,7 +218,7 @@ const VerifyEmailPage = () => {
           </p>
         )}
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-6">
-          Entered the wrong email address?{" "}
+         Wrong email address?{" "}
           <button
             type="button"
             onClick={handleWrongEmail}
